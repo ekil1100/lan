@@ -1,0 +1,8 @@
+.zig-cache/
+zig-out/
+*.o
+lan
+dump/
+.DS_Store
+.env
+*.log

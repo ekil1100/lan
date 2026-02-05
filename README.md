@@ -1,0 +1,152 @@
+# lan - TUI Agent in Zig
+
+A terminal UI agent inspired by OpenCode and Claude Code.
+
+## Features
+
+- ✅ Interactive chat TUI with beautiful box-drawing UI
+- ✅ Multi-provider LLM support (Kimi, Anthropic, OpenAI)
+- ✅ **Streaming responses** - See output as it's generated
+- ✅ **Tool calling** - AI can read files, write files, execute commands, list directories
+- ✅ Auto-saving conversation history
+- ✅ **Syntax highlighting** - Code blocks highlighted with colors
+- ✅ **Markdown rendering** - Bold, italic, inline code
+- ✅ Command mode with visual feedback
+- ✅ Multiline input support
+- ✅ Config file (~/.config/lan/config.json)
+- ✅ Retry logic for failed requests
+- ✅ Terminal size detection
+
+## Quick Start
+
+### 1. Install Zig
+
+```bash
+# Already installed at ~/zig/
+export PATH="$HOME/zig:$PATH"
+```
+
+### 2. Configure API Key
+
+**Environment Variable (recommended):**
+```bash
+export MOONSHOT_API_KEY="sk-xxx"
+# or
+export ANTHROPIC_API_KEY="sk-ant-xxx"
+# or  
+export OPENAI_API_KEY="sk-xxx"
+```
+
+**Config File:**
+```bash
+mkdir -p ~/.config/lan
+cat > ~/.config/lan/config.json << 'EOF'
+{
+  "provider": "kimi",
+  "model": "kimi-k2-0711-preview",
+  "base_url": "https://api.moonshot.cn/v1",
+  "api_key": "sk-xxx"
+}
+EOF
+```
+
+### 3. Build & Run
+
+```bash
+cd /Users/like/.openclaw/workspace/lan
+zig build
+./zig-out/bin/lan
+```
+
+## UI Preview
+
+```
+┌────────────────────────────────────────────────────────┐
+│  🤖 Lan Agent v0.3                                      │
+├────────────────────────────────────────────────────────┤
+│  Streaming: ON  Tools: ON  Model: kimi-k2-0711-preview │
+├────────────────────────────────────────────────────────┤
+│ Commands                                               │
+│   /help    Show this help                              │
+│   /clear   Clear conversation                          │
+│   ...                                                  │
+├────────────────────────────────────────────────────────┤
+
+▸ Hello, can you help me?
+◆ Hello! I'd be happy to help you with anything you need.
+  Just let me know what you'd like to work on!
+
+▸ 
+```
+
+## Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `read_file` | Read file contents |
+| `write_file` | Write/create files |
+| `exec` | Execute shell commands |
+| `list_dir` | List directory contents with icons |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/help` | Toggle help panel |
+| `/clear` | Clear conversation history |
+| `/save` | Manually save history |
+| `/load` | Load history from file |
+| `/history` | Show message count |
+| `/stream` | Toggle streaming mode |
+| `/tools` | Toggle tools |
+| `/exit` or `/quit` | Quit |
+
+## Multiline Input
+
+Type `"""` to enter multiline mode, then:
+- **Ctrl+D** to send
+- **Ctrl+C** to cancel
+
+```
+▸ """
+... (multiline mode, Ctrl+D to send, Ctrl+C to cancel)
+def hello():
+    return "world"
+(Ctrl+D)
+◆ Here's a simple Python function...
+```
+
+## Files
+
+| Path | Description |
+|------|-------------|
+| `~/.config/lan/config.json` | Configuration |
+| `~/.config/lan/history.json` | Conversation history |
+
+## Development
+
+```bash
+zig build              # Build
+zig build run          # Build and run
+zig build test         # Run tests
+zig fmt src/           # Format code
+```
+
+## Project Structure
+
+```
+lan/
+├── build.zig          # Build configuration
+├── build.zig.zon      # Dependencies
+├── src/
+│   ├── main.zig       # Entry point
+│   ├── tui.zig        # Beautiful terminal UI
+│   ├── agent.zig      # Agent logic + tools
+│   ├── llm.zig        # LLM clients + streaming
+│   ├── tools.zig      # Tool definitions
+│   └── config.zig     # Config file support
+└── README.md
+```
+
+## License
+MIT
