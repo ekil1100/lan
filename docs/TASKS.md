@@ -4,8 +4,8 @@
 
 ## In Progress
 
-- [ ] R1-T06 增加“有 API key”的在线对话 smoke（CI secrets 可启用）
-  - 现状：基础 smoke 已有，在线路径待补
+- [ ] R1-T07 为 streaming 增加最小回归测试（SSE 片段解析）
+  - 现状：待补测试用例
 
 ## Done
 
@@ -44,12 +44,16 @@
   - 结果：`chatOpenAIStream` 改为真实 SSE 增量读取并即时输出（非回退到非流式）
   - 验证：`zig build` / `zig build test` / `make smoke` 全通过
 
+- [x] R1-T06 增加“有 API key”的在线对话 smoke（CI secrets 可启用）
+  - 文件：`scripts/smoke-online.sh`、`Makefile`（新增 `smoke-online`）
+  - 结果：在线对话路径支持独立验收（有 key 必跑、无 key 直接 fail）
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 完成 R1-T06：增加“有 API key”的在线对话 smoke（可在 CI secrets 场景启用）
-2. 为 streaming 增加最小回归测试（SSE 片段解析）
+1. 完成 R1-T07：为 streaming 增加最小回归测试（SSE 片段解析）
+2. 在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
 3. 按 TDD/BDD 继续推进下一阶段任务
 
 ## 更新约定（强制）
