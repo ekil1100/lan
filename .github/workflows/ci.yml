@@ -28,3 +28,15 @@ jobs:
 
       - name: Smoke
         run: make smoke
+
+      - name: Smoke Online (with secrets)
+        if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
+        env:
+          MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: make smoke-online
+
+      - name: Smoke Online (skipped - no secrets)
+        if: ${{ !(secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '') }}
+        run: echo "Skipping smoke-online: no API key secrets configured"

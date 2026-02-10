@@ -4,8 +4,8 @@
 
 ## In Progress
 
-- [ ] R1-T08 在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
-  - 现状：待改 workflow 条件执行
+- [ ] R2-T01 下一阶段任务梳理（基于 TDD/BDD 拆分原子任务）
+  - 现状：待从 roadmap 生成第一批可执行子任务
 
 ## Done
 
@@ -53,13 +53,18 @@
   - 覆盖：多 chunk 拼接、`[DONE]` 终止、异常片段容错
   - 验证：`zig build` / `zig build test` / `make smoke` 通过
 
+- [x] R1-T08 在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
+  - 文件：`.github/workflows/ci.yml`
+  - 验收：存在任一 API key secrets 时执行 `make smoke-online`；无 secrets 时明确跳过且不失败
+  - 本地验证：`zig build` / `zig build test` / `make smoke` 通过
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 完成 R1-T08：在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
-2. 基于 TDD/BDD 继续推进下一阶段任务
-3. 视情况补充更多 streaming 边界回归样例
+1. 推进 R2-T01：基于 TDD/BDD 继续拆分下一阶段原子任务
+2. 视情况补充更多 streaming 边界回归样例
+3. 持续执行 30 分钟进度汇报
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
