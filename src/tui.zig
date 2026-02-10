@@ -104,18 +104,30 @@ pub const App = struct {
                 var multi = std.array_list.Managed(u8).init(self.allocator);
                 defer multi.deinit();
 
+                var closed = false;
                 while (true) {
                     const next_line = stdin.readUntilDelimiterOrEof(&buf, '\n') catch break;
                     if (next_line == null) break;
 
                     const next_trimmed = std.mem.trimRight(u8, next_line.?, "\r");
-                    if (std.mem.eql(u8, next_trimmed, "\"\"\"")) break;
+                    if (std.mem.eql(u8, next_trimmed, "\"\"\"")) {
+                        closed = true;
+                        break;
+                    }
 
                     if (multi.items.len > 0) try multi.append('\n');
                     try multi.appendSlice(next_trimmed);
                 }
 
-                if (multi.items.len == 0) continue;
+                if (!closed) {
+                    try stdout.writeAll("Multiline input not closed (missing \"\"\"). Input discarded.\n");
+                    continue;
+                }
+
+                if (multi.items.len == 0) {
+                    try stdout.writeAll("Empty multiline input ignored.\n");
+                    continue;
+                }
 
                 const response = self.agent.processInput(multi.items, stdout) catch |err| {
                     try stdout.print(Color.red ++ "Error: {s}\n" ++ Color.reset, .{@errorName(err)});

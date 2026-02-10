@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T11（NEXT，TDD）多行输入边界补测：空多行块/未闭合块
-  - 预计时长：1-2 小时
-  - 改动范围：`src/tui.zig`、`scripts/test-input-boundaries.sh`
-  - DoD：
-    1) `"""` 空块不会误触发模型调用；
-    2) 未闭合多行块行为可预期（退出或提示，不崩溃）；
-    3) 补充自动化脚本断言；
-    4) 三项命令验证通过。
-
-- [ ] R2-T12（BDD）错误文案统一与精简（中英文一致性）
+- [ ] R2-T12（NEXT，BDD）错误文案统一与精简（中英文一致性）
   - 预计时长：1 小时
   - 改动范围：`src/tui.zig`、`README.md`（如需）
   - DoD：
@@ -148,11 +139,19 @@
     2) 提供商类：本地 http server 返回非 2xx → 命中 `[error:provider]`。
   - 验证：`./scripts/test-error-network-provider.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T11（TDD）多行输入边界补测：空多行块/未闭合块
+  - 文件：`src/tui.zig`、`scripts/test-input-boundaries.sh`
+  - 行为验收：
+    1) `"""` 空块显示 `Empty multiline input ignored.` 且不触发模型调用；
+    2) 未闭合多行块显示 `Multiline input not closed...` 并丢弃输入，不崩溃；
+    3) 自动化脚本断言已补齐。
+  - 验证：`./scripts/test-input-boundaries.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T11（NEXT）：多行输入边界补测（空块/未闭合块）
+1. 立即执行 R2-T12（NEXT）：错误文案统一与精简（中英文一致性）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
