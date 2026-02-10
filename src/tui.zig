@@ -67,6 +67,37 @@ pub const App = struct {
 
             if (std.mem.eql(u8, trimmed, "/exit")) break;
 
+            if (std.mem.eql(u8, trimmed, "\"\"\"")) {
+                var multi = std.array_list.Managed(u8).init(self.allocator);
+                defer multi.deinit();
+
+                while (true) {
+                    const next_line = stdin.readUntilDelimiterOrEof(&buf, '\n') catch break;
+                    if (next_line == null) break;
+
+                    const next_trimmed = std.mem.trimRight(u8, next_line.?, "\r");
+                    if (std.mem.eql(u8, next_trimmed, "\"\"\"")) break;
+
+                    if (multi.items.len > 0) try multi.append('\n');
+                    try multi.appendSlice(next_trimmed);
+                }
+
+                if (multi.items.len == 0) continue;
+
+                const response = self.agent.processInput(multi.items, stdout) catch |err| {
+                    try stdout.print(Color.red ++ "Error: {s}\n" ++ Color.reset, .{@errorName(err)});
+                    continue;
+                };
+                defer self.allocator.free(response);
+
+                try stdout.writeAll(Color.yellow);
+                try stdout.writeAll("* ");
+                try stdout.writeAll(Color.reset);
+                try stdout.writeAll(response);
+                try stdout.writeByte('\n');
+                continue;
+            }
+
             if (std.mem.eql(u8, trimmed, "/help")) {
                 self.show_help = !self.show_help;
                 if (self.show_help) {

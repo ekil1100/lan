@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T03（NEXT，TDD）输入编辑基础：空输入/多行输入边界处理
-  - 预计时长：1-2 小时
-  - 改动范围：`src/tui.zig`（主）、`src/agent.zig`（如需）
-  - DoD：
-    1) 空输入不触发模型调用；
-    2) 多行输入发送后内容完整保留；
-    3) 为边界行为增加最小测试（单测或可重复脚本）；
-    4) 三项命令验证通过。
-
-- [ ] R2-T04（TDD）工具调用可视化状态：开始/成功/失败
+- [ ] R2-T04（NEXT，TDD）工具调用可视化状态：开始/成功/失败
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`src/tui.zig`
   - DoD：
@@ -104,12 +95,20 @@
     3) `/exit` 稳定退出不崩溃。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T03（TDD）输入编辑基础：空输入/多行输入边界处理
+  - 文件：`src/tui.zig`、`scripts/test-input-boundaries.sh`
+  - 行为验收：
+    1) 空输入不会产生 user message（不触发模型调用）；
+    2) 支持 `""" ... """` 多行输入并完整保留换行；
+    3) 新增可重复脚本：`./scripts/test-input-boundaries.sh`。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-input-boundaries.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T03（NEXT）：输入编辑基础边界处理（TDD）
-2. 执行 R2-T04：工具调用可视化状态（TDD）
+1. 立即执行 R2-T04（NEXT）：工具调用可视化状态（TDD）
+2. 执行 R2-T05：错误分级最小实现（BDD）
 3. 执行 R2-T06：streaming 回归补强（测试优先）
 
 ## 更新约定（强制）
