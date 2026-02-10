@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T10（NEXT，BDD）错误分级复现场景补全：网络/提供商
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/`、`docs/`（必要时）
-  - DoD：
-    1) 至少新增 2 个可复现步骤/脚本（网络类、提供商类）；
-    2) 输出中能看到对应 `[error:network]` / `[error:provider]`；
-    3) 文档包含复现前置条件；
-    4) 三项命令验证通过。
-
-- [ ] R2-T11（TDD）多行输入边界补测：空多行块/未闭合块
+- [ ] R2-T11（NEXT，TDD）多行输入边界补测：空多行块/未闭合块
   - 预计时长：1-2 小时
   - 改动范围：`src/tui.zig`、`scripts/test-input-boundaries.sh`
   - DoD：
@@ -149,11 +140,19 @@
     4) 脚本输出明确 PASS/FAIL 且可一条命令执行。
   - 验证：`./scripts/test-commands.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T10（BDD）错误分级复现场景补全：网络/提供商
+  - 文件：`scripts/test-error-network-provider.sh`
+  - 复现前置条件：本机可用 `python3`（用于本地 mock provider 端口）。
+  - 场景覆盖：
+    1) 网络类：`base_url=http://127.0.0.1:9/v1`（连接拒绝）→ 命中 `[error:network]`；
+    2) 提供商类：本地 http server 返回非 2xx → 命中 `[error:provider]`。
+  - 验证：`./scripts/test-error-network-provider.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T10（NEXT）：错误分级复现场景补全（网络/提供商）
+1. 立即执行 R2-T11（NEXT）：多行输入边界补测（空块/未闭合块）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
