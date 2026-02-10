@@ -2,6 +2,14 @@
 
 A terminal UI agent inspired by OpenCode and Claude Code.
 
+## Design Inspiration
+
+Lan draws strong inspiration from [badlogic/pi-mono](https://github.com/badlogic/pi-mono), and follows the same roadmap-level framing:
+
+- **Adopt:** simple/efficient Linux philosophy, minimal core, sane defaults
+- **Enhance:** native skills, streaming + tool loop integration, stronger engineering gates (TDD/BDD + smoke + CI)
+- **Avoid:** user-hostile configuration complexity, unstable feature bloat, opaque black-box behavior
+
 ## Features
 
 - ✅ Interactive chat TUI with beautiful box-drawing UI
