@@ -114,6 +114,10 @@ pub const Config = struct {
         self.allocator.free(self.config_dir);
     }
 
+    pub fn hasApiKey(self: *const Config) bool {
+        return self.api_key != null and self.api_key.?.len > 0;
+    }
+
     pub fn saveConfigFile(self: *Config) !void {
         const config_path = try std.fs.path.join(self.allocator, &[_][]const u8{ self.config_dir, "config.json" });
         defer self.allocator.free(config_path);

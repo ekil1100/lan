@@ -184,6 +184,9 @@ pub const LLMClient = struct {
         try req_body.end();
 
         var response_head = try req.receiveHead(&.{});
+        if (response_head.head.status.class() != .success) {
+            return error.ProviderError;
+        }
         var transfer_buffer: [4096]u8 = undefined;
         var response_reader = response_head.reader(&transfer_buffer);
         const response = try response_reader.allocRemaining(self.allocator, .limited(1024 * 1024));
@@ -245,6 +248,9 @@ pub const LLMClient = struct {
         try req_body.end();
 
         var response_head = try req.receiveHead(&.{});
+        if (response_head.head.status.class() != .success) {
+            return error.ProviderError;
+        }
         var transfer_buffer: [4096]u8 = undefined;
         var response_reader = response_head.reader(&transfer_buffer);
 
@@ -345,6 +351,9 @@ pub const LLMClient = struct {
         try req_body.end();
 
         var response_head = try req.receiveHead(&.{});
+        if (response_head.head.status.class() != .success) {
+            return error.ProviderError;
+        }
         var transfer_buffer: [4096]u8 = undefined;
         var response_reader = response_head.reader(&transfer_buffer);
         const response = try response_reader.allocRemaining(self.allocator, .limited(1024 * 1024));

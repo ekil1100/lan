@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T05（NEXT，BDD）错误分级最小实现：配置/网络/提供商
-  - 预计时长：1-2 小时
-  - 改动范围：`src/config.zig`、`src/llm.zig`、`src/tui.zig`
-  - DoD：
-    1) 至少区分三类错误并给出不同提示文案；
-    2) 错误提示包含下一步建议；
-    3) 常见失败场景可稳定复现并通过验收脚本/步骤；
-    4) 三项命令验证通过。
-
-- [ ] R2-T06（TDD）streaming 回归补强：partial line + escaped content
+- [ ] R2-T06（NEXT，TDD）streaming 回归补强：partial line + escaped content
   - 预计时长：1 小时
   - 改动范围：`src/llm.zig`（测试为主）
   - DoD：
@@ -102,13 +93,21 @@
     3) 未改变工具执行语义，仅增强提示层。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T05（BDD）错误分级最小实现：配置/网络/提供商
+  - 文件：`src/config.zig`、`src/llm.zig`、`src/tui.zig`、`scripts/test-error-classification.sh`
+  - 行为验收：
+    1) UI 可见 `[error:config]` / `[error:network]` / `[error:provider]` 三类分级；
+    2) 每类错误均有可执行下一步建议；
+    3) 新增可复现场景脚本：`./scripts/test-error-classification.sh`（配置类）。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-error-classification.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T05（NEXT）：错误分级最小实现（BDD）
-2. 执行 R2-T06：streaming 回归补强（测试优先）
-3. 基于 R2 进展继续拆分下一批原子任务
+1. 立即执行 R2-T06（NEXT）：streaming 回归补强（测试优先）
+2. 基于 R2 进展继续拆分下一批原子任务
+3. 补充网络/提供商错误场景脚本（可选）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
