@@ -1,7 +1,8 @@
 .{
-    .name = "lan",
+    .name = .lan,
     .version = "0.1.0",
-    .minimum_zig_version = "0.13.0",
+    .fingerprint = 0x6860fdef897a7b5c,
+    .minimum_zig_version = "0.15.0",
     .paths = .{
         "build.zig",
         "build.zig.zon",

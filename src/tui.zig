@@ -13,15 +13,15 @@ const Color = struct {
 pub const App = struct {
     allocator: std.mem.Allocator,
     agent: *Agent,
-    messages: std.ArrayList([]const u8),
-    input_buffer: std.ArrayList(u8),
+    messages: std.array_list.Managed([]const u8),
+    input_buffer: std.array_list.Managed(u8),
 
     pub fn init(allocator: std.mem.Allocator, agent: *Agent) !App {
         return App{
             .allocator = allocator,
             .agent = agent,
-            .messages = std.ArrayList([]const u8).init(allocator),
-            .input_buffer = std.ArrayList(u8).init(allocator),
+            .messages = std.array_list.Managed([]const u8).init(allocator),
+            .input_buffer = std.array_list.Managed(u8).init(allocator),
         };
     }
 
@@ -32,8 +32,8 @@ pub const App = struct {
     }
 
     pub fn run(self: *App) !void {
-        const stdin = std.io.getStdIn().reader();
-        const stdout = std.io.getStdOut().writer();
+        const stdin = std.fs.File.stdin().deprecatedReader();
+        const stdout = std.fs.File.stdout().deprecatedWriter();
 
         try stdout.writeAll(Color.cyan);
         try stdout.writeAll("╔══════════════════════════════════════╗\n");

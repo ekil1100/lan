@@ -60,8 +60,8 @@ pub const Config = struct {
             .allocator = allocator,
             .provider = .kimi,
             .api_key = null,
-            .model = kimi_model,
-            .base_url = kimi_base_url,
+            .model = try allocator.dupe(u8, kimi_model),
+            .base_url = try allocator.dupe(u8, kimi_base_url),
             .config_dir = config_dir,
         };
 
@@ -78,8 +78,14 @@ pub const Config = struct {
 
         // Parse JSON (simple string matching for now)
         config.provider = parseProviderFromJson(file_content);
-        config.model = parseStringFromJson(allocator, file_content, "\"model\":\"") orelse try allocator.dupe(u8, config.model);
-        config.base_url = parseStringFromJson(allocator, file_content, "\"base_url\":\"") orelse try allocator.dupe(u8, config.base_url);
+        if (parseStringFromJson(allocator, file_content, "\"model\":\"")) |model| {
+            allocator.free(config.model);
+            config.model = model;
+        }
+        if (parseStringFromJson(allocator, file_content, "\"base_url\":\"")) |base_url| {
+            allocator.free(config.base_url);
+            config.base_url = base_url;
+        }
 
         // API key from env always takes precedence
         config.api_key = std.process.getEnvVarOwned(allocator, "MOONSHOT_API_KEY") catch null;
@@ -115,13 +121,15 @@ pub const Config = struct {
         const file = try std.fs.cwd().createFile(config_path, .{});
         defer file.close();
 
-        const writer = file.writer();
-        try writer.print("{{\n", .{});
-        try writer.print("  \"provider\": \"{s}\",\n", .{self.provider.toString()});
-        try writer.print("  \"model\": \"{s}\",\n", .{self.model});
-        try writer.print("  \"base_url\": \"{s}\",\n", .{self.base_url});
-        try writer.print("  \"api_key\": \"{s}\"\n", .{if (self.api_key) |k| k else ""});
-        try writer.print("}}\n", .{});
+        var buf: [4096]u8 = undefined;
+        var writer = file.writer(&buf);
+        try writer.interface.print("{{\n", .{});
+        try writer.interface.print("  \"provider\": \"{s}\",\n", .{self.provider.toString()});
+        try writer.interface.print("  \"model\": \"{s}\",\n", .{self.model});
+        try writer.interface.print("  \"base_url\": \"{s}\",\n", .{self.base_url});
+        try writer.interface.print("  \"api_key\": \"{s}\"\n", .{if (self.api_key) |k| k else ""});
+        try writer.interface.print("}}\n", .{});
+        try writer.interface.flush();
     }
 
     fn parseProviderFromJson(json: []const u8) Provider {

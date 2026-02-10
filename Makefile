@@ -4,7 +4,7 @@ ZIG ?= zig
 BUILD_DIR = zig-out/bin
 TARGET = $(BUILD_DIR)/lan
 
-.PHONY: all build run test clean install fmt
+.PHONY: all build run test smoke clean install fmt
 
 all: build
 
@@ -16,6 +16,9 @@ run: build
 
 test:
 	$(ZIG) build test
+
+smoke: build
+	./scripts/smoke.sh
 
 clean:
 	rm -rf .zig-cache zig-out

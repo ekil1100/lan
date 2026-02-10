@@ -19,12 +19,16 @@ A terminal UI agent inspired by OpenCode and Claude Code.
 
 ## Quick Start
 
-### 1. Install Zig
+### 1. Install Zig (pinned)
+
+> Required version: **Zig 0.15.x** (current codebase target)
 
 ```bash
-# Already installed at ~/zig/
-export PATH="$HOME/zig:$PATH"
+# verify
+zig version
+# should print 0.15.x
 ```
+
 
 ### 2. Configure API Key
 

@@ -14,7 +14,7 @@ pub const ToolHandler = struct {
 pub const Agent = struct {
     allocator: std.mem.Allocator,
     config: *const @import("config.zig").Config,
-    messages: std.ArrayList(Message),
+    messages: std.array_list.Managed(Message),
     tool_handlers: std.StringHashMap(ToolHandler),
     llm: LLMClient,
     history_file: ?[]const u8,
@@ -27,7 +27,7 @@ pub const Agent = struct {
         var agent = Agent{
             .allocator = allocator,
             .config = config,
-            .messages = std.ArrayList(Message).init(allocator),
+            .messages = std.array_list.Managed(Message).init(allocator),
             .tool_handlers = std.StringHashMap(ToolHandler).init(allocator),
             .llm = LLMClient.init(allocator, config),
             .history_file = history_file,
@@ -197,28 +197,30 @@ pub const Agent = struct {
         const file = try std.fs.cwd().createFile(self.history_file.?, .{});
         defer file.close();
 
-        const w = file.writer();
-        try w.writeAll("[\n");
+        var buf: [8192]u8 = undefined;
+        var w = file.writer(&buf);
+        try w.interface.writeAll("[\n");
 
         for (self.messages.items, 0..) |msg, i| {
-            if (i > 0) try w.writeAll(",\n");
-            try w.writeAll("  {\"role\": \"");
-            try w.writeAll(msg.role);
-            try w.writeAll("\", \"content\": \"");
+            if (i > 0) try w.interface.writeAll(",\n");
+            try w.interface.writeAll("  {\"role\": \"");
+            try w.interface.writeAll(msg.role);
+            try w.interface.writeAll("\", \"content\": \"");
             for (msg.content) |c| {
                 switch (c) {
-                    '"' => try w.writeAll("\\\""),
-                    '\\' => try w.writeAll("\\\\"),
-                    '\n' => try w.writeAll("\\n"),
-                    '\r' => try w.writeAll("\\r"),
-                    '\t' => try w.writeAll("\\t"),
-                    else => try w.writeByte(c),
+                    '"' => try w.interface.writeAll("\\\""),
+                    '\\' => try w.interface.writeAll("\\\\"),
+                    '\n' => try w.interface.writeAll("\\n"),
+                    '\r' => try w.interface.writeAll("\\r"),
+                    '\t' => try w.interface.writeAll("\\t"),
+                    else => try w.interface.writeByte(c),
                 }
             }
-            try w.writeAll("\"}");
+            try w.interface.writeAll("\"}");
         }
 
-        try w.writeAll("\n]\n");
+        try w.interface.writeAll("\n]\n");
+        try w.interface.flush();
     }
 
     pub fn loadHistory(self: *Agent) !void {
@@ -298,7 +300,7 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
         return try std.fmt.allocPrint(allocator, "Error spawning process: {s}", .{@errorName(err)});
     };
 
-    var stdout = std.ArrayList(u8).init(allocator);
+    var stdout = std.array_list.Managed(u8).init(allocator);
     defer stdout.deinit();
 
     if (child.stdout) |out| {
@@ -333,7 +335,7 @@ fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     };
     defer dir.close();
 
-    var result = std.ArrayList(u8).init(allocator);
+    var result = std.array_list.Managed(u8).init(allocator);
     defer result.deinit();
 
     var iter = dir.iterate();

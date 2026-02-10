@@ -35,14 +35,14 @@ pub const LLMClient = struct {
     allocator: std.mem.Allocator,
     config: *const Config,
     http_client: std.http.Client,
-    tools: std.ArrayList(Tool),
+    tools: std.array_list.Managed(Tool),
 
     pub fn init(allocator: std.mem.Allocator, config: *const Config) LLMClient {
         return LLMClient{
             .allocator = allocator,
             .config = config,
             .http_client = std.http.Client{ .allocator = allocator },
-            .tools = std.ArrayList(Tool).init(allocator),
+            .tools = std.array_list.Managed(Tool).init(allocator),
         };
     }
 
@@ -71,7 +71,7 @@ pub const LLMClient = struct {
 
             return result catch |err| {
                 if (attempts == max_attempts - 1) return err;
-                std.time.sleep(1 * std.time.ns_per_s);
+                std.Thread.sleep(1 * std.time.ns_per_s);
                 continue;
             };
         }
@@ -99,7 +99,7 @@ pub const LLMClient = struct {
         defer self.allocator.free(uri_str);
         const uri = try std.Uri.parse(uri_str);
 
-        var body = std.ArrayList(u8).init(self.allocator);
+        var body = std.array_list.Managed(u8).init(self.allocator);
         defer body.deinit();
 
         var writer = body.writer();
@@ -167,26 +167,26 @@ pub const LLMClient = struct {
         try writer.writeAll("\"stream\":false");
         try writer.writeAll("}");
 
-        const server_header_buffer = try self.allocator.alloc(u8, 16 * 1024);
-        defer self.allocator.free(server_header_buffer);
-
-        var req = try self.http_client.open(.POST, uri, .{
-            .server_header_buffer = server_header_buffer,
-        });
-        defer req.deinit();
-
         const auth_header = try std.fmt.allocPrint(self.allocator, "Bearer {s}", .{self.config.api_key.?});
         defer self.allocator.free(auth_header);
 
-        req.headers.authorization = .{ .override = auth_header };
-        req.headers.content_type = .{ .override = "application/json" };
+        var req = try self.http_client.request(.POST, uri, .{
+            .headers = .{
+                .authorization = .{ .override = auth_header },
+                .content_type = .{ .override = "application/json" },
+            },
+        });
+        defer req.deinit();
 
-        try req.send();
-        try req.writeAll(body.items);
-        try req.finish();
-        try req.wait();
+        req.transfer_encoding = .{ .content_length = body.items.len };
+        var req_body = try req.sendBody(&.{});
+        try req_body.writer.writeAll(body.items);
+        try req_body.end();
 
-        const response = try req.reader().readAllAlloc(self.allocator, 1024 * 1024);
+        var response_head = try req.receiveHead(&.{});
+        var transfer_buffer: [4096]u8 = undefined;
+        var response_reader = response_head.reader(&transfer_buffer);
+        const response = try response_reader.allocRemaining(self.allocator, .limited(1024 * 1024));
         defer self.allocator.free(response);
 
         // Check for tool calls
@@ -207,7 +207,7 @@ pub const LLMClient = struct {
         defer self.allocator.free(uri_str);
         const uri = try std.Uri.parse(uri_str);
 
-        var body = std.ArrayList(u8).init(self.allocator);
+        var body = std.array_list.Managed(u8).init(self.allocator);
         defer body.deinit();
 
         var writer = body.writer();
@@ -228,45 +228,74 @@ pub const LLMClient = struct {
 
         try writer.writeAll("],\"temperature\":0.7,\"stream\":true}");
 
-        const server_header_buffer = try self.allocator.alloc(u8, 16 * 1024);
-        defer self.allocator.free(server_header_buffer);
-
-        var req = try self.http_client.open(.POST, uri, .{
-            .server_header_buffer = server_header_buffer,
-        });
-        defer req.deinit();
-
         const auth_header = try std.fmt.allocPrint(self.allocator, "Bearer {s}", .{self.config.api_key.?});
         defer self.allocator.free(auth_header);
 
-        req.headers.authorization = .{ .override = auth_header };
-        req.headers.content_type = .{ .override = "application/json" };
+        var req = try self.http_client.request(.POST, uri, .{
+            .headers = .{
+                .authorization = .{ .override = auth_header },
+                .content_type = .{ .override = "application/json" },
+            },
+        });
+        defer req.deinit();
 
-        try req.send();
-        try req.writeAll(body.items);
-        try req.finish();
+        req.transfer_encoding = .{ .content_length = body.items.len };
+        var req_body = try req.sendBody(&.{});
+        try req_body.writer.writeAll(body.items);
+        try req_body.end();
 
-        var result = std.ArrayList(u8).init(self.allocator);
-        var response_writer = result.writer();
+        var response_head = try req.receiveHead(&.{});
+        var transfer_buffer: [4096]u8 = undefined;
+        var response_reader = response_head.reader(&transfer_buffer);
 
-        // Read streaming response
-        var buf: [4096]u8 = undefined;
-        while (true) {
-            const n = try req.read(&buf);
+        var accumulated = std.array_list.Managed(u8).init(self.allocator);
+        defer accumulated.deinit();
+
+        var pending = std.array_list.Managed(u8).init(self.allocator);
+        defer pending.deinit();
+
+        var read_buf: [2048]u8 = undefined;
+        var done = false;
+
+        while (!done) {
+            const n = try response_reader.readSliceShort(&read_buf);
             if (n == 0) break;
 
-            const chunk = buf[0..n];
-            const content = extractStreamContent(chunk);
+            try pending.appendSlice(read_buf[0..n]);
 
-            if (content.len > 0) {
-                try output_writer.writeAll(content);
-                try response_writer.writeAll(content);
+            var start: usize = 0;
+            while (start < pending.items.len) {
+                const rel_nl = std.mem.indexOfScalar(u8, pending.items[start..], '\n') orelse break;
+                const end = start + rel_nl;
+                const raw_line = std.mem.trimRight(u8, pending.items[start..end], "\r");
+                start = end + 1;
+
+                if (std.mem.startsWith(u8, raw_line, "data: ")) {
+                    const payload = raw_line[6..];
+                    if (std.mem.eql(u8, payload, "[DONE]")) {
+                        done = true;
+                        break;
+                    }
+
+                    if (extractSsePayloadContent(payload)) |raw_content| {
+                        const content = try unescapeJsonString(self.allocator, raw_content);
+                        defer self.allocator.free(content);
+
+                        if (content.len > 0) {
+                            try output_writer.writeAll(content);
+                            try accumulated.appendSlice(content);
+                        }
+                    }
+                }
+            }
+
+            if (start > 0) {
+                std.mem.copyForwards(u8, pending.items[0 .. pending.items.len - start], pending.items[start..]);
+                pending.items.len -= start;
             }
         }
 
-        try req.wait();
-
-        return result.toOwnedSlice();
+        return try accumulated.toOwnedSlice();
     }
 
     fn chatAnthropic(self: *LLMClient, messages: []const Message) ![]const u8 {
@@ -274,7 +303,7 @@ pub const LLMClient = struct {
         defer self.allocator.free(uri_str);
         const uri = try std.Uri.parse(uri_str);
 
-        var body = std.ArrayList(u8).init(self.allocator);
+        var body = std.array_list.Managed(u8).init(self.allocator);
         defer body.deinit();
 
         var writer = body.writer();
@@ -295,31 +324,31 @@ pub const LLMClient = struct {
 
         try writer.writeAll("]}");
 
-        const server_header_buffer = try self.allocator.alloc(u8, 16 * 1024);
-        defer self.allocator.free(server_header_buffer);
-
-        var req = try self.http_client.open(.POST, uri, .{
-            .server_header_buffer = server_header_buffer,
-        });
-        defer req.deinit();
-
         const auth_header = try std.fmt.allocPrint(self.allocator, "Bearer {s}", .{self.config.api_key.?});
         defer self.allocator.free(auth_header);
 
-        req.headers.authorization = .{ .override = auth_header };
-        req.headers.content_type = .{ .override = "application/json" };
+        const extra_headers = [_]std.http.Header{
+            .{ .name = "anthropic-version", .value = "2023-06-01" },
+        };
 
-        const extra_headers = try self.allocator.alloc(std.http.Header, 1);
-        defer self.allocator.free(extra_headers);
-        extra_headers[0] = .{ .name = "anthropic-version", .value = "2023-06-01" };
-        req.extra_headers = extra_headers;
+        var req = try self.http_client.request(.POST, uri, .{
+            .headers = .{
+                .authorization = .{ .override = auth_header },
+                .content_type = .{ .override = "application/json" },
+            },
+            .extra_headers = &extra_headers,
+        });
+        defer req.deinit();
 
-        try req.send();
-        try req.writeAll(body.items);
-        try req.finish();
-        try req.wait();
+        req.transfer_encoding = .{ .content_length = body.items.len };
+        var req_body = try req.sendBody(&.{});
+        try req_body.writer.writeAll(body.items);
+        try req_body.end();
 
-        const response = try req.reader().readAllAlloc(self.allocator, 1024 * 1024);
+        var response_head = try req.receiveHead(&.{});
+        var transfer_buffer: [4096]u8 = undefined;
+        var response_reader = response_head.reader(&transfer_buffer);
+        const response = try response_reader.allocRemaining(self.allocator, .limited(1024 * 1024));
         defer self.allocator.free(response);
 
         return try parseAnthropicResponse(self.allocator, response);
@@ -370,36 +399,26 @@ pub const LLMClient = struct {
         return try allocator.dupe(u8, "[Tool call detected - processing...]");
     }
 
-    fn extractStreamContent(chunk: []const u8) []const u8 {
-        // Look for "content":"..." in SSE format
-        const prefix = "data: {";
-        var i: usize = 0;
-        while (i < chunk.len) : (i += 1) {
-            if (std.mem.startsWith(u8, chunk[i..], prefix)) {
-                const data_start = i + prefix.len;
-                const content_key = "\"content\":\"";
-                if (std.mem.indexOfPos(u8, chunk, data_start, content_key)) |content_pos| {
-                    const content_start = content_pos + content_key.len;
-                    var content_end = content_start;
-                    while (content_end < chunk.len) : (content_end += 1) {
-                        if (chunk[content_end] == '\\' and content_end + 1 < chunk.len) {
-                            content_end += 1;
-                        } else if (chunk[content_end] == '"') {
-                            break;
-                        }
-                    }
-                    if (content_end < chunk.len) {
-                        // Simple unescape
-                        return chunk[content_start..content_end];
-                    }
-                }
+    fn extractSsePayloadContent(payload: []const u8) ?[]const u8 {
+        const delta_key = "\"delta\":{\"content\":\"";
+        const start = std.mem.indexOf(u8, payload, delta_key) orelse return null;
+        const content_start = start + delta_key.len;
+
+        var content_end = content_start;
+        while (content_end < payload.len) : (content_end += 1) {
+            if (payload[content_end] == '\\' and content_end + 1 < payload.len) {
+                content_end += 1;
+            } else if (payload[content_end] == '"') {
+                break;
             }
         }
-        return "";
+
+        if (content_end >= payload.len) return null;
+        return payload[content_start..content_end];
     }
 };
 
-fn escapeJsonString(writer: *std.ArrayList(u8).Writer, str: []const u8) !void {
+fn escapeJsonString(writer: *std.array_list.Managed(u8).Writer, str: []const u8) !void {
     for (str) |c| {
         switch (c) {
             '"' => try writer.writeAll("\\\""),
@@ -413,7 +432,7 @@ fn escapeJsonString(writer: *std.ArrayList(u8).Writer, str: []const u8) !void {
 }
 
 fn unescapeJsonString(allocator: std.mem.Allocator, str: []const u8) ![]const u8 {
-    var result = std.ArrayList(u8).init(allocator);
+    var result = std.array_list.Managed(u8).init(allocator);
     defer result.deinit();
 
     var i: usize = 0;

@@ -80,7 +80,7 @@ pub const BuiltinTools = struct {
             return std.fmt.allocPrint(allocator, "Error spawning process: {}", .{err});
         };
 
-        var stdout = std.ArrayList(u8).init(allocator);
+        var stdout = std.array_list.Managed(u8).init(allocator);
         defer stdout.deinit();
 
         if (child.stdout) |out| {
