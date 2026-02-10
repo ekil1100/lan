@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T04（NEXT，TDD）工具调用可视化状态：开始/成功/失败
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`src/tui.zig`
-  - DoD：
-    1) 工具调用时用户可见“开始→完成/失败”；
-    2) 失败信息包含可操作原因（非空泛报错）；
-    3) 不改变既有工具行为语义；
-    4) 三项命令验证通过。
-
-- [ ] R2-T05（BDD）错误分级最小实现：配置/网络/提供商
+- [ ] R2-T05（NEXT，BDD）错误分级最小实现：配置/网络/提供商
   - 预计时长：1-2 小时
   - 改动范围：`src/config.zig`、`src/llm.zig`、`src/tui.zig`
   - DoD：
@@ -103,13 +94,21 @@
     3) 新增可重复脚本：`./scripts/test-input-boundaries.sh`。
   - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-input-boundaries.sh` 通过。
 
+- [x] R2-T04（TDD）工具调用可视化状态：开始/成功/失败
+  - 文件：`src/agent.zig`、`src/tui.zig`
+  - 行为验收：
+    1) 工具调用路径增加可见状态提示（start → success）；
+    2) 失败提示附可操作建议（API key / 网络 / 通用诊断建议）；
+    3) 未改变工具执行语义，仅增强提示层。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T04（NEXT）：工具调用可视化状态（TDD）
-2. 执行 R2-T05：错误分级最小实现（BDD）
-3. 执行 R2-T06：streaming 回归补强（测试优先）
+1. 立即执行 R2-T05（NEXT）：错误分级最小实现（BDD）
+2. 执行 R2-T06：streaming 回归补强（测试优先）
+3. 基于 R2 进展继续拆分下一批原子任务
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

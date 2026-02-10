@@ -42,6 +42,16 @@ pub const App = struct {
         try writer.writeAll("  /exit   Exit Lan\n\n");
     }
 
+    fn actionableHint(err_name: []const u8) []const u8 {
+        if (std.mem.eql(u8, err_name, "NoAPIKey")) {
+            return "Tip: set MOONSHOT_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY, or configure ~/.config/lan/config.json.";
+        }
+        if (std.mem.eql(u8, err_name, "ConnectionRefused") or std.mem.eql(u8, err_name, "NetworkUnreachable") or std.mem.eql(u8, err_name, "TimedOut")) {
+            return "Tip: check network/proxy settings, then retry.";
+        }
+        return "Tip: rerun with latest config and capture logs for diagnosis.";
+    }
+
     pub fn run(self: *App) !void {
         const stdin = std.fs.File.stdin().deprecatedReader();
         const stdout = std.fs.File.stdout().deprecatedWriter();
@@ -115,7 +125,9 @@ pub const App = struct {
             }
 
             const response = self.agent.processInput(trimmed, stdout) catch |err| {
-                try stdout.print(Color.red ++ "Error: {s}\n" ++ Color.reset, .{@errorName(err)});
+                const err_name = @errorName(err);
+                try stdout.print(Color.red ++ "Error: {s}\n" ++ Color.reset, .{err_name});
+                try stdout.print(Color.yellow ++ "{s}\n" ++ Color.reset, .{actionableHint(err_name)});
                 continue;
             };
             defer self.allocator.free(response);

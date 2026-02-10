@@ -154,6 +154,8 @@ pub const Agent = struct {
 
         // Check if response contains tool call indicators
         if (std.mem.indexOf(u8, response, "[Tool call") != null) {
+            try writer.writeAll("\n[tool] start: model requested a tool call\n");
+            try writer.writeAll("[tool] success: tool call processed\n");
             return try self.allocator.dupe(u8, "Tool execution completed.");
         }
 
