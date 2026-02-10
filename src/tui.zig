@@ -15,6 +15,7 @@ pub const App = struct {
     agent: *Agent,
     messages: std.array_list.Managed([]const u8),
     input_buffer: std.array_list.Managed(u8),
+    show_help: bool,
 
     pub fn init(allocator: std.mem.Allocator, agent: *Agent) !App {
         return App{
@@ -22,6 +23,7 @@ pub const App = struct {
             .agent = agent,
             .messages = std.array_list.Managed([]const u8).init(allocator),
             .input_buffer = std.array_list.Managed(u8).init(allocator),
+            .show_help = false,
         };
     }
 
@@ -29,6 +31,15 @@ pub const App = struct {
         for (self.messages.items) |msg| self.allocator.free(msg);
         self.messages.deinit();
         self.input_buffer.deinit();
+    }
+
+    fn printHelp(writer: anytype) !void {
+        try writer.writeAll(Color.cyan);
+        try writer.writeAll("\nCommands:\n");
+        try writer.writeAll(Color.reset);
+        try writer.writeAll("  /help   Toggle this help\n");
+        try writer.writeAll("  /clear  Clear chat history (keeps system message)\n");
+        try writer.writeAll("  /exit   Exit Lan\n\n");
     }
 
     pub fn run(self: *App) !void {
@@ -53,7 +64,24 @@ pub const App = struct {
 
             const trimmed = std.mem.trimRight(u8, line.?, "\r");
             if (trimmed.len == 0) continue;
+
             if (std.mem.eql(u8, trimmed, "/exit")) break;
+
+            if (std.mem.eql(u8, trimmed, "/help")) {
+                self.show_help = !self.show_help;
+                if (self.show_help) {
+                    try printHelp(stdout);
+                } else {
+                    try stdout.writeAll("Help hidden.\n");
+                }
+                continue;
+            }
+
+            if (std.mem.eql(u8, trimmed, "/clear")) {
+                self.agent.clearHistory();
+                try stdout.writeAll("History cleared (system message kept).\n");
+                continue;
+            }
 
             const response = self.agent.processInput(trimmed, stdout) catch |err| {
                 try stdout.print(Color.red ++ "Error: {s}\n" ++ Color.reset, .{@errorName(err)});

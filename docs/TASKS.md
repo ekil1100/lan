@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T02（NEXT）BDD：命令面板最小闭环（`/help`、`/clear`、`/exit`）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/tui.zig`、`src/agent.zig`、`src/main.zig`（必要时）
-  - DoD：
-    1) `/help` 可稳定显示/切换帮助信息；
-    2) `/clear` 清空会话（保留 system message）；
-    3) `/exit` 稳定退出且不崩溃；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R2-T03（TDD）输入编辑基础：空输入/多行输入边界处理
+- [ ] R2-T03（NEXT，TDD）输入编辑基础：空输入/多行输入边界处理
   - 预计时长：1-2 小时
   - 改动范围：`src/tui.zig`（主）、`src/agent.zig`（如需）
   - DoD：
@@ -105,12 +96,20 @@
   - 结果：产出 5 个可执行原子任务（R2-T02 ~ R2-T06），每项含 DoD、改动范围、预计时长
   - 指定下一执行项：R2-T02（NEXT）
 
+- [x] R2-T02（BDD）命令面板最小闭环（`/help`、`/clear`、`/exit`）
+  - 文件：`src/tui.zig`
+  - 行为验收：
+    1) `/help` 支持显示与再次输入后隐藏（toggle）；
+    2) `/clear` 清空会话并保留 system message；
+    3) `/exit` 稳定退出不崩溃。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T02（NEXT）：BDD 命令面板最小闭环
-2. 执行 R2-T03：输入编辑基础边界处理（TDD）
+1. 立即执行 R2-T03（NEXT）：输入编辑基础边界处理（TDD）
+2. 执行 R2-T04：工具调用可视化状态（TDD）
 3. 执行 R2-T06：streaming 回归补强（测试优先）
 
 ## 更新约定（强制）
