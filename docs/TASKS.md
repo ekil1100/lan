@@ -4,13 +4,49 @@
 
 ## In Progress
 
-- [ ] R2-T13（NEXT）R2 阶段收尾与 R3 启动任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+- [ ] R3-T01（NEXT，TDD）Tool 错误码最小规范（read/write/exec/list）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`src/tools.zig`、`docs/`（必要时）
   - DoD：
-    1) 明确 R2 剩余项（若有）与关闭条件；
-    2) 生成 R3 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 定义统一错误码命名与映射（至少覆盖四个内置工具）；
+    2) 不改变工具语义，仅统一错误输出结构；
+    3) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R3-T02（BDD）Tool 调用日志最小落地（时间/工具名/结果）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`src/tui.zig`
+  - DoD：
+    1) 每次工具调用至少输出 start/end 与成功/失败；
+    2) 失败时带错误摘要与 next step；
+    3) 不引入交互阻塞；
+    4) 三项命令验证通过。
+
+- [ ] R3-T03（TDD）`exec` 工具超时保护（最小实现）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`（toolExec）
+  - DoD：
+    1) 支持默认超时（如 10s，可常量配置）；
+    2) 超时时返回可识别错误并给建议；
+    3) 不影响正常短命令执行；
+    4) 三项命令验证通过。
+
+- [ ] R3-T04（BDD）工具参数缺失文案统一（read/write/exec/list）
+  - 预计时长：1 小时
+  - 改动范围：`src/agent.zig`、`README.md`（如需）
+  - DoD：
+    1) 参数缺失错误文案统一格式；
+    2) 每条文案包含可执行 next step；
+    3) 至少 1 个脚本或步骤可复现验证；
+    4) 三项命令验证通过。
+
+- [ ] R3-T05（TDD）工具行为回归脚本 v1（read/write/list/exec）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/`
+  - DoD：
+    1) 新增可重复脚本覆盖四个内置工具基础路径；
+    2) 输出 PASS/FAIL，适合本地/CI 批跑；
+    3) 脚本不依赖在线 API key；
+    4) 三项命令验证通过。
 
 ## Done
 
@@ -154,11 +190,17 @@
     3) 删除重复/模糊提示并同步 README 的 Error Labels 说明。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T13（收尾）R2 关闭条件判定 + R3 启动任务拆解
+  - 文件：`docs/TASKS.md`、`docs/ROADMAP.md`
+  - R2 判定：close-ready（R2-T02 ~ R2-T12 已完成，无阻塞项）
+  - 结果：产出 R3 第一批 5 个原子任务（R3-T01 ~ R3-T05），均含范围/DoD/预计时长
+  - 指定唯一 NEXT：R3-T01
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T13（NEXT）：R2 收尾与 R3 启动任务拆解
+1. 立即执行 R3-T01（NEXT）：Tool 错误码最小规范
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
