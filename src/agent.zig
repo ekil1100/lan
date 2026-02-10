@@ -155,7 +155,22 @@ pub const Agent = struct {
         // Check if response contains tool call indicators
         if (std.mem.indexOf(u8, response, "[Tool call") != null) {
             try writer.writeAll("\n[tool] start: model requested a tool call\n");
-            try writer.writeAll("[tool] success: tool call processed\n");
+
+            const lower = try std.ascii.allocLowerString(self.allocator, response);
+            defer self.allocator.free(lower);
+
+            const has_fail = std.mem.indexOf(u8, lower, "fail") != null or
+                std.mem.indexOf(u8, lower, "error") != null;
+
+            if (has_fail) {
+                const summary = toolFailureSummary(response);
+                const hint = toolFailureHint(summary);
+                try writer.print("[tool] fail: {s}\n", .{summary});
+                try writer.print("[tool] tip: {s}\n", .{hint});
+            } else {
+                try writer.writeAll("[tool] success: tool call processed\n");
+            }
+
             return try self.allocator.dupe(u8, "Tool execution completed.");
         }
 
@@ -262,6 +277,26 @@ pub const Agent = struct {
         }
     }
 };
+
+fn toolFailureSummary(response: []const u8) []const u8 {
+    if (std.mem.indexOf(u8, response, "Unknown tool")) |_| return "unknown tool requested";
+    if (std.mem.indexOf(u8, response, "No path provided")) |_| return "missing required path argument";
+    if (std.mem.indexOf(u8, response, "No command provided")) |_| return "missing required command argument";
+    if (std.mem.indexOf(u8, response, "Error reading file")) |_| return "file read failed";
+    if (std.mem.indexOf(u8, response, "Error creating file")) |_| return "file create failed";
+    if (std.mem.indexOf(u8, response, "Error writing file")) |_| return "file write failed";
+    if (std.mem.indexOf(u8, response, "Error spawning process")) |_| return "process spawn failed";
+    if (std.mem.indexOf(u8, response, "Error waiting for process")) |_| return "process execution failed";
+    return "tool call failed";
+}
+
+fn toolFailureHint(summary: []const u8) []const u8 {
+    if (std.mem.eql(u8, summary, "unknown tool requested")) return "check tool name and manifest registration.";
+    if (std.mem.eql(u8, summary, "missing required path argument") or std.mem.eql(u8, summary, "missing required command argument")) return "check tool arguments and provide required fields.";
+    if (std.mem.eql(u8, summary, "file read failed") or std.mem.eql(u8, summary, "file create failed") or std.mem.eql(u8, summary, "file write failed")) return "check path existence/permissions and retry.";
+    if (std.mem.eql(u8, summary, "process spawn failed") or std.mem.eql(u8, summary, "process execution failed")) return "check command availability and shell environment.";
+    return "inspect tool input/output and rerun with minimal arguments.";
+}
 
 // Tool implementations
 fn toolReadFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {

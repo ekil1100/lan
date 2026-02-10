@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T08（NEXT，TDD）工具状态补全：失败路径可视化（start → fail）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`src/tui.zig`
-  - DoD：
-    1) 工具调用失败时明确显示 fail 状态；
-    2) fail 状态包含错误摘要与操作建议；
-    3) 不改变工具调用语义；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R2-T09（TDD）命令回归脚本：`/help` `/clear` `/exit` 自动验收
+- [ ] R2-T09（NEXT，TDD）命令回归脚本：`/help` `/clear` `/exit` 自动验收
   - 预计时长：1 小时
   - 改动范围：`scripts/`、`Makefile`（必要时）
   - DoD：
@@ -150,11 +141,19 @@
   - 结果：新增 5 个可执行任务（R2-T08 ~ R2-T12），均包含范围与 DoD
   - 指定唯一 NEXT：R2-T08
 
+- [x] R2-T08（TDD）工具状态补全：失败路径可视化（start → fail）
+  - 文件：`src/agent.zig`
+  - 行为验收：
+    1) 工具调用链路统一输出 `start`，并在识别失败摘要时输出 `fail`；
+    2) fail 输出包含错误摘要与可执行建议；
+    3) 不改变工具调用语义（仅提示层增强）。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T08（NEXT）：工具状态补全（失败路径可视化）
+1. 立即执行 R2-T09（NEXT）：命令回归脚本（`/help` `/clear` `/exit`）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
