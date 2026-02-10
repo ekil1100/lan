@@ -44,35 +44,45 @@ pub const App = struct {
 
     const ErrorClass = struct {
         label: []const u8,
-        hint: []const u8,
+        summary: []const u8,
+        next_step: []const u8,
     };
 
     fn classifyError(err_name: []const u8) ErrorClass {
         if (std.mem.eql(u8, err_name, "NoAPIKey")) {
             return .{
                 .label = "config",
-                .hint = "Tip: set MOONSHOT_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY, or configure ~/.config/lan/config.json.",
+                .summary = "missing API key",
+                .next_step = "set MOONSHOT_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY, or configure ~/.config/lan/config.json",
             };
         }
 
         if (std.mem.eql(u8, err_name, "ConnectionRefused") or std.mem.eql(u8, err_name, "NetworkUnreachable") or std.mem.eql(u8, err_name, "TimedOut") or std.mem.eql(u8, err_name, "HostUnreachable")) {
             return .{
                 .label = "network",
-                .hint = "Tip: check network/proxy settings and base_url reachability, then retry.",
+                .summary = "network connection failed",
+                .next_step = "check network/proxy settings and base_url reachability, then retry",
             };
         }
 
         if (std.mem.eql(u8, err_name, "ProviderError")) {
             return .{
                 .label = "provider",
-                .hint = "Tip: verify provider status/model availability and API key permissions, then retry.",
+                .summary = "provider returned a non-success response",
+                .next_step = "verify provider status/model availability and API key permissions, then retry",
             };
         }
 
         return .{
             .label = "provider",
-            .hint = "Tip: capture error logs and provider response for diagnosis.",
+            .summary = "provider request failed",
+            .next_step = "capture request/response logs and retry with a minimal prompt",
         };
+    }
+
+    fn renderClassifiedError(writer: anytype, info: ErrorClass) !void {
+        try writer.print(Color.red ++ "[error:{s}] {s}\n" ++ Color.reset, .{ info.label, info.summary });
+        try writer.print(Color.yellow ++ "next: {s}\n" ++ Color.reset, .{info.next_step});
     }
 
     pub fn run(self: *App) !void {
@@ -160,17 +170,15 @@ pub const App = struct {
             }
 
             if (!self.agent.config.hasApiKey()) {
-                const cfg = classifyError("NoAPIKey");
-                try stdout.print(Color.red ++ "[error:{s}] missing API key\n" ++ Color.reset, .{cfg.label});
-                try stdout.print(Color.yellow ++ "{s}\n" ++ Color.reset, .{cfg.hint});
+                const info = classifyError("NoAPIKey");
+                try renderClassifiedError(stdout, info);
                 continue;
             }
 
             const response = self.agent.processInput(trimmed, stdout) catch |err| {
                 const err_name = @errorName(err);
                 const info = classifyError(err_name);
-                try stdout.print(Color.red ++ "[error:{s}] {s}\n" ++ Color.reset, .{ info.label, err_name });
-                try stdout.print(Color.yellow ++ "{s}\n" ++ Color.reset, .{info.hint});
+                try renderClassifiedError(stdout, info);
                 continue;
             };
             defer self.allocator.free(response);

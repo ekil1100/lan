@@ -135,6 +135,17 @@ def hello():
 | `~/.config/lan/config.json` | Configuration |
 | `~/.config/lan/history.json` | Conversation history |
 
+## Error Labels (Runtime)
+
+Lan uses a unified error format in TUI:
+
+- `[error:config] <summary>`
+  - next: set API key env vars or configure `~/.config/lan/config.json`
+- `[error:network] <summary>`
+  - next: check network/proxy and `base_url` reachability, then retry
+- `[error:provider] <summary>`
+  - next: check provider/model availability and key permissions, then retry
+
 ## Development
 
 ```bash

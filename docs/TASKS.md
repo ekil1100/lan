@@ -4,14 +4,13 @@
 
 ## In Progress
 
-- [ ] R2-T12（NEXT，BDD）错误文案统一与精简（中英文一致性）
-  - 预计时长：1 小时
-  - 改动范围：`src/tui.zig`、`README.md`（如需）
+- [ ] R2-T13（NEXT）R2 阶段收尾与 R3 启动任务拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 配置/网络/提供商三类文案语气与格式统一；
-    2) 每条文案都包含 next step；
-    3) 避免重复和模糊建议；
-    4) 三项命令验证通过。
+    1) 明确 R2 剩余项（若有）与关闭条件；
+    2) 生成 R3 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 ## Done
 
@@ -147,11 +146,19 @@
     3) 自动化脚本断言已补齐。
   - 验证：`./scripts/test-input-boundaries.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T12（BDD）错误文案统一与精简（中英文一致性）
+  - 文件：`src/tui.zig`、`README.md`
+  - 行为验收：
+    1) 三类错误统一为 `[error:<class>] <summary>` + `next: <step>`；
+    2) 每类均包含明确可执行 next step；
+    3) 删除重复/模糊提示并同步 README 的 Error Labels 说明。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T12（NEXT）：错误文案统一与精简（中英文一致性）
+1. 立即执行 R2-T13（NEXT）：R2 收尾与 R3 启动任务拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
