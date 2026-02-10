@@ -4,8 +4,8 @@
 
 ## In Progress
 
-- [ ] R1-T07 为 streaming 增加最小回归测试（SSE 片段解析）
-  - 现状：待补测试用例
+- [ ] R1-T08 在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
+  - 现状：待改 workflow 条件执行
 
 ## Done
 
@@ -48,13 +48,18 @@
   - 文件：`scripts/smoke-online.sh`、`Makefile`（新增 `smoke-online`）
   - 结果：在线对话路径支持独立验收（有 key 必跑、无 key 直接 fail）
 
+- [x] R1-T07 为 streaming 增加最小回归测试（SSE 片段解析）
+  - 文件：`src/llm.zig`
+  - 覆盖：多 chunk 拼接、`[DONE]` 终止、异常片段容错
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 完成 R1-T07：为 streaming 增加最小回归测试（SSE 片段解析）
-2. 在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
-3. 按 TDD/BDD 继续推进下一阶段任务
+1. 完成 R1-T08：在 CI 中增加可选 `smoke-online`（secrets 存在时执行）
+2. 基于 TDD/BDD 继续推进下一阶段任务
+3. 视情况补充更多 streaming 边界回归样例
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

@@ -270,14 +270,13 @@ pub const LLMClient = struct {
                 const raw_line = std.mem.trimRight(u8, pending.items[start..end], "\r");
                 start = end + 1;
 
-                if (std.mem.startsWith(u8, raw_line, "data: ")) {
-                    const payload = raw_line[6..];
-                    if (std.mem.eql(u8, payload, "[DONE]")) {
+                switch (parseSseDataLine(raw_line)) {
+                    .done => {
                         done = true;
                         break;
-                    }
-
-                    if (extractSsePayloadContent(payload)) |raw_content| {
+                    },
+                    .none => {},
+                    .content => |raw_content| {
                         const content = try unescapeJsonString(self.allocator, raw_content);
                         defer self.allocator.free(content);
 
@@ -285,7 +284,7 @@ pub const LLMClient = struct {
                             try output_writer.writeAll(content);
                             try accumulated.appendSlice(content);
                         }
-                    }
+                    },
                 }
             }
 
@@ -399,6 +398,25 @@ pub const LLMClient = struct {
         return try allocator.dupe(u8, "[Tool call detected - processing...]");
     }
 
+    const SseLine = union(enum) {
+        none,
+        done,
+        content: []const u8,
+    };
+
+    fn parseSseDataLine(raw_line: []const u8) SseLine {
+        if (!std.mem.startsWith(u8, raw_line, "data: ")) return .none;
+
+        const payload = raw_line[6..];
+        if (std.mem.eql(u8, payload, "[DONE]")) return .done;
+
+        if (extractSsePayloadContent(payload)) |raw_content| {
+            return .{ .content = raw_content };
+        }
+
+        return .none;
+    }
+
     fn extractSsePayloadContent(payload: []const u8) ?[]const u8 {
         const delta_key = "\"delta\":{\"content\":\"";
         const start = std.mem.indexOf(u8, payload, delta_key) orelse return null;
@@ -453,4 +471,74 @@ fn unescapeJsonString(allocator: std.mem.Allocator, str: []const u8) ![]const u8
     }
 
     return result.toOwnedSlice();
+}
+
+test "SSE parser handles multi-chunk content and DONE" {
+    const allocator = std.testing.allocator;
+
+    const chunks = [_][]const u8{
+        "data: {\"choices\":[{\"delta\":{\"content\":\"Hel",
+        "lo\"}}]}\n",
+        "data: {\"choices\":[{\"delta\":{\"content\":\" world\"}}]}\n",
+        "data: [DONE]\n",
+    };
+
+    var pending = std.array_list.Managed(u8).init(allocator);
+    defer pending.deinit();
+
+    var out = std.array_list.Managed(u8).init(allocator);
+    defer out.deinit();
+
+    var done = false;
+    for (chunks) |chunk| {
+        try pending.appendSlice(chunk);
+
+        var start: usize = 0;
+        while (start < pending.items.len) {
+            const rel_nl = std.mem.indexOfScalar(u8, pending.items[start..], '\n') orelse break;
+            const end = start + rel_nl;
+            const raw_line = std.mem.trimRight(u8, pending.items[start..end], "\r");
+            start = end + 1;
+
+            switch (LLMClient.parseSseDataLine(raw_line)) {
+                .done => {
+                    done = true;
+                    break;
+                },
+                .none => {},
+                .content => |raw| {
+                    const s = try unescapeJsonString(allocator, raw);
+                    defer allocator.free(s);
+                    try out.appendSlice(s);
+                },
+            }
+        }
+
+        if (start > 0) {
+            std.mem.copyForwards(u8, pending.items[0 .. pending.items.len - start], pending.items[start..]);
+            pending.items.len -= start;
+        }
+
+        if (done) break;
+    }
+
+    try std.testing.expect(done);
+    try std.testing.expectEqualStrings("Hello world", out.items);
+}
+
+test "SSE parser tolerates malformed lines" {
+    switch (LLMClient.parseSseDataLine("event: ping")) {
+        .none => {},
+        else => return error.TestUnexpectedResult,
+    }
+
+    switch (LLMClient.parseSseDataLine("data: {not-json}")) {
+        .none => {},
+        else => return error.TestUnexpectedResult,
+    }
+
+    switch (LLMClient.parseSseDataLine("data: [DONE]")) {
+        .done => {},
+        else => return error.TestUnexpectedResult,
+    }
 }
