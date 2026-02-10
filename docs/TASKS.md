@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R2-T09（NEXT，TDD）命令回归脚本：`/help` `/clear` `/exit` 自动验收
-  - 预计时长：1 小时
-  - 改动范围：`scripts/`、`Makefile`（必要时）
-  - DoD：
-    1) 新增可重复脚本覆盖三条命令行为；
-    2) 可在本地一条命令运行并给出 PASS/FAIL；
-    3) 不引入交互阻塞；
-    4) 三项命令验证通过。
-
-- [ ] R2-T10（BDD）错误分级复现场景补全：网络/提供商
+- [ ] R2-T10（NEXT，BDD）错误分级复现场景补全：网络/提供商
   - 预计时长：1-2 小时
   - 改动范围：`scripts/`、`docs/`（必要时）
   - DoD：
@@ -149,11 +140,20 @@
     3) 不改变工具调用语义（仅提示层增强）。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R2-T09（TDD）命令回归脚本：`/help` `/clear` `/exit` 自动验收
+  - 文件：`scripts/test-commands.sh`
+  - 行为验收：
+    1) 覆盖 `/help` 显示与隐藏（toggle）；
+    2) 覆盖 `/clear` 清理提示；
+    3) 覆盖 `/exit` 退出链路；
+    4) 脚本输出明确 PASS/FAIL 且可一条命令执行。
+  - 验证：`./scripts/test-commands.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T09（NEXT）：命令回归脚本（`/help` `/clear` `/exit`）
+1. 立即执行 R2-T10（NEXT）：错误分级复现场景补全（网络/提供商）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
