@@ -4,14 +4,13 @@
 
 ## In Progress
 
-- [ ] R2-T06（NEXT，TDD）streaming 回归补强：partial line + escaped content
-  - 预计时长：1 小时
-  - 改动范围：`src/llm.zig`（测试为主）
+- [ ] R2-T07（NEXT）基于 R2 进展拆分下一批原子任务
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`
   - DoD：
-    1) 新增覆盖 partial line 缓冲拼接案例；
-    2) 新增覆盖转义字符内容（`\n`、`\"`）案例；
-    3) 不改动业务行为，仅测试与必要最小修复；
-    4) 三项命令验证通过。
+    1) 新增 3-5 个可执行任务；
+    2) 每项包含范围与 DoD；
+    3) 指定下一执行项。
 
 ## Done
 
@@ -101,13 +100,21 @@
     3) 新增可复现场景脚本：`./scripts/test-error-classification.sh`（配置类）。
   - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-error-classification.sh` 通过。
 
+- [x] R2-T06（TDD）streaming 回归补强：partial line + escaped content
+  - 文件：`src/llm.zig`（测试）
+  - 新增测试：
+    1) `SSE parser handles partial-line buffering across chunks`；
+    2) `SSE parser unescapes newline and quote content`。
+  - 说明：仅补测试，无业务语义变更。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R2-T06（NEXT）：streaming 回归补强（测试优先）
-2. 基于 R2 进展继续拆分下一批原子任务
-3. 补充网络/提供商错误场景脚本（可选）
+1. 立即执行 R2-T07（NEXT）：基于 R2 进展拆分下一批原子任务
+2. 补充网络/提供商错误场景脚本（可选）
+3. 继续 30 分钟进度汇报
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

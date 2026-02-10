@@ -535,6 +535,73 @@ test "SSE parser handles multi-chunk content and DONE" {
     try std.testing.expectEqualStrings("Hello world", out.items);
 }
 
+test "SSE parser handles partial-line buffering across chunks" {
+    const allocator = std.testing.allocator;
+
+    const chunks = [_][]const u8{
+        "data: {\"choices\":[{\"delta\":{\"content\":\"par",
+        "tial\"}}]}",
+        "\n",
+        "data: [DONE]\n",
+    };
+
+    var pending = std.array_list.Managed(u8).init(allocator);
+    defer pending.deinit();
+
+    var out = std.array_list.Managed(u8).init(allocator);
+    defer out.deinit();
+
+    var done = false;
+    for (chunks) |chunk| {
+        try pending.appendSlice(chunk);
+
+        var start: usize = 0;
+        while (start < pending.items.len) {
+            const rel_nl = std.mem.indexOfScalar(u8, pending.items[start..], '\n') orelse break;
+            const end = start + rel_nl;
+            const raw_line = std.mem.trimRight(u8, pending.items[start..end], "\r");
+            start = end + 1;
+
+            switch (LLMClient.parseSseDataLine(raw_line)) {
+                .done => {
+                    done = true;
+                    break;
+                },
+                .none => {},
+                .content => |raw| {
+                    const s = try unescapeJsonString(allocator, raw);
+                    defer allocator.free(s);
+                    try out.appendSlice(s);
+                },
+            }
+        }
+
+        if (start > 0) {
+            std.mem.copyForwards(u8, pending.items[0 .. pending.items.len - start], pending.items[start..]);
+            pending.items.len -= start;
+        }
+
+        if (done) break;
+    }
+
+    try std.testing.expect(done);
+    try std.testing.expectEqualStrings("partial", out.items);
+}
+
+test "SSE parser unescapes newline and quote content" {
+    const allocator = std.testing.allocator;
+
+    const line = "data: {\"choices\":[{\"delta\":{\"content\":\"line1\\n\\\"q\\\"\"}}]}";
+    switch (LLMClient.parseSseDataLine(line)) {
+        .content => |raw| {
+            const s = try unescapeJsonString(allocator, raw);
+            defer allocator.free(s);
+            try std.testing.expectEqualStrings("line1\n\"q\"", s);
+        },
+        else => return error.TestUnexpectedResult,
+    }
+}
+
 test "SSE parser tolerates malformed lines" {
     switch (LLMClient.parseSseDataLine("event: ping")) {
         .none => {},
