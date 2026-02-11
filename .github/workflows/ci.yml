@@ -41,6 +41,9 @@ jobs:
       - name: R5 Routing Suite
         run: make r5-routing-regression
 
+      - name: R6 Release Suite
+        run: make r6-release-regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:

@@ -4,7 +4,7 @@ ZIG ?= zig
 BUILD_DIR = zig-out/bin
 TARGET = $(BUILD_DIR)/lan
 
-.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression package-release clean install fmt
+.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression package-release clean install fmt
 
 all: build
 
@@ -36,6 +36,9 @@ r4-skill-regression: build
 
 r5-routing-regression: build
 	./scripts/test-r5-routing-suite.sh
+
+r6-release-regression: build
+	./scripts/test-r6-release-suite.sh
 
 package-release: build
 	./scripts/package-release.sh
