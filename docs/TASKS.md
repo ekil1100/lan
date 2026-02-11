@@ -23,14 +23,61 @@
   - R4-T05.A 本地回归入口定义：done
   - R4-T05.B CI 复用本地回归入口：done
 
-### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T12（NEXT）R4 第二批收口与 R5 启动拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R4 第二批收口结论（R4-T12）
+- **状态判定**：close-ready ✅
+- **第二批任务状态**：
+  - R4-T07 manifest 字段边界校验：done
+  - R4-T08 `lan skill update` 本地覆盖安装：done
+  - R4-T09 skill index snapshot + list 回退：done
+  - R4-T10 权限声明显示与提示：done
+  - R4-T11 第二批回归入口与 CI 对齐：done
+
+### R5 第一批原子任务（多模型编排启动）
+- [ ] R5-T01（NEXT，TDD）Provider 配置 schema v1（路由最小字段）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/config.zig`、`docs/`
   - DoD：
-    1) 判定 R4 第二批状态（done/remaining）；
-    2) 若 close-ready，产出 R5 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 定义 provider 路由最小字段（primary/fallback/timeout/retry）；
+    2) 提供 1 份合法 + 1 份非法配置样例；
+    3) 增加 schema 校验测试；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R5-T02（BDD）Provider fallback 最小闭环（网络失败触发）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/llm.zig`、`scripts/`
+  - DoD：
+    1) 主 provider 失败可切换 fallback；
+    2) 输出明确 fallback 提示（可观测）；
+    3) 离线可复现脚本 PASS/FAIL；
+    4) 三项命令验证通过。
+
+- [ ] R5-T03（TDD）路由策略 v1：速度优先/质量优先开关
+  - 预计时长：1-2 小时
+  - 改动范围：`src/config.zig`、`src/agent.zig`
+  - DoD：
+    1) 新增 route_mode（speed|quality）；
+    2) 不同模式选择不同 provider/model 组合；
+    3) 保持默认配置兼容；
+    4) 三项命令验证通过。
+
+- [ ] R5-T04（BDD）多模型路由日志标准化（机器可解析）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`README.md`、`scripts/`
+  - DoD：
+    1) 路由日志字段固定（phase/provider/model/result/reason/duration_ms）；
+    2) 提供脚本解析样例与 PASS/FAIL 断言；
+    3) 与现有 tool_event 风格一致；
+    4) 三项命令验证通过。
+
+- [ ] R5-T05（串行）R5 第一批回归入口与 CI 对齐
+  - 依赖：R5-T01~R5-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R5 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
 
 ## Done
 
@@ -444,11 +491,18 @@
     3) CI 复用同一入口命令（`make r4-skill-regression`）。
   - 验证：`make r4-skill-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T12（收口）R4 第二批收口与 R5 启动拆解
+  - 文件：`docs/TASKS.md`
+  - 结论：
+    1) R4 第二批（R4-T07~R4-T11）全部 done，close-ready；
+    2) 已产出 R5 第一批 5 个原子任务（R5-T01~R5-T05）；
+    3) 唯一 NEXT 已切换到 R5-T01。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T12（NEXT）：R4 第二批收口与 R5 启动拆解
+1. 立即执行 R5-T01（NEXT）：Provider 配置 schema v1（路由最小字段）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
