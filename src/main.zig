@@ -99,6 +99,27 @@ pub fn main() !void {
         return;
     }
 
+    // lan history export — dump history as JSON with role/content/timestamp
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "export")) {
+        var cfg = try Config.load(allocator);
+        defer cfg.deinit();
+        const history_path = try std.fs.path.join(allocator, &[_][]const u8{ cfg.config_dir, "history.json" });
+        defer allocator.free(history_path);
+        const content = std.fs.cwd().readFileAlloc(allocator, history_path, 4 * 1024 * 1024) catch |err| {
+            var ebuf: [4096]u8 = undefined;
+            var ew = std.fs.File.stdout().writer(&ebuf);
+            try ew.interface.print("History export failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew.interface.flush();
+            return;
+        };
+        defer allocator.free(content);
+        var hbuf: [4096]u8 = undefined;
+        var hw = std.fs.File.stdout().writer(&hbuf);
+        try hw.interface.print("{s}", .{content});
+        try hw.interface.flush();
+        return;
+    }
+
     var config = try Config.load(allocator);
     defer config.deinit();
 
