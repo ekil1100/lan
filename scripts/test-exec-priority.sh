@@ -6,9 +6,9 @@ cd "$(dirname "$0")/.."
 OUT="$(zig test src/agent.zig --test-filter "tool exec" 2>&1 || true)"
 
 echo "$OUT" | grep -Eq "All [0-9]+ tests passed" || {
-  echo "[exec-priority] FAIL: expected exec tests to pass"
+  echo "[exec-priority] FAIL reason=exec-priority-tests-not-passed"
   echo "$OUT"
   exit 1
 }
 
-echo "[exec-priority] PASS"
+echo "[exec-priority] PASS reason=exec-priority-tests-passed"

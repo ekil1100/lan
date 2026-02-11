@@ -3,6 +3,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-zig test src/agent.zig --test-filter "tool regression v1" >/dev/null
+OUT="$(zig test src/agent.zig --test-filter "tool regression v1" 2>&1 || true)"
 
-echo "[tools-regression] PASS"
+echo "$OUT" | grep -Eq "All [0-9]+ tests passed" || {
+  echo "[tools-regression] FAIL reason=regression-tests-not-passed"
+  echo "$OUT"
+  exit 1
+}
+
+echo "[tools-regression] PASS reason=regression-tests-passed"

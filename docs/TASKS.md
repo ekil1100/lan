@@ -237,14 +237,16 @@
     3) 唯一 NEXT 已切换到 R3-T11。
   - 说明：本次为文档原子收口提交。
 
-- [x] R3-T11（验收增强）回归入口失败判定补强
-  - 文件：`scripts/test-regression-suite.sh`
+- [x] R3-T11（验收增强）回归入口失败判定补强 + 判定文案统一
+  - 文件：`scripts/test-regression-suite.sh`、`scripts/test-tools-regression.sh`、`scripts/test-tools-fail-nonzero.sh`、`scripts/test-exec-priority.sh`
   - 验收：
     1) 任一子脚本失败即立即非零退出（ERR trap）；
-    2) 输出统一失败摘要：`[regression-suite] FAIL case=<name> exit=<code>`；
-    3) 本地可复现失败演示：
+    2) 入口输出统一失败摘要：`[regression-suite] FAIL case=<name> exit=<code>`；
+    3) 三个关键子脚本判定文案统一为 `PASS/FAIL + reason=<...>`；
+    4) 本地可复现失败演示：
        - `REGRESSION_FAIL_AT=./scripts/test-commands.sh ./scripts/test-regression-suite.sh` → `exit 1`；
-    4) 正常路径保持 `[regression-suite] PASS`。
+    5) 正常路径保持 `[regression-suite] PASS`。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
