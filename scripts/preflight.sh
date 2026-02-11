@@ -51,4 +51,17 @@ if ! command -v shasum >/dev/null 2>&1 && ! command -v sha256sum >/dev/null 2>&1
   emit_fail "sha_tool_missing" "install shasum/sha256sum and retry"
 fi
 
+# 5) provider health (WARN only — does not block PASS)
+if [[ -n "${LAN_PROVIDER_URL:-}" ]]; then
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  provider_check="$("$script_dir/check-provider-health.sh" "$LAN_PROVIDER_URL" 5 2>&1 || true)"
+  if echo "$provider_check" | grep -q "\[provider-health\] FAIL"; then
+    if [[ "$JSON_MODE" == "true" ]]; then
+      printf '{"ok":true,"reason":"provider_unreachable","target":"%s","next":"check LAN_PROVIDER_URL and network connectivity","severity":"warn"}\n' "$TARGET_DIR"
+    else
+      echo "[preflight] WARN provider_unreachable next=check LAN_PROVIDER_URL and network"
+    fi
+  fi
+fi
+
 emit_pass
