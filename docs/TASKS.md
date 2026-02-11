@@ -179,38 +179,47 @@
   - R16-T02 安装验证脚本：done
   - R16-T03 CONTRIBUTING.md 更新：done
 
-### R17 第一批原子任务（Beta 质量强化）
-- [ ] R17-T01（NEXT，并行）端到端 release 打包验证（本地模拟 tag → package → install → health）
+### R17 第一批收口结论（R17-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R17-T01 端到端 release 打包验证：done
+  - R17-T02 CI 跨平台 smoke：done
+  - R17-T03 Beta known-issues 文档：done
+  - R17-T04 回归入口与 CI 对齐：done
+
+### R18 第一批原子任务（Beta 功能迭代）
+- [ ] R18-T01（NEXT，并行）Skill 示例包（内置 hello-world skill）
   - 预计时长：1-2 小时
-  - 改动范围：`scripts/test-e2e-release.sh`
+  - 改动范围：`skills/hello-world/`、`docs/skills/`
   - DoD：
-    1) 模拟 tag 触发的完整链路（package → install → post-install-health）；
-    2) 输出 PASS/FAIL；
-    3) 可离线执行。
+    1) 提供完整 skill 示例（manifest + 入口）；
+    2) `lan skill add ./skills/hello-world` 可正常安装；
+    3) 文档说明如何创建自定义 skill。
 
-- [ ] R17-T02（并行）CI 增加跨平台 smoke（macos runner）
-  - 预计时长：1 小时
-  - 改动范围：`.github/workflows/ci.yml`
+- [ ] R18-T02（并行）Provider 健康检查端点
+  - 预计时长：1-2 小时
+  - 改动范围：`src/llm.zig`、`scripts/test-provider-health.sh`
   - DoD：
-    1) CI 增加 macos-latest runner（至少 build + test + smoke）；
-    2) 保持现有 ubuntu 步骤不变。
+    1) 新增 provider 可达性检测（超时/连通性）；
+    2) 输出 PASS/FAIL + latency；
+    3) 可被 preflight 脚本调用。
 
-- [ ] R17-T03（并行）Beta known-issues 文档（从已知限制提取）
+- [ ] R18-T03（并行）会话历史导出（JSON 格式）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`scripts/`
+  - DoD：
+    1) `lan history export` 输出 JSON 格式会话记录；
+    2) 含 role/content/timestamp 字段；
+    3) 回归测试覆盖。
+
+- [ ] R18-T04（串行收口）R18 第一批回归入口与 CI 对齐
+  - 依赖：R18-T01~R18-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`docs/release/known-issues.md`
-  - DoD：
-    1) 从 CHANGELOG/announcement 已知限制提取并结构化；
-    2) 每项含状态/workaround/跟踪 issue。
-
-- [ ] R17-T04（串行收口）R17 第一批回归入口与 CI 对齐
-  - 依赖：R17-T01~R17-T03
-  - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r17-*.sh`、`docs/TASKS.md`
+  - 改动范围：`Makefile`、`scripts/test-r18-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
     3) TASKS 写清依赖（T01~T03 → T04）。
-    3) 保持向后兼容（同样参数接口）。
 
 
 ## Done
@@ -1128,6 +1137,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R16 close-ready；R17 第一批 4 个原子任务已拆；NEXT → R17-T01。
 
+- [x] R17-T01（并行）端到端 release 打包验证
+  - 文件：`scripts/test-e2e-release.sh`
+  - 验收：package → install → health 全链路 PASS/FAIL；离线可执行。
+
+- [x] R17-T02（并行）CI 增加跨平台 smoke
+  - 文件：`.github/workflows/ci.yml`
+  - 验收：matrix 增加 macos-latest；现有 ubuntu 不变。
+
+- [x] R17-T03（并行）Beta known-issues 文档
+  - 文件：`docs/release/known-issues.md`
+  - 验收：5 项已知限制结构化；含 status/workaround/tracking。
+
+- [x] R17-T04（串行收口）R17 回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r17-quality-suite.sh`
+  - 验收：`make r17-quality-regression` 通过。
+
+- [x] R17-T05（收口）R17 收口与 R18 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R17 close-ready；R18 第一批 4 个原子任务已拆；NEXT → R18-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1161,7 +1190,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R17-T01（NEXT）：端到端 release 打包验证
+1. 立即执行 R18-T01（NEXT）：Skill 示例包（内置 hello-world skill）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
