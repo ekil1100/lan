@@ -45,14 +45,65 @@
   - R5-T04 路由日志标准化：done
   - R5-T05 第一批回归入口与 CI 对齐：done
 
-### R6 第一批原子任务（发布与生态启动）
-- [ ] R6-T06（NEXT）R6 第一批收口与下一批任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R6 第一批收口结论（R6-T06）
+- **收口判据**：
+  1) R6-T01~R6-T05 全部达到 DoD 且有离线回归验证；
+  2) 本地与 CI 使用同一回归命令（无双维护）；
+  3) 版本/打包/安装/升级链路完整闭环。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R6-T01 `--version` 构建元信息：done
+  - R6-T02 发布包最小闭环：done
+  - R6-T03 安装脚本 v1：done
+  - R6-T04 升级脚本 v1：done
+  - R6-T05 第一批回归入口与 CI 对齐：done
+
+### R7 第一批原子任务（安装升级机制强化）
+- [ ] R7-T01（NEXT，TDD）安装路径探测与冲突检查
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/install.sh`、`scripts/`
   - DoD：
-    1) 判定 R6 第一批状态（done/remaining）；
-    2) 若 close-ready，产出下一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 安装前检测目标路径冲突（文件/目录/权限）；
+    2) 冲突场景输出 next-step；
+    3) 增加离线 PASS/FAIL 回归；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R7-T02（BDD）升级回滚最小机制（失败可回退）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/upgrade.sh`、`scripts/`
+  - DoD：
+    1) 升级前备份旧二进制；
+    2) 升级失败自动回滚；
+    3) 输出回滚结果与 next-step；
+    4) 三项命令验证通过。
+
+- [ ] R7-T03（TDD）发布产物校验清单（checksum + manifest）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/package-release.sh`、`scripts/`
+  - DoD：
+    1) 生成 checksum 与产物清单；
+    2) 安装前可校验完整性；
+    3) 增加离线校验脚本；
+    4) 三项命令验证通过。
+
+- [ ] R7-T04（BDD）安装/升级说明文档收敛
+  - 预计时长：1-2 小时
+  - 改动范围：`README.md`、`docs/`
+  - DoD：
+    1) 文档覆盖 install/upgrade/package 常见路径；
+    2) 包含失败场景 next-step 指南；
+    3) 与脚本行为一致；
+    4) 三项命令验证通过。
+
+- [ ] R7-T05（串行）R7 第一批回归入口与 CI 对齐
+  - 依赖：R7-T01~R7-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R7 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
   - 依赖：R6-T01~R6-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -584,11 +635,18 @@
     3) CI 复用同一入口命令（`make r6-release-regression`）。
   - 验证：`make r6-release-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R6-T06（并行预拆）R6 第一批收口与 R7 启动草案
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已给出 R6 第一批收口判据与 done/remaining 结论（close-ready）；
+    2) 预拆 R7 第一批 5 个原子任务（R7-T01~R7-T05）；
+    3) 唯一 NEXT 已切换到 R7-T01。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R6-T06（NEXT）：R6 第一批收口与下一批任务拆解
+1. 立即执行 R7-T01（NEXT）：安装路径探测与冲突检查
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
