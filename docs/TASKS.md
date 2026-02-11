@@ -72,16 +72,7 @@
   - R7-T05 第一批回归入口与 CI 对齐：done
 
 ### R8 第一批原子任务（文档与分发体验收敛）
-- [ ] R8-T01（NEXT，BDD）README 安装/升级一页式指引重构
-  - 预计时长：1-2 小时
-  - 改动范围：`README.md`
-  - DoD：
-    1) 将 package/install/upgrade/verify 命令集中到单节；
-    2) 增加失败场景 next-step 对照；
-    3) 与脚本当前行为一致；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R8-T02（TDD）发布产物索引页生成（dist/index.txt）
+- [ ] R8-T02（NEXT，TDD）发布产物索引页生成（dist/index.txt）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/package-release.sh`、`scripts/`
   - DoD：
@@ -700,11 +691,19 @@
     2) 预拆 R8 第一批 5 个原子任务（R8-T01~R8-T05）；
     3) 唯一 NEXT 已切换到 R8-T01。
 
+- [x] R8-T01（TDD）安装器平台探测与默认路径策略
+  - 文件：`scripts/install.sh`、`scripts/test-install-platform-path.sh`、`scripts/test-install-path-conflict.sh`
+  - 验收：
+    1) 自动识别平台并选择默认安装路径（macOS: `~/bin`, Linux: `~/.local/bin`）；
+    2) 路径冲突与权限不足仍输出 `next:` 提示；
+    3) 新增离线 PASS/FAIL 回归脚本覆盖平台默认路径与冲突场景。
+  - 验证：`./scripts/test-install-platform-path.sh` / `./scripts/test-install-path-conflict.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R8-T01（NEXT）：README 安装/升级一页式指引重构
+1. 立即执行 R8-T02（NEXT）：发布产物索引页生成（dist/index.txt）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

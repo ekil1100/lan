@@ -4,7 +4,26 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PKG_PATH="${1:-}"
-TARGET_DIR="${2:-$HOME/.local/bin}"
+TARGET_DIR_INPUT="${2:-}"
+
+platform_name() {
+  local os="${PLATFORM_OVERRIDE:-$(uname -s)}"
+  case "$os" in
+    Darwin) echo "macos" ;;
+    Linux) echo "linux" ;;
+    *) echo "unknown" ;;
+  esac
+}
+
+default_target_dir() {
+  case "$(platform_name)" in
+    macos) echo "$HOME/bin" ;;
+    linux) echo "$HOME/.local/bin" ;;
+    *) echo "$HOME/.local/bin" ;;
+  esac
+}
+
+TARGET_DIR="${TARGET_DIR_INPUT:-$(default_target_dir)}"
 
 started_at=$(date +%s)
 
@@ -77,3 +96,4 @@ chmod +x "$TARGET_DIR/lan"
 
 log_event "end" "install" "$TARGET_DIR/lan" "success" "install_completed"
 echo "Install success: $TARGET_DIR/lan"
+echo "platform: $(platform_name)"
