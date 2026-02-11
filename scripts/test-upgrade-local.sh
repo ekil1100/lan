@@ -33,4 +33,19 @@ bad_out="$(./scripts/upgrade.sh "$tmp_dir/nope.tgz" "$tmp_dir/bin" "$tmp_dir/con
 echo "$bad_out" | grep -q "Upgrade failed:" || { echo "[upgrade-test] FAIL reason=bad-path-not-failed"; echo "$bad_out"; exit 1; }
 echo "$bad_out" | grep -q "next:" || { echo "[upgrade-test] FAIL reason=next-step-missing"; echo "$bad_out"; exit 1; }
 
+# Rollback path: feed a package with broken lan binary -> should restore backup
+bad_pkg_dir="$tmp_dir/badpkg/lan-0.1.0-macos-arm64"
+mkdir -p "$bad_pkg_dir"
+echo "not-a-binary" > "$bad_pkg_dir/lan"
+cp README.md "$bad_pkg_dir/README.md"
+tar -czf "$tmp_dir/bad.tgz" -C "$tmp_dir/badpkg" "lan-0.1.0-macos-arm64"
+
+rb_out="$(./scripts/upgrade.sh "$tmp_dir/bad.tgz" "$tmp_dir/bin" "$tmp_dir/config" 2>&1 || true)"
+echo "$rb_out" | grep -q "Upgrade rollback: restored previous binary" || { echo "[upgrade-test] FAIL reason=rollback-message-missing"; echo "$rb_out"; exit 1; }
+echo "$rb_out" | grep -q "next:" || { echo "[upgrade-test] FAIL reason=rollback-next-missing"; echo "$rb_out"; exit 1; }
+
+# binary still usable after rollback
+post="$($tmp_dir/bin/lan --version 2>&1 || true)"
+echo "$post" | grep -q "^lan version=" || { echo "[upgrade-test] FAIL reason=post-rollback-binary-unusable"; echo "$post"; exit 1; }
+
 echo "[upgrade-test] PASS reason=upgrade-config-version-observable"
