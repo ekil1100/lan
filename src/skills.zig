@@ -117,7 +117,7 @@ pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, s
     defer allocator.free(perms);
 
     try refreshIndexFromRoot(allocator, skills_root);
-    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\npermissions: {s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest, perms });
+    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} perms={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, perms, dst_manifest });
 }
 
 pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
@@ -156,21 +156,40 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     defer allocator.free(perms);
 
     try refreshIndexFromRoot(allocator, skills_root);
-    return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} path={s}\npermissions: {s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest, perms });
+    return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} perms={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, perms, dst_manifest });
+}
+
+fn lessString(_: void, a: []const u8, b: []const u8) bool {
+    return std.mem.order(u8, a, b) == .lt;
 }
 
 fn joinPermissions(allocator: std.mem.Allocator, permissions: [][]const u8) ![]u8 {
-    if (permissions.len == 0) return allocator.dupe(u8, "-");
+    if (permissions.len == 0) return allocator.dupe(u8, "[]");
+
+    const sorted = try allocator.alloc([]const u8, permissions.len);
+    defer allocator.free(sorted);
+    for (permissions, 0..) |p, i| sorted[i] = p;
+    std.sort.heap([]const u8, sorted, {}, lessString);
 
     var out = std.ArrayList(u8).empty;
     defer out.deinit(allocator);
 
-    for (permissions, 0..) |p, i| {
+    try out.appendSlice(allocator, "[");
+    for (sorted, 0..) |p, i| {
         if (i != 0) try out.appendSlice(allocator, ",");
         try out.appendSlice(allocator, p);
     }
+    try out.appendSlice(allocator, "]");
 
     return out.toOwnedSlice(allocator);
+}
+
+test "permissions formatter is stable and short" {
+    const allocator = std.testing.allocator;
+    var perms = [_][]const u8{ "workspace.write", "workspace.read" };
+    const out = try joinPermissions(allocator, perms[0..]);
+    defer allocator.free(out);
+    try std.testing.expectEqualStrings("[workspace.read,workspace.write]", out);
 }
 
 fn formatNoSkills(allocator: std.mem.Allocator) ![]const u8 {
@@ -197,7 +216,7 @@ fn tryListFromIndex(allocator: std.mem.Allocator, skills_root: []const u8) !?[]c
     defer out.deinit(allocator);
 
     for (parsed.value.skills) |s| {
-        try out.writer(allocator).print("- name={s} version={s} permissions={s} path={s}\n", .{ s.name, s.version, s.permissions, s.path });
+        try out.writer(allocator).print("- name={s} version={s} perms={s} path={s}\n", .{ s.name, s.version, s.permissions, s.path });
     }
 
     const owned = try out.toOwnedSlice(allocator);
@@ -390,12 +409,12 @@ test "skill add installs local manifest and becomes listable" {
     const add_out = try addSkillFromRoot(allocator, skills_root, source_dir);
     defer allocator.free(add_out);
     try std.testing.expect(std.mem.indexOf(u8, add_out, "Skill installed") != null);
-    try std.testing.expect(std.mem.indexOf(u8, add_out, "permissions:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, add_out, "perms=[") != null);
 
     const list_out = try listSkillsFromRoot(allocator, skills_root);
     defer allocator.free(list_out);
     try std.testing.expect(std.mem.indexOf(u8, list_out, "name=demo-skill") != null);
-    try std.testing.expect(std.mem.indexOf(u8, list_out, "permissions=") != null);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "perms=[") != null);
 }
 
 test "skill add returns next-step when manifest invalid" {
@@ -478,12 +497,12 @@ test "skill update changes visible version in list" {
     const upd_out = try updateSkillFromRoot(allocator, skills_root, src_v2);
     defer allocator.free(upd_out);
     try std.testing.expect(std.mem.indexOf(u8, upd_out, "Skill updated") != null);
-    try std.testing.expect(std.mem.indexOf(u8, upd_out, "permissions:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, upd_out, "perms=[") != null);
 
     const list_out = try listSkillsFromRoot(allocator, skills_root);
     defer allocator.free(list_out);
     try std.testing.expect(std.mem.indexOf(u8, list_out, "version=1.1.0") != null);
-    try std.testing.expect(std.mem.indexOf(u8, list_out, "permissions=") != null);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "perms=[") != null);
 }
 
 test "skill update returns next-step when target not installed" {

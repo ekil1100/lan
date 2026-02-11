@@ -498,6 +498,14 @@
     2) 已产出 R5 第一批 5 个原子任务（R5-T01~R5-T05）；
     3) 唯一 NEXT 已切换到 R5-T01。
 
+- [x] R5-1.A（并行预拆）Skill 权限提示可读性优化
+  - 文件：`src/skills.zig`、`scripts/test-skill-add-local.sh`、`scripts/test-skill-update-local.sh`
+  - 验收：
+    1) permissions 展示改为稳定顺序 + 短格式：`perms=[a,b]`；
+    2) add/update/list 三处输出统一为 `perms=` 结构；
+    3) 增加最小回归断言（含稳定顺序字符串断言）。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-update-local.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 

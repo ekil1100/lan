@@ -28,11 +28,11 @@ ok_out="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill add "$tmp_dir/src-ok" 2>&
 echo "$ok_out" | grep -q "Skill installed:" || { echo "[skill-add] FAIL reason=install-success-missing"; echo "$ok_out"; exit 1; }
 
 echo "$ok_out" | grep -q "name=demo-skill" || { echo "[skill-add] FAIL reason=name-missing"; echo "$ok_out"; exit 1; }
-echo "$ok_out" | grep -q "permissions:" || { echo "[skill-add] FAIL reason=permissions-hint-missing"; echo "$ok_out"; exit 1; }
+echo "$ok_out" | grep -q "perms=\[" || { echo "[skill-add] FAIL reason=permissions-hint-missing"; echo "$ok_out"; exit 1; }
 
 list_out="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill list 2>&1 || true)"
 echo "$list_out" | grep -q "name=demo-skill" || { echo "[skill-add] FAIL reason=list-missing-installed"; echo "$list_out"; exit 1; }
-echo "$list_out" | grep -q "permissions=" || { echo "[skill-add] FAIL reason=list-permissions-missing"; echo "$list_out"; exit 1; }
+echo "$list_out" | grep -q "perms=\[" || { echo "[skill-add] FAIL reason=list-permissions-missing"; echo "$list_out"; exit 1; }
 
 bad_out="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill add "$tmp_dir/src-bad" 2>&1 || true)"
 echo "$bad_out" | grep -q "Skill install failed" || { echo "[skill-add] FAIL reason=invalid-manifest-not-failed"; echo "$bad_out"; exit 1; }
