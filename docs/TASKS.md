@@ -24,23 +24,13 @@
   - R4-T05.B CI 复用本地回归入口：done
 
 ### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T11（NEXT，串行）R4 第二批回归入口与 CI 对齐
-  - 依赖：R4-T07~R4-T10
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R4-T12（NEXT）R4 第二批收口与 R5 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义 R4 第二批统一回归入口；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
-  - 依赖：R4-T07~R4-T10
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义 R4 第二批统一回归入口；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
+    1) 判定 R4 第二批状态（done/remaining）；
+    2) 若 close-ready，产出 R5 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 ## Done
 
@@ -446,11 +436,19 @@
     3) 仅可观测提示，不做权限拦截。
   - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-update-local.sh` / `scripts/test-skill-remove-local.sh` 通过。
 
+- [x] R4-T11（串行，依赖 R4-T10）R4 第二批回归入口与 CI 对齐
+  - 文件：`scripts/test-r4-skill-suite.sh`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) R4 第二批统一回归入口明确：`make r4-skill-regression`（覆盖 T07/T08/T09/T10）；
+    2) PASS/FAIL 判定明确：exit code + `[r4-skill-suite] PASS/FAIL`；
+    3) CI 复用同一入口命令（`make r4-skill-regression`）。
+  - 验证：`make r4-skill-regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T11（NEXT）：R4 第二批回归入口与 CI 对齐
+1. 立即执行 R4-T12（NEXT）：R4 第二批收口与 R5 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
