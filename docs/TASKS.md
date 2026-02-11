@@ -160,11 +160,37 @@
   - R14-T03 ROADMAP 里程碑切换：done
   - R14-T04 第一批回归入口与 CI 对齐：done
 
-### R15 第一批原子任务（待拆解）
-- [ ] R15-T00（NEXT）R15 第一批任务拆解
-  - 预计时长：0.5 小时
-  - 改动范围：`docs/TASKS.md`
-  - DoD：产出 R15 第一批 3-5 个原子任务并指定唯一 NEXT。
+### R15 第一批原子任务（Beta 发布基建）
+- [ ] R15-T01（NEXT，串行）CD release workflow 补充跨平台构建矩阵
+  - 预计时长：1-2 小时
+  - 改动范围：`.github/workflows/release.yml`
+  - DoD：
+    1) release workflow 增加 matrix 构建（至少 ubuntu-latest + macos-latest）；
+    2) 每个平台产出独立 artifact 并上传到同一 GitHub Release；
+    3) workflow 语法校验通过。
+
+- [ ] R15-T02（并行）Beta 反馈收集模板与 issue template
+  - 预计时长：0.5-1 小时
+  - 改动范围：`.github/ISSUE_TEMPLATE/`、`docs/`
+  - DoD：
+    1) 新增 bug report 和 feature request issue template；
+    2) 包含环境信息/复现步骤/严重等级字段。
+
+- [ ] R15-T03（串行，依赖 T02）README Beta 文档更新
+  - 预计时长：0.5-1 小时
+  - 改动范围：`README.md`
+  - DoD：
+    1) 增加 Beta 状态徽章；
+    2) 安装说明更新为 release 下载方式；
+    3) 反馈渠道入口。
+
+- [ ] R15-T04（并行）release-notes.sh 增强为自动分类
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/release-notes.sh`、`scripts/test-release-notes.sh`
+  - DoD：
+    1) 自动从 commit message 提取 feat/fix/docs/ci 分类；
+    2) 生成结构化 release notes；
+    3) 保持向后兼容（同样参数接口）。
 
 
 ## Done
@@ -1076,7 +1102,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R15-T00（NEXT）：R15 第一批任务拆解
+1. 立即执行 R15-T01（NEXT）：CD release workflow 补充跨平台构建矩阵
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
