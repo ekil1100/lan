@@ -4,13 +4,57 @@
 
 ## In Progress
 
-- [ ] R3-T12（NEXT）R3 第三批原子任务拆解（聚焦 Tool 协议与可观测性）
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R3 第三批设计说明（R3-T11.A）
+- **聚焦主题**：Tool 协议与可观测性（Protocol + Observability）
+- **不重叠约束**：
+  1) 不重复 R3-T01~T10 已完成内容（错误码规范、日志最小落地、超时/非零退出、CI入口对齐）；
+  2) 本批不新增在线 API 测试，不进入 Skill Runtime。
+
+- [ ] R3-T12（NEXT，TDD）Tool 协议响应结构 v1（统一字段）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/tools.zig`、`src/agent.zig`
   - DoD：
-    1) 新增 3-5 个可执行任务（范围 + DoD + 预计时长）；
-    2) 任务不与已完成 R3-T01~T11 重叠；
-    3) 指定唯一 NEXT。
+    1) 统一成功/失败响应字段（如 `ok/code/detail/next/meta`）；
+    2) read/write/list/exec 输出结构一致；
+    3) 不改变执行语义，仅协议结构统一；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R3-T13（TDD）Tool 调用耗时指标最小落地（duration_ms）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`scripts/`
+  - DoD：
+    1) 每次工具调用输出 `duration_ms`；
+    2) 成功/失败路径都记录耗时；
+    3) 不阻塞交互；
+    4) 三项命令验证通过。
+
+- [ ] R3-T14（BDD）Tool 观测日志格式稳定化（机器可解析）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`README.md`（如需）
+  - DoD：
+    1) 关键日志字段顺序与命名固定；
+    2) 至少 1 个日志样例可被脚本稳定解析；
+    3) 文档提供字段说明；
+    4) 三项命令验证通过。
+
+- [ ] R3-T15（TDD）Tool 协议回归脚本 v1（结构断言）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/`
+  - DoD：
+    1) 覆盖 read/write/list/exec 的协议结构断言；
+    2) 输出 PASS/FAIL，适合本地与 CI；
+    3) 离线可运行；
+    4) 三项命令验证通过。
+
+- [ ] R3-T16（BDD，串行）观测与协议入口汇总（本地/CI）
+  - 依赖：R3-T12~R3-T15
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行本批协议+观测回归；
+    2) 明确通过/失败判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
 
 ## Done
 
@@ -248,11 +292,16 @@
     5) 正常路径保持 `[regression-suite] PASS`。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T11.A（并行）第三批原子任务拆解草案
+  - 文件：`docs/TASKS.md`
+  - 结果：新增 5 个任务（R3-T12 ~ R3-T16），均包含范围/DoD/预计时长
+  - 约束：明确不与 R3-T01~T10 重叠（见“R3 第三批设计说明”）
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T12（NEXT）：R3 第三批原子任务拆解（Tool 协议与可观测性）
+1. 立即执行 R3-T12（NEXT）：Tool 协议响应结构 v1（统一字段）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
