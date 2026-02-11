@@ -99,6 +99,27 @@ pub fn main() !void {
         return;
     }
 
+    // lan history clear — delete history file
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "clear")) {
+        var cfg_c = try Config.load(allocator);
+        defer cfg_c.deinit();
+        const hpc = try std.fs.path.join(allocator, &[_][]const u8{ cfg_c.config_dir, "history.json" });
+        defer allocator.free(hpc);
+        std.fs.cwd().deleteFile(hpc) catch {};
+        // Write empty array so export returns []
+        const f = try std.fs.cwd().createFile(hpc, .{});
+        defer f.close();
+        var cbuf: [256]u8 = undefined;
+        var cw = f.writer(&cbuf);
+        try cw.interface.writeAll("[]\n");
+        try cw.interface.flush();
+        var obuf: [256]u8 = undefined;
+        var ow = std.fs.File.stdout().writer(&obuf);
+        try ow.interface.writeAll("History cleared.\n");
+        try ow.interface.flush();
+        return;
+    }
+
     // lan history search <keyword> — filter history by keyword
     if (args.len >= 4 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "search")) {
         const keyword = args[3];
