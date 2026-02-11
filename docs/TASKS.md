@@ -195,35 +195,43 @@
   - R18-T03 会话历史导出：done
   - R18-T04 回归入口与 CI 对齐：done
 
-### R19 第一批原子任务（Beta 稳定性与体验）
-- [ ] R19-T01（NEXT，并行）会话历史搜索（关键词过滤）
+### R19 第一批收口结论（R19-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R19-T01 会话历史搜索：done
+  - R19-T02 Preflight provider 集成：done
+  - R19-T03 错误码标准化：done
+  - R19-T04 回归入口与 CI 对齐：done
+
+### R20 第一批原子任务（Beta 打磨与跨平台）
+- [ ] R20-T01（NEXT，并行）Linux amd64 交叉编译验证
   - 预计时长：1-2 小时
-  - 改动范围：`src/main.zig`、`scripts/test-history-search.sh`
+  - 改动范围：`Makefile`、`scripts/test-cross-compile.sh`
   - DoD：
-    1) `lan history search <keyword>` 输出匹配的消息；
-    2) 输出 JSON 格式；
-    3) 回归测试覆盖。
+    1) 本地 macOS 可交叉编译 Linux x86_64 目标；
+    2) 产出二进制可在 CI ubuntu runner 上执行；
+    3) 回归脚本覆盖。
 
-- [ ] R19-T02（并行）Preflight 集成 provider 健康检查
-  - 预计时长：1 小时
-  - 改动范围：`scripts/preflight.sh`、`scripts/test-preflight-provider.sh`
-  - DoD：
-    1) preflight 增加 provider 可达性检查项；
-    2) 不可达时标记 WARN（不阻塞整体 PASS）；
-    3) 回归测试覆盖。
-
-- [ ] R19-T03（并行）错误码标准化与文档
+- [ ] R20-T02（并行）配置文件模板与校验
   - 预计时长：1-2 小时
-  - 改动范围：`docs/errors.md`、`src/`
+  - 改动范围：`docs/config/`、`scripts/validate-config.sh`
   - DoD：
-    1) 定义统一错误码表（E001~E0xx）；
-    2) 每个错误含描述/next-step/严重等级；
-    3) 至少覆盖安装/升级/provider/skill 四类。
+    1) 提供默认配置文件模板（provider/route/skill 相关）；
+    2) 校验脚本检查必填字段和格式；
+    3) 输出 PASS/FAIL + 缺失项。
 
-- [ ] R19-T04（串行收口）R19 第一批回归入口与 CI 对齐
-  - 依赖：R19-T01~R19-T03
+- [ ] R20-T03（并行）会话历史清除命令
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r19-*.sh`、`docs/TASKS.md`
+  - 改动范围：`src/main.zig`、`scripts/test-history-clear.sh`
+  - DoD：
+    1) `lan history clear` 清除历史文件；
+    2) 确认清除后 `lan history export` 返回空数组；
+    3) 回归测试覆盖。
+
+- [ ] R20-T04（串行收口）R20 第一批回归入口与 CI 对齐
+  - 依赖：R20-T01~R20-T03
+  - 预计时长：0.5-1 小时
+  - 改动范围：`Makefile`、`scripts/test-r20-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1185,6 +1193,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R18 close-ready；R19 第一批 4 个原子任务已拆；NEXT → R19-T01。
 
+- [x] R19-T01（并行）会话历史搜索
+  - 文件：`src/main.zig`、`scripts/test-history-search.sh`
+  - 验收：`lan history search <keyword>` JSON 输出；match + no-match 测试通过。
+
+- [x] R19-T02（并行）Preflight provider 集成
+  - 文件：`scripts/preflight.sh`、`scripts/test-preflight-provider.sh`
+  - 验收：不可达 WARN 不阻塞 PASS；无 URL 时跳过。
+
+- [x] R19-T03（并行）错误码标准化
+  - 文件：`docs/errors.md`
+  - 验收：E1xx~E4xx 覆盖安装/升级/provider/skill。
+
+- [x] R19-T04（串行收口）R19 回归入口
+  - 文件：`Makefile`、`scripts/test-r19-stability-suite.sh`
+  - 验收：`make r19-stability-regression` 通过。
+
+- [x] R19-T05（收口）R19 收口与 R20 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R19 close-ready；R20 第一批 4 个原子任务已拆；NEXT → R20-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1218,7 +1246,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R19-T01（NEXT）：会话历史搜索（关键词过滤）
+1. 立即执行 R20-T01（NEXT）：Linux amd64 交叉编译验证
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
