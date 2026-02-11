@@ -148,39 +148,23 @@
   - R13-T03 Trial 证据一致性检查：done
   - R13-T04 第一批回归入口与 CI 对齐：done
 
-### R14 第一批原子任务（Beta 正式发布准备）
-- [ ] R14-T01（NEXT，并行）Beta 正式宣布文档（changelog + 公告模板）
-  - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-announcement.md`、`docs/release/CHANGELOG.md`
-  - DoD：
-    1) changelog 覆盖 R1~R13 关键能力（人话）；
-    2) 公告模板含安装方式 + 已知限制 + 反馈渠道；
-    3) 文档人话可读。
+### R14 第一批收口结论（R14-T04）
+- **收口判据**：
+  1) R14-T01~R14-T03 全部达到 DoD；
+  2) 本地与 CI 复用同一回归入口（`make r14-beta-launch-regression`）；
+  3) Beta 宣布文档/准入验收/里程碑切换全部就绪。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R14-T01 Beta 宣布文档：done
+  - R14-T02 准入清单验收脚本：done
+  - R14-T03 ROADMAP 里程碑切换：done
+  - R14-T04 第一批回归入口与 CI 对齐：done
 
-- [ ] R14-T02（并行）Beta 准入清单逐项验收脚本
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/verify-beta-entry.sh`、`scripts/test-verify-beta-entry.sh`
-  - DoD：
-    1) 逐项检查清单条目（能力/回归/稳定性/发布支持）；
-    2) 输出 PASS/FAIL 与未通过项清单；
-    3) 新增回归脚本并通过。
-
-- [ ] R14-T03（并行）ROADMAP 里程碑口径正式切换到 Beta
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
-  - DoD：
-    1) ROADMAP 当前里程碑标记为 Beta（含切换日期）；
-    2) MVP 阶段标记为已完成；
-    3) Beta 阶段目标与退出条件明确。
-
-- [ ] R14-T04（串行收口）R14 第一批回归入口与 CI 对齐
-  - 依赖：R14-T01~R14-T03
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`scripts/test-r14-beta-launch-suite.sh`、`docs/TASKS.md`
-  - DoD：
-    1) 新增统一入口（`make r14-beta-launch-regression`）；
-    2) 输出统一 PASS/FAIL 标识；
-    3) TASKS 写清依赖顺序（T01~T03 -> T04）。
+### R15 第一批原子任务（待拆解）
+- [ ] R15-T00（NEXT）R15 第一批任务拆解
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/TASKS.md`
+  - DoD：产出 R15 第一批 3-5 个原子任务并指定唯一 NEXT。
 
 
 ## Done
@@ -1043,6 +1027,22 @@
     3) 保留机读字段供 CI/脚本消费。
   - 验证：`./scripts/test-check-trial-artifact-consistency.sh` 通过。
 
+- [x] R14-T01（并行）Beta 正式宣布文档（changelog + 公告模板）
+  - 文件：`docs/release/CHANGELOG.md`、`docs/release/beta-announcement.md`
+  - 验收：changelog 覆盖 R1-R13；公告含安装/已知限制/反馈渠道。
+
+- [x] R14-T02（并行）Beta 准入清单逐项验收脚本
+  - 文件：`scripts/verify-beta-entry.sh`、`scripts/test-verify-beta-entry.sh`
+  - 验收：逐项检查 4 类门禁；输出 PASS/FAIL + 未通过清单。
+
+- [x] R14-T03（并行）ROADMAP 里程碑口径正式切换到 Beta
+  - 文件：`docs/ROADMAP.md`
+  - 验收：MVP 已完成；Beta 当前（2026-02-12）；退出条件明确。
+
+- [x] R14-T04（串行收口）R14 第一批回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r14-beta-launch-suite.sh`、`docs/TASKS.md`
+  - 验收：`make r14-beta-launch-regression` 通过；统一 PASS/FAIL 标识。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1076,7 +1076,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R14-T01（NEXT）：Beta 正式宣布文档（changelog + 公告模板）
+1. 立即执行 R15-T00（NEXT）：R15 第一批任务拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
