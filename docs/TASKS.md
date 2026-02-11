@@ -964,6 +964,14 @@
     2) 增加正常/重跑两档示例；
     3) 口径与 #overview 模板字段对齐（样本/平均/P50/P90）。
 
+- [x] R12-A（并行）Beta 候选安装后健康检查增强（覆盖异常分支）
+  - 文件：`scripts/post-install-health.sh`、`scripts/test-post-install-health.sh`
+  - 验收：
+    1) 扩展覆盖至少 2 个失败分支（missing binary / version mismatch）；
+    2) 统一 PASS/FAIL + next-step 输出；
+    3) 更新验收脚本断言并通过。
+  - 验证：`./scripts/test-post-install-health.sh` / `./scripts/post-install-health.sh ./zig-out/bin/lan` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：

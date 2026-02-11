@@ -16,7 +16,7 @@ echo "$ok_out" | grep -q "\[post-install-health\] PASS summary=all_checks_passed
   exit 1
 }
 
-# failure path with missing binary should include next
+# failure path 1: missing binary should include next
 bad_out="$(./scripts/post-install-health.sh "$tmp_dir/missing-lan" 2>&1 || true)"
 echo "$bad_out" | grep -q "\[post-install-health\] FAIL case=binary" || {
   echo "[post-install-health-test] FAIL reason=fail-case-missing"
@@ -29,4 +29,17 @@ echo "$bad_out" | grep -q "next:" || {
   exit 1
 }
 
-echo "[post-install-health-test] PASS reason=health-check-covered"
+# failure path 2: wrong version prefix expectation
+bad_ver="$(EXPECT_VERSION_PREFIX='not-a-real-prefix' ./scripts/post-install-health.sh ./zig-out/bin/lan 2>&1 || true)"
+echo "$bad_ver" | grep -q "\[post-install-health\] FAIL case=version-readable" || {
+  echo "[post-install-health-test] FAIL reason=version-fail-case-missing"
+  echo "$bad_ver"
+  exit 1
+}
+echo "$bad_ver" | grep -q "next:" || {
+  echo "[post-install-health-test] FAIL reason=version-next-missing"
+  echo "$bad_ver"
+  exit 1
+}
+
+echo "[post-install-health-test] PASS reason=health-check-covered-with-fail-branches"

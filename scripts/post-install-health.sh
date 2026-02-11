@@ -2,10 +2,17 @@
 set -euo pipefail
 
 BIN_PATH="${1:-$HOME/.local/bin/lan}"
+EXPECT_VERSION_PREFIX="${EXPECT_VERSION_PREFIX:-lan version=}"
 
 if [[ ! -x "$BIN_PATH" ]]; then
   echo "[post-install-health] FAIL case=binary reason=not_executable path=$BIN_PATH"
   echo "next: install lan binary first (or chmod +x), then rerun health check"
+  exit 1
+fi
+
+if [[ ! -r "$BIN_PATH" ]]; then
+  echo "[post-install-health] FAIL case=binary reason=not_readable path=$BIN_PATH"
+  echo "next: grant read permission on binary and rerun health check"
   exit 1
 fi
 
@@ -23,7 +30,7 @@ run_check() {
   fi
 }
 
-run_check "version-readable" "\"$BIN_PATH\" --version" "check binary integrity and reinstall if needed"
+run_check "version-readable" "\"$BIN_PATH\" --version | grep -q \"$EXPECT_VERSION_PREFIX\"" "check binary integrity/version output, then reinstall if needed"
 run_check "core-command-exec" "printf '/exit\n' | \"$BIN_PATH\" >/dev/null 2>&1" "verify binary startup path and terminal environment"
 run_check "dependency-shell" "command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1" "install shasum/sha256sum and retry"
 
