@@ -14,16 +14,7 @@
   - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
   - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
 
-- [ ] R3-T14（NEXT，BDD）Tool 观测日志格式稳定化（机器可解析）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`README.md`（如需）
-  - DoD：
-    1) 关键日志字段顺序与命名固定；
-    2) 至少 1 个日志样例可被脚本稳定解析；
-    3) 文档提供字段说明；
-    4) 三项命令验证通过。
-
-- [ ] R3-T15（TDD）Tool 协议回归脚本 v1（结构断言）
+- [ ] R3-T15（NEXT，TDD）Tool 协议回归脚本 v1（结构断言）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/`
   - DoD：
@@ -306,11 +297,19 @@
     3) 仅日志增强，不引入阻塞交互。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T14（BDD）Tool 观测日志格式稳定化（机器可解析）
+  - 文件：`src/agent.zig`、`README.md`、`scripts/parse-tool-log-sample.sh`
+  - 验收：
+    1) 日志字段顺序与命名固定（`tool_event phase ts name result duration_ms summary next`）；
+    2) 样例可被脚本稳定解析（`./scripts/parse-tool-log-sample.sh`）；
+    3) README 已补字段说明与解析示例。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/parse-tool-log-sample.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T14（NEXT）：Tool 观测日志格式稳定化（机器可解析）
+1. 立即执行 R3-T15（NEXT）：Tool 协议回归脚本 v1（结构断言）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

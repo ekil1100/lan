@@ -159,7 +159,7 @@ pub const Agent = struct {
         if (std.mem.indexOf(u8, response, "[Tool call") != null) {
             const ts_start = nowTs();
             const started_ms = std.time.milliTimestamp();
-            try writer.print("\n[tool][ts:{d}] start name=model_tool_call\n", .{ts_start});
+            try writer.print("tool_event phase=start ts={d} name=model_tool_call result=running duration_ms=0 summary=- next=-\n", .{ts_start});
 
             const lower = try std.ascii.allocLowerString(self.allocator, response);
             defer self.allocator.free(lower);
@@ -171,10 +171,9 @@ pub const Agent = struct {
             if (has_fail) {
                 const summary = toolFailureSummary(response);
                 const hint = toolFailureHint(summary);
-                try writer.print("[tool][ts:{d}] end result=fail duration_ms={d} summary={s}\n", .{ nowTs(), duration_ms, summary });
-                try writer.print("[tool] next: {s}\n", .{hint});
+                try writer.print("tool_event phase=end ts={d} name=model_tool_call result=fail duration_ms={d} summary={s} next={s}\n", .{ nowTs(), duration_ms, summary, hint });
             } else {
-                try writer.print("[tool][ts:{d}] end result=success duration_ms={d} summary=tool call processed\n", .{ nowTs(), duration_ms });
+                try writer.print("tool_event phase=end ts={d} name=model_tool_call result=success duration_ms={d} summary=tool_call_processed next=-\n", .{ nowTs(), duration_ms });
             }
 
             return try self.allocator.dupe(u8, "Tool execution completed.");

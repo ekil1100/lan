@@ -150,6 +150,26 @@ Lan uses a unified error format in TUI:
 - `[error:provider] <summary>`
   - next: check provider/model availability and key permissions, then retry
 
+## Tool Event Log Format (Machine-Parse)
+
+Tool lifecycle logs are normalized to this fixed key order:
+
+`tool_event phase=<start|end> ts=<unix> name=<tool_name> result=<running|success|fail> duration_ms=<number> summary=<token> next=<token-or-hint>`
+
+Field notes:
+- `phase`: start/end lifecycle stage
+- `ts`: unix timestamp (seconds)
+- `name`: tool call name
+- `result`: running/success/fail
+- `duration_ms`: elapsed time in milliseconds (0 at start)
+- `summary`: short machine-friendly summary
+- `next`: actionable follow-up hint or `-`
+
+Parser demo:
+```bash
+./scripts/parse-tool-log-sample.sh
+```
+
 ## Development
 
 ```bash
