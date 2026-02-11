@@ -1,6 +1,9 @@
 # lan - TUI Agent in Zig
 
-A terminal UI agent inspired by OpenCode and Claude Code.
+[![Beta](https://img.shields.io/badge/status-beta-blue)](https://github.com/ekil1100/lan/releases)
+[![CI](https://github.com/ekil1100/lan/actions/workflows/ci.yml/badge.svg)](https://github.com/ekil1100/lan/actions/workflows/ci.yml)
+
+A terminal UI agent inspired by OpenCode and Claude Code. Now in **Beta** — feedback welcome!
 
 ## Design Inspiration
 
@@ -62,10 +65,23 @@ cat > ~/.config/lan/config.json << 'EOF'
 EOF
 ```
 
-### 3. Build & Run
+### 3. Install from Release (recommended)
 
 ```bash
-cd /Users/like/.openclaw/workspace/lan
+# Download latest beta
+curl -fsSL https://github.com/ekil1100/lan/releases/latest/download/lan-$(uname -s | tr A-Z a-z)-$(uname -m).tar.gz -o lan.tar.gz
+
+# Install
+./scripts/install.sh lan.tar.gz ~/.local/bin
+
+# Verify
+lan --version
+```
+
+### 3b. Build from Source
+
+```bash
+git clone https://github.com/ekil1100/lan.git && cd lan
 zig build
 ./zig-out/bin/lan
 ```
@@ -256,6 +272,15 @@ lan/
 │   └── config.zig     # Config file support
 └── README.md
 ```
+
+## Feedback
+
+Lan is in **Beta** — your feedback shapes what comes next!
+
+- **Bug reports**: [File an issue](https://github.com/ekil1100/lan/issues/new?template=bug_report.yml)
+- **Feature requests**: [Suggest a feature](https://github.com/ekil1100/lan/issues/new?template=feature_request.yml)
+- **Trial guide**: See [`docs/release/beta-trial-runbook.md`](docs/release/beta-trial-runbook.md)
+- **Changelog**: See [`docs/release/CHANGELOG.md`](docs/release/CHANGELOG.md)
 
 ## License
 MIT
