@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R3-T04（NEXT，BDD）工具参数缺失文案统一（read/write/exec/list）
-  - 预计时长：1 小时
-  - 改动范围：`src/agent.zig`、`README.md`（如需）
-  - DoD：
-    1) 参数缺失错误文案统一格式；
-    2) 每条文案包含可执行 next step；
-    3) 至少 1 个脚本或步骤可复现验证；
-    4) 三项命令验证通过。
-
-- [ ] R3-T05（TDD）工具行为回归脚本 v1（read/write/list/exec）
+- [ ] R3-T05（NEXT，TDD）工具行为回归脚本 v1（read/write/list/exec）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/`
   - DoD：
@@ -194,11 +185,19 @@
     3) 正常短命令路径不受影响。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/repro-exec-timeout.sh` 通过。
 
+- [x] R3-T04（BDD）工具参数缺失文案统一（read/write/exec/list）
+  - 文件：`src/agent.zig`、`scripts/repro-missing-args.sh`
+  - 验收：
+    1) read/write/exec/list 参数缺失统一返回 `[tool_error:missing_argument] ... | next: ...`；
+    2) 每条缺失文案包含可执行 next step；
+    3) 可复现脚本：`./scripts/repro-missing-args.sh`。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/repro-missing-args.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T04（NEXT）：工具参数缺失文案统一
+1. 立即执行 R3-T05（NEXT）：工具行为回归脚本 v1（read/write/list/exec）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

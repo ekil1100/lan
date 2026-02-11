@@ -335,7 +335,12 @@ fn toolWriteFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
         "provide {\"path\":\"...\",\"content\":\"...\"} for write_file",
         allocator,
     );
-    const content = extractJsonString(args, "content") orelse "";
+    const content = extractJsonString(args, "content") orelse return try toolError(
+        .missing_argument,
+        "missing required field: content",
+        "provide {\"path\":\"...\",\"content\":\"...\"} for write_file",
+        allocator,
+    );
 
     const file = std.fs.cwd().createFile(path, .{}) catch |err| {
         const detail = try std.fmt.allocPrint(allocator, "create file failed: {s}", .{@errorName(err)});
@@ -442,7 +447,12 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
 }
 
 fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
-    const path = extractJsonString(args, "path") orelse ".";
+    const path = extractJsonString(args, "path") orelse return try toolError(
+        .missing_argument,
+        "missing required field: path",
+        "provide {\"path\":\"...\"} for list_dir",
+        allocator,
+    );
 
     var dir = std.fs.cwd().openDir(path, .{ .iterate = true }) catch |err| {
         const detail = try std.fmt.allocPrint(allocator, "open directory failed: {s}", .{@errorName(err)});
@@ -508,4 +518,28 @@ fn extractJsonString(json: []const u8, key: []const u8) ?[]const u8 {
 
     if (end >= json.len) return null;
     return json[val_start..end];
+}
+
+test "tool missing-argument errors are unified for read/write/exec/list" {
+    const allocator = std.testing.allocator;
+
+    const r1 = try toolReadFile(allocator, "{}");
+    defer allocator.free(r1);
+    try std.testing.expect(std.mem.indexOf(u8, r1, "[tool_error:missing_argument]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r1, "next:") != null);
+
+    const r2 = try toolWriteFile(allocator, "{}");
+    defer allocator.free(r2);
+    try std.testing.expect(std.mem.indexOf(u8, r2, "[tool_error:missing_argument]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r2, "next:") != null);
+
+    const r3 = try toolExec(allocator, "{}");
+    defer allocator.free(r3);
+    try std.testing.expect(std.mem.indexOf(u8, r3, "[tool_error:missing_argument]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r3, "next:") != null);
+
+    const r4 = try toolListDir(allocator, "{}");
+    defer allocator.free(r4);
+    try std.testing.expect(std.mem.indexOf(u8, r4, "[tool_error:missing_argument]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r4, "next:") != null);
 }
