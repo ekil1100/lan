@@ -175,6 +175,21 @@ Parser demo:
 - 故障清单（install / upgrade / verify / preflight）：`docs/ops/troubleshooting.md`
 - 文档与脚本 `next:` 输出按同一口径维护
 
+## Beta Candidate One-Command Verify
+
+```bash
+./scripts/verify-beta-candidate.sh <artifact.tar.gz> [target-dir]
+```
+
+Example:
+```bash
+./scripts/verify-beta-candidate.sh dist/lan-0.1.0-macos-arm64.tar.gz "$HOME/.local/bin"
+```
+
+Output contract:
+- success: `[beta-candidate-verify] PASS ...`
+- fail: `[beta-candidate-verify] FAIL case=... ...` + `next: ...`
+
 ## Regression Entrypoints (Local + CI)
 
 Unified commands:

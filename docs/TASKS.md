@@ -98,17 +98,7 @@
   - R9-T05 第一批回归入口与 CI 对齐：done
 
 ### R10 第一批原子任务（Beta 准入落地）
-- [ ] R10-T02（NEXT，并行，BDD）Beta 证据索引生成（evidence index）
-  - 依赖：R10-T01
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/generate-beta-evidence-index.sh`、`docs/release/`
-  - DoD：
-    1) 生成证据索引（命令、输出摘要、证据路径）；
-    2) 与 beta-entry-checklist 一一对应；
-    3) 离线可运行；
-    4) 三项命令验证通过。
-
-- [ ] R10-T03（并行，TDD）发布健康检查脚本（post-install health）
+- [ ] R10-T03（NEXT，并行，TDD）发布健康检查脚本（post-install health）
   - 依赖：R10-T01
   - 预计时长：1-2 小时
   - 改动范围：`scripts/generate-beta-evidence-index.sh`、`docs/release/`
@@ -817,6 +807,14 @@
     3) 与 `docs/beta-checklist.md`（映射 `docs/release/beta-entry-checklist.md`）口径一致。
   - 验证：`./scripts/test-beta-readiness-check.sh` 通过。
 
+- [x] R10-T02（并行）Beta 候选一键验证入口（聚合 install/verify/preflight）
+  - 文件：`scripts/verify-beta-candidate.sh`、`scripts/test-verify-beta-candidate.sh`、`README.md`、`docs/TASKS.md`
+  - 验收：
+    1) 单命令执行 verify/preflight/install 聚合核验；
+    2) 输出统一 PASS/FAIL + 失败 `next:` 提示；
+    3) README/TASKS 补充使用说明。
+  - 验证：`./scripts/test-verify-beta-candidate.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -835,7 +833,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R10-T02（NEXT）：Beta 证据索引生成（evidence index）
+1. 立即执行 R10-T03（NEXT）：发布健康检查脚本（post-install health）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
