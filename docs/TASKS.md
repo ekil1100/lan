@@ -46,16 +46,7 @@
   - R5-T05 第一批回归入口与 CI 对齐：done
 
 ### R6 第一批原子任务（发布与生态启动）
-- [ ] R6-T03（NEXT，TDD）安装脚本 v1（本地 tarball 安装）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/install.sh`、`README.md`
-  - DoD：
-    1) 支持从本地包安装到目标目录；
-    2) 安装失败提示 next-step；
-    3) 增加离线回归断言；
-    4) 三项命令验证通过。
-
-- [ ] R6-T04（BDD）升级脚本 v1（保留配置）
+- [ ] R6-T04（NEXT，BDD）升级脚本 v1（保留配置）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/upgrade.sh`、`scripts/`
   - DoD：
@@ -572,11 +563,19 @@
     3) 提供离线自检脚本 PASS/FAIL。
   - 验证：`./scripts/test-package-release.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R6-T03（TDD）安装脚本 v1（本地 tarball 安装）
+  - 文件：`scripts/install.sh`、`scripts/test-install-local.sh`
+  - 验收：
+    1) 支持从本地 tarball 安装到目标目录；
+    2) 安装失败输出 `next:` 指引；
+    3) 提供离线 PASS/FAIL 回归断言。
+  - 验证：`./scripts/test-install-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R6-T03（NEXT）：安装脚本 v1（本地 tarball 安装）
+1. 立即执行 R6-T04（NEXT）：升级脚本 v1（保留配置）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
