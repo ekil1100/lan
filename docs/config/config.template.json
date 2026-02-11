@@ -1,0 +1,14 @@
+{
+  "provider": {
+    "url": "https://api.openai.com",
+    "api_key": "",
+    "model": "gpt-4"
+  },
+  "route": {
+    "mode": "speed",
+    "fallback": []
+  },
+  "skills": {
+    "dir": "~/.config/lan/skills"
+  }
+}
