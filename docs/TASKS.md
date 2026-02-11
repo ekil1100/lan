@@ -111,16 +111,15 @@
   - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
 ### R11 第一批原子任务（Beta 试用准备）
-- [ ] R11-T04（NEXT，并行，BDD）Beta 试用 runbook（最小版）
-  - 依赖：R11-T02,R11-T03
-  - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-trial-runbook.md`
+- [ ] R11-T05（NEXT，串行）R11 第一批回归入口与 CI 对齐
+  - 依赖：R11-T01~R11-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 覆盖验收、回滚、问题上报三条主路径；
-    2) 每条路径附命令和证据路径；
-    3) 与脚本输出保持一致。
-
-- [ ] R11-T05（串行）R11 第一批回归入口与 CI 对齐
+    1) 定义统一入口执行 R11 第一批回归；
+    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
+    3) CI 复用本地入口命令；
+    4) 三项命令验证通过。
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
@@ -887,6 +886,13 @@
     3) 离线可运行。
   - 验证：`./scripts/test-rehearse-beta-rollback.sh` 通过。
 
+- [x] R11-T04（并行，BDD）Beta 试用 runbook（最小版）
+  - 文件：`docs/release/beta-trial-runbook.md`
+  - 验收：
+    1) 人话说明试用流程（安装→验证→反馈）；
+    2) 每步包含命令与期望输出；
+    3) 常见失败给出 next-step。
+
 - [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
   - 文件：`docs/ROADMAP.md`
   - 结果：
@@ -912,7 +918,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R11-T04（NEXT）：Beta 试用 runbook（最小版）
+1. 立即执行 R11-T05（NEXT）：R11 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
