@@ -437,6 +437,17 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
         );
     }
 
+    if (exit_code != 0) {
+        const detail = try std.fmt.allocPrint(allocator, "command exited with non-zero code: {d}", .{exit_code});
+        defer allocator.free(detail);
+        return try toolError(
+            .process_nonzero_exit,
+            detail,
+            "check command syntax/inputs or inspect stderr and retry",
+            allocator,
+        );
+    }
+
     if (stdout.items.len == 0) {
         return try std.fmt.allocPrint(allocator, "Command executed (exit code: {d})", .{exit_code});
     }
@@ -542,6 +553,16 @@ test "tool missing-argument errors are unified for read/write/exec/list" {
     defer allocator.free(r4);
     try std.testing.expect(std.mem.indexOf(u8, r4, "[tool_error:missing_argument]") != null);
     try std.testing.expect(std.mem.indexOf(u8, r4, "next:") != null);
+}
+
+test "tool exec non-zero exit returns unified error format" {
+    const allocator = std.testing.allocator;
+
+    const out = try toolExec(allocator, "{\"command\":\"sh -c 'exit 7'\"}");
+    defer allocator.free(out);
+
+    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_nonzero_exit]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
 }
 
 test "tool regression v1 covers read/write/list/exec basic paths" {

@@ -14,16 +14,7 @@
   2) 不改动模型调用链路与 Skill Runtime；
   3) 不重复已完成项（R3-T01 ~ R3-T05）。
 
-- [ ] R3-T07（NEXT，TDD，并行）工具失败路径回归扩展：非零退出码（离线）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`scripts/test-tools-regression.sh`
-  - DoD：
-    1) 新增非零退出码失败路径回归（离线可复现）；
-    2) 命中统一错误结构（含错误码与 next step）；
-    3) 可独立运行并输出 PASS/FAIL；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R3-T08（TDD，并行）exec 稳定性边界：`stderr/exit-code/timeout` 优先级固化
+- [ ] R3-T08（NEXT，TDD，并行）exec 稳定性边界：`stderr/exit-code/timeout` 优先级固化
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`src/tools.zig`、`scripts/repro-exec-timeout.sh`
   - DoD：
@@ -244,11 +235,19 @@
   - 结果：完成 A/B/C/D/E 收敛，产出 R3-T07 ~ R3-T10（3-5 个）并明确依赖关系
   - 指定唯一 NEXT：R3-T07
 
+- [x] R3-T07（TDD，并行）工具失败路径回归扩展：非零退出码（离线）
+  - 文件：`src/tools.zig`、`src/agent.zig`、`scripts/test-tools-fail-nonzero.sh`
+  - 验收：
+    1) 新增非零退出码失败路径回归（离线可复现）；
+    2) 命中统一错误结构：`[tool_error:process_nonzero_exit] ... | next: ...`；
+    3) 脚本输出 PASS/FAIL：`./scripts/test-tools-fail-nonzero.sh`。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T07（NEXT）：工具失败路径回归扩展（非零退出码）
+1. 立即执行 R3-T08（NEXT）：exec 稳定性边界（stderr/exit-code/timeout）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
