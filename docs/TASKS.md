@@ -110,14 +110,65 @@
   - R10-T04 Beta 验收报告模板：done
   - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
-### R11 第一批原子任务（Beta 试用准备）
-- [ ] R11-T06（NEXT）R11 第一批收口与 R12 启动拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R11 第一批收口结论（R11-T06）
+- **收口判据**：
+  1) R11-T01~R11-T05 全部达到 DoD 且可离线回归；
+  2) 本地与 CI 复用同一回归入口（`make r11-beta-trial-regression`）；
+  3) 试用准备链路（快照/反馈模板/回滚演练/runbook）形成闭环。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R11-T01 Beta 验收结果快照脚本：done
+  - R11-T02 试用反馈模板：done
+  - R11-T03 Beta 回滚演练脚本：done
+  - R11-T04 Beta 试用 runbook：done
+  - R11-T05 第一批回归入口与 CI 对齐：done
+
+### R12 第一批原子任务（Beta 小规模试用执行）
+- [ ] R12-T01（NEXT，并行，TDD）Beta 试用环境自检脚本（trial precheck）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/trial-precheck.sh`、`scripts/`
   - DoD：
-    1) 判定 R11 第一批状态（done/remaining）；
-    2) 若 close-ready，产出 R12 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 检查包路径、可执行权限、反馈模板可用性；
+    2) 输出 PASS/FAIL + next-step；
+    3) 离线可执行；
+    4) 三项命令验证通过。
+
+- [ ] R12-T02（并行，BDD）Beta 试用登记表模板（批次/设备/状态）
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/release/beta-trial-tracker-template.md`
+  - DoD：
+    1) 字段覆盖试用批次、设备、执行状态、问题链接；
+    2) 可直接复制使用；
+    3) 与 runbook/反馈模板口径一致。
+
+- [ ] R12-T03（并行，TDD）Beta 试用结果汇总脚本（summary generator）
+  - 依赖：R12-T02
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/summarize-beta-trial.sh`、`scripts/`
+  - DoD：
+    1) 从试用记录生成通过/失败统计；
+    2) 输出机读字段 + 人话摘要；
+    3) 离线可执行；
+    4) 三项命令验证通过。
+
+- [ ] R12-T04（并行，BDD）Beta 风险清单（go/no-go）模板
+  - 依赖：R12-T03
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/release/beta-go-no-go-template.md`
+  - DoD：
+    1) 固定风险项（阻塞/高风险/可接受风险）；
+    2) 每项附证据路径与责任人；
+    3) 与试用汇总口径一致。
+
+- [ ] R12-T05（串行）R12 第一批回归入口与 CI 对齐
+  - 依赖：R12-T01~R12-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R12 第一批回归；
+    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
+    3) CI 复用本地入口命令；
+    4) 三项命令验证通过。
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
@@ -899,6 +950,13 @@
     3) CI 复用同一入口命令（`make r11-beta-trial-regression`）。
   - 验证：`make r11-beta-trial-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R11-T06（收口）R11 第一批收口与 R12 启动拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已输出 R11 第一批 done/remaining 收口结论（close-ready）；
+    2) 预拆 R12 第一批 5 个原子任务（范围+DoD+预计时长+依赖）；
+    3) 唯一 NEXT 切换到 R12-T01。
+
 - [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
   - 文件：`docs/ROADMAP.md`
   - 结果：
@@ -924,7 +982,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R11-T06（NEXT）：R11 第一批收口与 R12 启动拆解
+1. 立即执行 R12-T01（NEXT）：Beta 试用环境自检脚本（trial precheck）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
