@@ -97,19 +97,65 @@
   - R9-T04 运维故障清单：done
   - R9-T05 第一批回归入口与 CI 对齐：done
 
-### R10 第一批原子任务（Beta 准入落地）
-- **依赖关系（清理后）**：
-  - 已完成：R10-T01（清单执行）→ R10-T02（一键验证）→ R10-T03（健康检查）→ R10-T04（验收模板）→ R10-T05（总入口+CI）
-  - 当前：仅剩收口任务 R10-T06（唯一 NEXT）
+### R10 第一批收口结论（R10-T06）
+- **收口判据**：
+  1) R10-T01~R10-T05 全部达到 DoD 且可离线复验；
+  2) Beta 验收总入口可一键串联 checklist/verify/health/report；
+  3) 本地与 CI 复用同一验收入口（无双维护）。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R10-T01 Beta 清单执行脚本：done
+  - R10-T02 Beta 候选一键验证入口：done
+  - R10-T03 发布后健康检查：done
+  - R10-T04 Beta 验收报告模板：done
+  - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
-- [ ] R10-T06（NEXT）R10 第一批收口与 R11 启动拆解
-  - 人话解释：把“Beta 候选可验收”这批能力正式收口，确认是否可进入下一阶段开发。
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R11 第一批原子任务（Beta 试用准备）
+- [ ] R11-T01（NEXT，并行，TDD）Beta 验收结果快照脚本
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/snapshot-beta-acceptance.sh`、`scripts/`
   - DoD：
-    1) 判定 R10 第一批状态（done/remaining）；
-    2) 若 close-ready，产出 R11 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 固化保存 checklist/verify/health/report 关键输出；
+    2) 输出带时间戳的快照目录；
+    3) 离线可执行；
+    4) 三项命令验证通过。
+
+- [ ] R11-T02（并行，BDD）试用反馈模板（问题分级+复现信息）
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
+  - DoD：
+    1) 模板覆盖严重级别、复现步骤、环境信息；
+    2) 与当前故障清单/next-step 口径一致；
+    3) 文档人话可读。
+
+- [ ] R11-T03（并行，TDD）Beta 回滚演练脚本
+  - 依赖：R11-T01
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/rehearse-beta-rollback.sh`、`scripts/`
+  - DoD：
+    1) 演练升级失败后的恢复流程；
+    2) 输出 PASS/FAIL + next-step；
+    3) 离线可执行；
+    4) 三项命令验证通过。
+
+- [ ] R11-T04（并行，BDD）Beta 试用 runbook（最小版）
+  - 依赖：R11-T02,R11-T03
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/release/beta-trial-runbook.md`
+  - DoD：
+    1) 覆盖验收、回滚、问题上报三条主路径；
+    2) 每条路径附命令和证据路径；
+    3) 与脚本输出保持一致。
+
+- [ ] R11-T05（串行）R11 第一批回归入口与 CI 对齐
+  - 依赖：R11-T01~R11-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R11 第一批回归；
+    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
+    3) CI 复用本地入口命令；
+    4) 三项命令验证通过。
 
 ## Done
 
@@ -811,6 +857,13 @@
     3) CI 复用同一入口命令（`make r10-beta-acceptance-regression`）。
   - 验证：`./scripts/test-run-beta-acceptance.sh` / `make r10-beta-acceptance-regression` 通过。
 
+- [x] R10-T06（收口）R10 第一批收口与 R11 启动拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已输出 R10 第一批 done/remaining 收口结论（close-ready）；
+    2) 预拆 R11 第一批 5 个原子任务（范围+DoD+预计时长+依赖）；
+    3) 唯一 NEXT 切换到 R11-T01。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -829,7 +882,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R10-T06（NEXT）：R10 第一批收口与 R11 启动拆解
+1. 立即执行 R11-T01（NEXT）：Beta 验收结果快照脚本
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
