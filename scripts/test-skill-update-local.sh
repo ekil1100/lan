@@ -47,9 +47,11 @@ echo "$before" | grep -q "version=1.0.0" || { echo "[skill-update] FAIL reason=b
 
 upd="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill update "$tmp_dir/src-v2" 2>&1 || true)"
 echo "$upd" | grep -q "Skill updated" || { echo "[skill-update] FAIL reason=update-failed"; echo "$upd"; exit 1; }
+echo "$upd" | grep -q "permissions:" || { echo "[skill-update] FAIL reason=permissions-hint-missing"; echo "$upd"; exit 1; }
 
 after="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill list 2>&1 || true)"
 echo "$after" | grep -q "version=1.1.0" || { echo "[skill-update] FAIL reason=after-version-not-updated"; echo "$after"; exit 1; }
+echo "$after" | grep -q "permissions=" || { echo "[skill-update] FAIL reason=list-permissions-missing"; echo "$after"; exit 1; }
 
 nf="$(HOME="$tmp_dir/home" ./zig-out/bin/lan skill update "$tmp_dir/src-no-target" 2>&1 || true)"
 echo "$nf" | grep -q "Skill update failed" || { echo "[skill-update] FAIL reason=no-target-not-failed"; echo "$nf"; exit 1; }

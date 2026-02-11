@@ -24,16 +24,15 @@
   - R4-T05.B CI 复用本地回归入口：done
 
 ### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T10（NEXT，BDD）Skill 权限声明显示与提示
-  - 预计时长：1-2 小时
-  - 改动范围：`src/main.zig`、`src/skills.zig`、`README.md`
+- [ ] R4-T11（NEXT，串行）R4 第二批回归入口与 CI 对齐
+  - 依赖：R4-T07~R4-T10
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) list 输出权限摘要（permissions）；
-    2) add/update 成功后显示权限提示；
-    3) 不执行权限拦截，仅做可观测提示；
+    1) 定义 R4 第二批统一回归入口；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
     4) 三项命令验证通过。
-
-- [ ] R4-T11（串行）R4 第二批回归入口与 CI 对齐
   - 依赖：R4-T07~R4-T10
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -439,11 +438,19 @@
     3) 离线可运行。
   - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-remove-local.sh` / `scripts/test-skill-update-local.sh` 通过。
 
+- [x] R4-T10（BDD）Skill 权限声明显示与提示
+  - 文件：`src/skills.zig`、`scripts/test-skill-add-local.sh`、`scripts/test-skill-update-local.sh`
+  - 验收：
+    1) `lan skill list` 输出 `permissions=` 摘要；
+    2) add/update 成功输出 `permissions:` 提示；
+    3) 仅可观测提示，不做权限拦截。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-update-local.sh` / `scripts/test-skill-remove-local.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T10（NEXT）：Skill 权限声明显示与提示
+1. 立即执行 R4-T11（NEXT）：R4 第二批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

@@ -5,6 +5,7 @@ const IndexEntry = struct {
     name: []const u8,
     version: []const u8,
     path: []const u8,
+    permissions: []const u8,
 };
 
 const IndexFile = struct {
@@ -112,8 +113,11 @@ pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, s
     defer allocator.free(dst_manifest);
     try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
 
+    const perms = try joinPermissions(allocator, loaded.manifest.permissions);
+    defer allocator.free(perms);
+
     try refreshIndexFromRoot(allocator, skills_root);
-    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
+    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\npermissions: {s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest, perms });
 }
 
 pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
@@ -148,8 +152,25 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     defer allocator.free(dst_manifest);
     try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
 
+    const perms = try joinPermissions(allocator, loaded.manifest.permissions);
+    defer allocator.free(perms);
+
     try refreshIndexFromRoot(allocator, skills_root);
-    return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
+    return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} path={s}\npermissions: {s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest, perms });
+}
+
+fn joinPermissions(allocator: std.mem.Allocator, permissions: [][]const u8) ![]u8 {
+    if (permissions.len == 0) return allocator.dupe(u8, "-");
+
+    var out = std.ArrayList(u8).empty;
+    defer out.deinit(allocator);
+
+    for (permissions, 0..) |p, i| {
+        if (i != 0) try out.appendSlice(allocator, ",");
+        try out.appendSlice(allocator, p);
+    }
+
+    return out.toOwnedSlice(allocator);
 }
 
 fn formatNoSkills(allocator: std.mem.Allocator) ![]const u8 {
@@ -176,7 +197,7 @@ fn tryListFromIndex(allocator: std.mem.Allocator, skills_root: []const u8) !?[]c
     defer out.deinit(allocator);
 
     for (parsed.value.skills) |s| {
-        try out.writer(allocator).print("- name={s} version={s} path={s}\n", .{ s.name, s.version, s.path });
+        try out.writer(allocator).print("- name={s} version={s} permissions={s} path={s}\n", .{ s.name, s.version, s.permissions, s.path });
     }
 
     const owned = try out.toOwnedSlice(allocator);
@@ -190,6 +211,7 @@ fn refreshIndexFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) !
             allocator.free(e.name);
             allocator.free(e.version);
             allocator.free(e.path);
+            allocator.free(e.permissions);
         }
         entries.deinit(allocator);
     }
@@ -217,10 +239,14 @@ fn refreshIndexFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) !
         var manifest = skill_manifest.parseAndValidate(allocator, text) catch continue;
         defer manifest.deinit(allocator);
 
+        const perms = try joinPermissions(allocator, manifest.permissions);
+        errdefer allocator.free(perms);
+
         try entries.append(allocator, .{
             .name = try allocator.dupe(u8, manifest.name),
             .version = try allocator.dupe(u8, manifest.version),
             .path = try allocator.dupe(u8, manifest_path),
+            .permissions = perms,
         });
     }
 
@@ -237,7 +263,7 @@ fn writeIndex(allocator: std.mem.Allocator, skills_root: []const u8, skills: []c
     try out.appendSlice(allocator, "{\"skills\":[");
     for (skills, 0..) |s, i| {
         if (i != 0) try out.appendSlice(allocator, ",");
-        try out.writer(allocator).print("{{\"name\":\"{s}\",\"version\":\"{s}\",\"path\":\"{s}\"}}", .{ s.name, s.version, s.path });
+        try out.writer(allocator).print("{{\"name\":\"{s}\",\"version\":\"{s}\",\"path\":\"{s}\",\"permissions\":\"{s}\"}}", .{ s.name, s.version, s.path, s.permissions });
     }
     try out.appendSlice(allocator, "]}");
 
@@ -364,10 +390,12 @@ test "skill add installs local manifest and becomes listable" {
     const add_out = try addSkillFromRoot(allocator, skills_root, source_dir);
     defer allocator.free(add_out);
     try std.testing.expect(std.mem.indexOf(u8, add_out, "Skill installed") != null);
+    try std.testing.expect(std.mem.indexOf(u8, add_out, "permissions:") != null);
 
     const list_out = try listSkillsFromRoot(allocator, skills_root);
     defer allocator.free(list_out);
     try std.testing.expect(std.mem.indexOf(u8, list_out, "name=demo-skill") != null);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "permissions=") != null);
 }
 
 test "skill add returns next-step when manifest invalid" {
@@ -450,10 +478,12 @@ test "skill update changes visible version in list" {
     const upd_out = try updateSkillFromRoot(allocator, skills_root, src_v2);
     defer allocator.free(upd_out);
     try std.testing.expect(std.mem.indexOf(u8, upd_out, "Skill updated") != null);
+    try std.testing.expect(std.mem.indexOf(u8, upd_out, "permissions:") != null);
 
     const list_out = try listSkillsFromRoot(allocator, skills_root);
     defer allocator.free(list_out);
     try std.testing.expect(std.mem.indexOf(u8, list_out, "version=1.1.0") != null);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "permissions=") != null);
 }
 
 test "skill update returns next-step when target not installed" {
