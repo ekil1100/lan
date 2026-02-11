@@ -20,6 +20,9 @@ jobs:
       - name: Zig version
         run: zig version
 
+      - name: Format Check
+        run: zig fmt --check src/
+
       - name: Build
         run: zig build
 

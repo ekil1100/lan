@@ -38,7 +38,8 @@ pub fn removeSkill(allocator: std.mem.Allocator, config_dir: []const u8, skill_n
 
 pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, skill_name: []const u8) ![]const u8 {
     if (skill_name.len == 0 or std.mem.indexOf(u8, skill_name, "/") != null or std.mem.eql(u8, skill_name, ".") or std.mem.eql(u8, skill_name, "..")) {
-        return std.fmt.allocPrint(allocator,
+        return std.fmt.allocPrint(
+            allocator,
             "Skill remove failed: invalid name ({s})\nnext: use a plain skill name (e.g. demo-skill) and retry `lan skill remove <name>`.\n",
             .{skill_name},
         );
@@ -48,7 +49,8 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     defer allocator.free(skill_dir);
 
     var existing_dir = std.fs.cwd().openDir(skill_dir, .{}) catch {
-        return std.fmt.allocPrint(allocator,
+        return std.fmt.allocPrint(
+            allocator,
             "Skill remove failed: not found ({s})\nnext: run `lan skill list` to check installed names, then retry `lan skill remove <name>`.\n",
             .{skill_name},
         );
@@ -57,7 +59,8 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
 
     std.fs.cwd().deleteTree(skill_dir) catch |err| switch (err) {
         error.AccessDenied, error.PermissionDenied => {
-            return std.fmt.allocPrint(allocator,
+            return std.fmt.allocPrint(
+                allocator,
                 "Skill remove failed: permission denied ({s})\nnext: check directory permissions under ~/.config/lan/skills and retry.\n",
                 .{skill_name},
             );
@@ -89,12 +92,14 @@ fn loadSourceManifest(allocator: std.mem.Allocator, source_dir: []const u8, acti
 pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
     var loaded = loadSourceManifest(allocator, source_dir, "add") catch |err| switch (err) {
         error.FileNotFound => {
-            return allocator.dupe(u8,
+            return allocator.dupe(
+                u8,
                 "Skill install failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill add <path>`.\n",
             );
         },
         error.InvalidData => {
-            return allocator.dupe(u8,
+            return allocator.dupe(
+                u8,
                 "Skill install failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
             );
         },
@@ -123,12 +128,14 @@ pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, s
 pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
     var loaded = loadSourceManifest(allocator, source_dir, "update") catch |err| switch (err) {
         error.FileNotFound => {
-            return allocator.dupe(u8,
+            return allocator.dupe(
+                u8,
                 "Skill update failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill update <path>`.\n",
             );
         },
         error.InvalidData => {
-            return allocator.dupe(u8,
+            return allocator.dupe(
+                u8,
                 "Skill update failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
             );
         },
@@ -141,7 +148,8 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     defer allocator.free(target_dir);
 
     var existing = std.fs.cwd().openDir(target_dir, .{}) catch {
-        return std.fmt.allocPrint(allocator,
+        return std.fmt.allocPrint(
+            allocator,
             "Skill update failed: target not installed ({s})\nnext: run `lan skill list` then `lan skill add <path>` for first install.\n",
             .{loaded.manifest.name},
         );
@@ -193,7 +201,8 @@ test "permissions formatter is stable and short" {
 }
 
 fn formatNoSkills(allocator: std.mem.Allocator) ![]const u8 {
-    return allocator.dupe(u8,
+    return allocator.dupe(
+        u8,
         "No skills installed.\nnext: add a valid manifest at ~/.config/lan/skills/<skill-name>/manifest.json then rerun `lan skill list`.\n",
     );
 }
