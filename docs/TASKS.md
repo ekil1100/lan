@@ -33,16 +33,7 @@
   - R4-T11 第二批回归入口与 CI 对齐：done
 
 ### R5 第一批原子任务（多模型编排启动）
-- [ ] R5-T02（NEXT，BDD）Provider fallback 最小闭环（网络失败触发）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/llm.zig`、`scripts/`
-  - DoD：
-    1) 主 provider 失败可切换 fallback；
-    2) 输出明确 fallback 提示（可观测）；
-    3) 离线可复现脚本 PASS/FAIL；
-    4) 三项命令验证通过。
-
-- [ ] R5-T03（TDD）路由策略 v1：速度优先/质量优先开关
+- [ ] R5-T03（NEXT，TDD）路由策略 v1：速度优先/质量优先开关
   - 预计时长：1-2 小时
   - 改动范围：`src/config.zig`、`src/agent.zig`
   - DoD：
@@ -505,11 +496,19 @@
     3) 新增 schema 校验测试（valid/invalid）。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R5-T02（BDD）Provider fallback 最小闭环（网络失败触发）
+  - 文件：`src/config.zig`、`src/llm.zig`、`scripts/test-provider-fallback.sh`
+  - 验收：
+    1) 主 provider 失败后可切换 fallback（按 route_primary/route_fallback + retry）；
+    2) 成功回退时输出可观测提示：`[fallback] primary=... fallback=...`；
+    3) 提供离线可复现 PASS/FAIL 脚本。
+  - 验证：`./scripts/test-provider-fallback.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R5-T02（NEXT）：Provider fallback 最小闭环（网络失败触发）
+1. 立即执行 R5-T03（NEXT）：路由策略 v1：速度优先/质量优先开关
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

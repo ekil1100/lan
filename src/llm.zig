@@ -55,24 +55,40 @@ pub const LLMClient = struct {
         try self.tools.append(tool);
     }
 
+    fn chatByProvider(self: *LLMClient, provider: Provider, messages: []const Message) ![]const u8 {
+        return switch (provider) {
+            .kimi, .openai => self.chatOpenAI(messages),
+            .anthropic => self.chatAnthropic(messages),
+        };
+    }
+
+    fn fallbackHint(self: *LLMClient, primary: Provider, fallback: Provider) ![]const u8 {
+        return std.fmt.allocPrint(self.allocator, "[fallback] primary={s} fallback={s}\n", .{ primary.toString(), fallback.toString() });
+    }
+
     pub fn chat(self: *LLMClient, messages: []const Message) ![]const u8 {
         if (self.config.api_key == null) {
             return error.NoAPIKey;
         }
 
-        var attempts: u32 = 0;
-        const max_attempts = 3;
-
+        var attempts: u8 = 0;
+        const max_attempts: u8 = self.config.route_retry + 1;
         while (attempts < max_attempts) : (attempts += 1) {
-            const result = switch (self.config.provider) {
-                .kimi, .openai => self.chatOpenAI(messages),
-                .anthropic => self.chatAnthropic(messages),
-            };
+            const primary_result = self.chatByProvider(self.config.route_primary, messages);
+            return primary_result catch |primary_err| {
+                if (attempts + 1 < max_attempts) {
+                    std.Thread.sleep(200 * std.time.ns_per_ms);
+                    continue;
+                }
 
-            return result catch |err| {
-                if (attempts == max_attempts - 1) return err;
-                std.Thread.sleep(1 * std.time.ns_per_s);
-                continue;
+                if (self.config.route_fallback == self.config.route_primary) return primary_err;
+
+                const fallback_result = self.chatByProvider(self.config.route_fallback, messages) catch {
+                    return primary_err;
+                };
+                const hint = try self.fallbackHint(self.config.route_primary, self.config.route_fallback);
+                defer self.allocator.free(hint);
+                return try std.mem.concat(self.allocator, u8, &[_][]const u8{ hint, fallback_result });
             };
         }
 
@@ -617,4 +633,28 @@ test "SSE parser tolerates malformed lines" {
         .done => {},
         else => return error.TestUnexpectedResult,
     }
+}
+
+test "provider fallback hint format is observable and stable" {
+    const allocator = std.testing.allocator;
+    var cfg = Config{
+        .allocator = allocator,
+        .provider = .kimi,
+        .route_primary = .kimi,
+        .route_fallback = .openai,
+        .route_retry = 1,
+        .route_timeout_ms = 12000,
+        .api_key = null,
+        .model = try allocator.dupe(u8, "m"),
+        .base_url = try allocator.dupe(u8, "u"),
+        .config_dir = try allocator.dupe(u8, "."),
+    };
+    defer cfg.deinit();
+
+    var client = LLMClient.init(allocator, &cfg);
+    defer client.deinit();
+
+    const hint = try client.fallbackHint(.kimi, .openai);
+    defer allocator.free(hint);
+    try std.testing.expectEqualStrings("[fallback] primary=kimi fallback=openai\n", hint);
 }

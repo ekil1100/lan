@@ -76,6 +76,10 @@ fn parseProviderStrict(str: []const u8) ?Provider {
 pub const Config = struct {
     allocator: std.mem.Allocator,
     provider: Provider,
+    route_primary: Provider,
+    route_fallback: Provider,
+    route_retry: u8,
+    route_timeout_ms: u32,
     api_key: ?[]const u8,
     model: []const u8,
     base_url: []const u8,
@@ -111,6 +115,10 @@ pub const Config = struct {
         var config = Config{
             .allocator = allocator,
             .provider = .kimi,
+            .route_primary = .kimi,
+            .route_fallback = .openai,
+            .route_retry = 2,
+            .route_timeout_ms = 12000,
             .api_key = null,
             .model = try allocator.dupe(u8, kimi_model),
             .base_url = try allocator.dupe(u8, kimi_base_url),
@@ -137,6 +145,20 @@ pub const Config = struct {
         if (parseStringFromJson(allocator, file_content, "\"base_url\":\"")) |base_url| {
             allocator.free(config.base_url);
             config.base_url = base_url;
+        }
+        if (parseStringFromJson(allocator, file_content, "\"route_primary\":\"")) |rp| {
+            defer allocator.free(rp);
+            config.route_primary = parseProviderStrict(rp) orelse config.route_primary;
+        }
+        if (parseStringFromJson(allocator, file_content, "\"route_fallback\":\"")) |rf| {
+            defer allocator.free(rf);
+            config.route_fallback = parseProviderStrict(rf) orelse config.route_fallback;
+        }
+        if (parseNumberFromJson(file_content, "\"route_retry\":")) |rr| {
+            config.route_retry = @intCast(@min(rr, 5));
+        }
+        if (parseNumberFromJson(file_content, "\"route_timeout_ms\":")) |rt| {
+            config.route_timeout_ms = @intCast(@min(@max(rt, 1), 120000));
         }
 
         // API key from env always takes precedence
@@ -183,6 +205,10 @@ pub const Config = struct {
         try writer.interface.print("  \"provider\": \"{s}\",\n", .{self.provider.toString()});
         try writer.interface.print("  \"model\": \"{s}\",\n", .{self.model});
         try writer.interface.print("  \"base_url\": \"{s}\",\n", .{self.base_url});
+        try writer.interface.print("  \"route_primary\": \"{s}\",\n", .{self.route_primary.toString()});
+        try writer.interface.print("  \"route_fallback\": \"{s}\",\n", .{self.route_fallback.toString()});
+        try writer.interface.print("  \"route_retry\": {d},\n", .{self.route_retry});
+        try writer.interface.print("  \"route_timeout_ms\": {d},\n", .{self.route_timeout_ms});
         try writer.interface.print("  \"api_key\": \"{s}\"\n", .{if (self.api_key) |k| k else ""});
         try writer.interface.print("}}\n", .{});
         try writer.interface.flush();
@@ -199,6 +225,15 @@ pub const Config = struct {
         const val_start = start + key.len;
         const end = std.mem.indexOfScalar(u8, json[val_start..], '"') orelse return null;
         return allocator.dupe(u8, json[val_start .. val_start + end]) catch return null;
+    }
+
+    fn parseNumberFromJson(json: []const u8, key: []const u8) ?u32 {
+        const start = std.mem.indexOf(u8, json, key) orelse return null;
+        const val_start = start + key.len;
+        var i: usize = val_start;
+        while (i < json.len and json[i] >= '0' and json[i] <= '9') : (i += 1) {}
+        if (i == val_start) return null;
+        return std.fmt.parseInt(u32, json[val_start..i], 10) catch null;
     }
 };
 
