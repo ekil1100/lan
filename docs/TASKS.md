@@ -111,15 +111,13 @@
   - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
 ### R11 第一批原子任务（Beta 试用准备）
-- [ ] R11-T05（NEXT，串行）R11 第一批回归入口与 CI 对齐
-  - 依赖：R11-T01~R11-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R11-T06（NEXT）R11 第一批收口与 R12 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义统一入口执行 R11 第一批回归；
-    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
-    3) CI 复用本地入口命令；
-    4) 三项命令验证通过。
+    1) 判定 R11 第一批状态（done/remaining）；
+    2) 若 close-ready，产出 R12 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
@@ -893,6 +891,14 @@
     2) 每步包含命令与期望输出；
     3) 常见失败给出 next-step。
 
+- [x] R11-T05（串行）R11 第一批回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r11-beta-trial-suite.sh`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) 本地统一入口：`make r11-beta-trial-regression`（覆盖 R11-T01~R11-T04）；
+    2) PASS/FAIL 判定：exit code + `[r11-beta-trial-suite] PASS/FAIL`；
+    3) CI 复用同一入口命令（`make r11-beta-trial-regression`）。
+  - 验证：`make r11-beta-trial-regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 - [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
   - 文件：`docs/ROADMAP.md`
   - 结果：
@@ -918,7 +924,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R11-T05（NEXT）：R11 第一批回归入口与 CI 对齐
+1. 立即执行 R11-T06（NEXT）：R11 第一批收口与 R12 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
