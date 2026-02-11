@@ -632,6 +632,48 @@ test "tool exec timeout has higher priority than stderr/exit-code" {
     try std.testing.expect(std.mem.indexOf(u8, out, "process_nonzero_exit") == null);
 }
 
+test "tool protocol structure contains required fields for read/write/list/exec" {
+    const allocator = std.testing.allocator;
+
+    const tmp_dir_name = try std.fmt.allocPrint(allocator, ".lan_tool_protocol_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_dir_name);
+    std.fs.cwd().makeDir(tmp_dir_name) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_dir_name) catch {};
+
+    const file_path = try std.fmt.allocPrint(allocator, "{s}/p.txt", .{tmp_dir_name});
+    defer allocator.free(file_path);
+
+    const wargs = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\",\"content\":\"v\"}}", .{file_path});
+    defer allocator.free(wargs);
+    const w = try toolWriteFile(allocator, wargs);
+    defer allocator.free(w);
+
+    const rargs = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{file_path});
+    defer allocator.free(rargs);
+    const r = try toolReadFile(allocator, rargs);
+    defer allocator.free(r);
+
+    const largs = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{tmp_dir_name});
+    defer allocator.free(largs);
+    const l = try toolListDir(allocator, largs);
+    defer allocator.free(l);
+
+    const e = try toolExec(allocator, "{\"command\":\"echo ok\"}");
+    defer allocator.free(e);
+
+    const outputs = [_][]const u8{ w, r, l, e };
+    for (outputs) |o| {
+        try std.testing.expect(std.mem.indexOf(u8, o, "ok=true;") != null);
+        try std.testing.expect(std.mem.indexOf(u8, o, "code=") != null);
+        try std.testing.expect(std.mem.indexOf(u8, o, "detail=") != null);
+        try std.testing.expect(std.mem.indexOf(u8, o, "next=") != null);
+        try std.testing.expect(std.mem.indexOf(u8, o, "meta=") != null);
+    }
+}
+
 test "tool regression v1 covers read/write/list/exec basic paths" {
     const allocator = std.testing.allocator;
 

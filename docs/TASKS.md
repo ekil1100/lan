@@ -14,16 +14,7 @@
   - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
   - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
 
-- [ ] R3-T15（NEXT，TDD）Tool 协议回归脚本 v1（结构断言）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/`
-  - DoD：
-    1) 覆盖 read/write/list/exec 的协议结构断言；
-    2) 输出 PASS/FAIL，适合本地与 CI；
-    3) 离线可运行；
-    4) 三项命令验证通过。
-
-- [ ] R3-T16（BDD，串行）观测与协议入口汇总（本地/CI）
+- [ ] R3-T16（NEXT，BDD，串行）观测与协议入口汇总（本地/CI）
   - 依赖：R3-T12~R3-T15
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -305,11 +296,19 @@
     3) README 已补字段说明与解析示例。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/parse-tool-log-sample.sh` 通过。
 
+- [x] R3-T15（TDD）Tool 协议回归脚本 v1（结构断言）
+  - 文件：`src/agent.zig`、`scripts/test-tool-protocol-structure.sh`
+  - 验收：
+    1) 覆盖 read/write/list/exec 四工具协议结构断言（`ok/code/detail/next/meta`）；
+    2) 脚本输出 PASS/FAIL，适合本地与 CI；
+    3) 离线可运行。
+  - 验证：`./scripts/test-tool-protocol-structure.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T15（NEXT）：Tool 协议回归脚本 v1（结构断言）
+1. 立即执行 R3-T16（NEXT）：观测与协议入口汇总（本地/CI）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
