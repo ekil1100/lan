@@ -1015,6 +1015,14 @@
     3) 文档补一条可复现命令。
   - 验证：`./scripts/test-validate-beta-go-no-go.sh` 通过。
 
+- [x] R13-T03（并行）Trial 证据目录一致性检查（tracker/report/snapshot 对账）
+  - 文件：`scripts/check-trial-artifact-consistency.sh`、`scripts/test-check-trial-artifact-consistency.sh`
+  - 验收：
+    1) 校验 run_id/batch_id 映射一致；
+    2) 输出 PASS/FAIL 与不一致清单；
+    3) 保留机读字段供 CI/脚本消费。
+  - 验证：`./scripts/test-check-trial-artifact-consistency.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
