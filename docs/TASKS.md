@@ -111,16 +111,15 @@
   - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
 ### R11 第一批原子任务（Beta 试用准备）
-- [ ] R11-T01（NEXT，并行，TDD）Beta 验收结果快照脚本
+- [ ] R11-T02（NEXT，并行，BDD）试用反馈模板（问题分级+复现信息）
   - 预计时长：1-2 小时
-  - 改动范围：`scripts/snapshot-beta-acceptance.sh`、`scripts/`
+  - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
-    1) 固化保存 checklist/verify/health/report 关键输出；
-    2) 输出带时间戳的快照目录；
-    3) 离线可执行；
-    4) 三项命令验证通过。
+    1) 模板覆盖严重级别、复现步骤、环境信息；
+    2) 与当前故障清单/next-step 口径一致；
+    3) 文档人话可读。
 
-- [ ] R11-T02（并行，BDD）试用反馈模板（问题分级+复现信息）
+- [ ] R11-T03（并行，TDD）Beta 回滚演练脚本
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
@@ -864,6 +863,14 @@
     2) 预拆 R11 第一批 5 个原子任务（范围+DoD+预计时长+依赖）；
     3) 唯一 NEXT 切换到 R11-T01。
 
+- [x] R11-T01（并行，TDD）Beta 验收结果快照脚本
+  - 文件：`scripts/snapshot-beta-acceptance.sh`、`scripts/test-snapshot-beta-acceptance.sh`
+  - 验收：
+    1) 生成本轮 Beta 验收快照（通过项/失败项/next-step）；
+    2) 输出机读结果（`results.jsonl`）+ 人类摘要（`summary.txt`）；
+    3) 与 beta 验收入口口径一致（checklist/verify/health/acceptance）。
+  - 验证：`./scripts/test-snapshot-beta-acceptance.sh` 通过。
+
 - [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
   - 文件：`docs/ROADMAP.md`
   - 结果：
@@ -889,7 +896,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R11-T01（NEXT）：Beta 验收结果快照脚本
+1. 立即执行 R11-T02（NEXT）：试用反馈模板（问题分级+复现信息）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
