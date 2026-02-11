@@ -4,15 +4,7 @@
 
 ## In Progress
 
-- [ ] R3-T01（NEXT，TDD）Tool 错误码最小规范（read/write/exec/list）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`src/tools.zig`、`docs/`（必要时）
-  - DoD：
-    1) 定义统一错误码命名与映射（至少覆盖四个内置工具）；
-    2) 不改变工具语义，仅统一错误输出结构；
-    3) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R3-T02（BDD）Tool 调用日志最小落地（时间/工具名/结果）
+- [ ] R3-T02（NEXT，BDD）Tool 调用日志最小落地（时间/工具名/结果）
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`src/tui.zig`
   - DoD：
@@ -196,11 +188,19 @@
   - 结果：产出 R3 第一批 5 个原子任务（R3-T01 ~ R3-T05），均含范围/DoD/预计时长
   - 指定唯一 NEXT：R3-T01
 
+- [x] R3-T01（TDD）Tool 错误码最小规范（read/write/exec/list）
+  - 文件：`src/tools.zig`、`src/agent.zig`
+  - 验收：
+    1) 定义统一错误码枚举与输出格式：`[tool_error:<code>] <detail> | next: <step>`；
+    2) 覆盖 read/write/exec/list 四个内置工具错误路径；
+    3) 不改变工具语义，仅统一错误输出结构。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T01（NEXT）：Tool 错误码最小规范
+1. 立即执行 R3-T02（NEXT）：Tool 调用日志最小落地（时间/工具名/结果）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

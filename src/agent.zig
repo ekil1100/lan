@@ -3,6 +3,8 @@ const LLMClient = @import("llm.zig").LLMClient;
 const Message = @import("llm.zig").Message;
 const Tool = @import("llm.zig").Tool;
 const ToolCall = @import("llm.zig").ToolCall;
+const ToolErrorCode = @import("tools.zig").ToolErrorCode;
+const toolError = @import("tools.zig").toolError;
 
 pub const ToolHandler = struct {
     name: []const u8,
@@ -301,32 +303,68 @@ fn toolFailureHint(summary: []const u8) []const u8 {
 // Tool implementations
 fn toolReadFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     // Parse simple JSON: {"path":"..."}
-    const path = extractJsonString(args, "path") orelse return try allocator.dupe(u8, "Error: No path provided");
+    const path = extractJsonString(args, "path") orelse return try toolError(
+        .missing_argument,
+        "missing required field: path",
+        "provide {\"path\":\"...\"} for read_file",
+        allocator,
+    );
 
     const content = std.fs.cwd().readFileAlloc(allocator, path, 1024 * 1024) catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error reading file: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "read file failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .fs_read_failed,
+            detail,
+            "check file path/permissions and retry",
+            allocator,
+        );
     };
     return content;
 }
 
 fn toolWriteFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
-    const path = extractJsonString(args, "path") orelse return try allocator.dupe(u8, "Error: No path provided");
+    const path = extractJsonString(args, "path") orelse return try toolError(
+        .missing_argument,
+        "missing required field: path",
+        "provide {\"path\":\"...\",\"content\":\"...\"} for write_file",
+        allocator,
+    );
     const content = extractJsonString(args, "content") orelse "";
 
     const file = std.fs.cwd().createFile(path, .{}) catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error creating file: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "create file failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .fs_open_failed,
+            detail,
+            "check parent directory/path permissions and retry",
+            allocator,
+        );
     };
     defer file.close();
 
     file.writeAll(content) catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error writing file: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "write file failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .fs_write_failed,
+            detail,
+            "check disk/path permissions and retry",
+            allocator,
+        );
     };
 
     return try std.fmt.allocPrint(allocator, "Successfully wrote to {s}", .{path});
 }
 
 fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
-    const cmd = extractJsonString(args, "command") orelse return try allocator.dupe(u8, "Error: No command provided");
+    const cmd = extractJsonString(args, "command") orelse return try toolError(
+        .missing_argument,
+        "missing required field: command",
+        "provide {\"command\":\"...\"} for exec",
+        allocator,
+    );
 
     const argv = &[_][]const u8{ "sh", "-c", cmd };
     var child = std.process.Child.init(argv, allocator);
@@ -334,7 +372,14 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     child.stderr_behavior = .Pipe;
 
     child.spawn() catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error spawning process: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "spawn process failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .process_spawn_failed,
+            detail,
+            "check command/shell availability and retry",
+            allocator,
+        );
     };
 
     var stdout = std.array_list.Managed(u8).init(allocator);
@@ -350,7 +395,14 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     }
 
     const result = child.wait() catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error waiting for process: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "wait process failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .process_wait_failed,
+            detail,
+            "check command behavior and retry with simpler args",
+            allocator,
+        );
     };
 
     const exit_code = result.Exited;
@@ -368,7 +420,14 @@ fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     const path = extractJsonString(args, "path") orelse ".";
 
     var dir = std.fs.cwd().openDir(path, .{ .iterate = true }) catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error opening directory: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "open directory failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .directory_open_failed,
+            detail,
+            "check directory path/permissions and retry",
+            allocator,
+        );
     };
     defer dir.close();
 
@@ -377,7 +436,14 @@ fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
 
     var iter = dir.iterate();
     while (iter.next() catch |err| {
-        return try std.fmt.allocPrint(allocator, "Error reading directory: {s}", .{@errorName(err)});
+        const detail = try std.fmt.allocPrint(allocator, "read directory failed: {s}", .{@errorName(err)});
+        defer allocator.free(detail);
+        return try toolError(
+            .directory_read_failed,
+            detail,
+            "check directory readability and retry",
+            allocator,
+        );
     }) |entry| {
         const icon = switch (entry.kind) {
             .directory => "[DIR]  ",

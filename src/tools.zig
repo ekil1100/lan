@@ -1,5 +1,21 @@
 const std = @import("std");
 
+pub const ToolErrorCode = enum {
+    missing_argument,
+    invalid_argument,
+    fs_open_failed,
+    fs_read_failed,
+    fs_write_failed,
+    process_spawn_failed,
+    process_wait_failed,
+    directory_open_failed,
+    directory_read_failed,
+};
+
+pub fn toolError(code: ToolErrorCode, detail: []const u8, next_step: []const u8, allocator: std.mem.Allocator) ![]const u8 {
+    return std.fmt.allocPrint(allocator, "[tool_error:{s}] {s} | next: {s}", .{ @tagName(code), detail, next_step });
+}
+
 pub const Tool = struct {
     name: []const u8,
     description: []const u8,
