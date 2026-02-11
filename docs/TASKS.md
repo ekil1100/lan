@@ -85,16 +85,7 @@
   - R8-T05 第一批回归入口与 CI 对齐：done
 
 ### R9 第一批原子任务（发布后运维体验）
-- [ ] R9-T04（NEXT，BDD）运维文档最小闭环（故障排查清单）
-  - 预计时长：1-2 小时
-  - 改动范围：`README.md`、`docs/`
-  - DoD：
-    1) 提供 install/upgrade/verify/preflight 的故障清单；
-    2) 每类故障包含 next-step；
-    3) 与脚本输出一致；
-    4) 三项命令验证通过。
-
-- [ ] R9-T05（串行）R9 第一批回归入口与 CI 对齐
+- [ ] R9-T05（NEXT，串行）R9 第一批回归入口与 CI 对齐
   - 依赖：R9-T01~R9-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -765,11 +756,19 @@
     3) 离线可运行。
   - 验证：`./scripts/test-support-bundle.sh` / `./scripts/support-bundle.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R9-T04（并行，BDD）运维文档最小闭环（故障排查清单）
+  - 文件：`README.md`、`docs/ops/troubleshooting.md`
+  - 验收：
+    1) 文档新增 install/upgrade/verify/preflight 故障清单；
+    2) 每类故障提供 next-step；
+    3) 文档口径与脚本输出一致。
+  - 验证：`./scripts/preflight.sh --json "$HOME/.local/bin"` / `./scripts/verify-package.sh dist/lan-0.1.0-macos-arm64.tar.gz` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R9-T04（NEXT）：运维文档最小闭环（故障排查清单）
+1. 立即执行 R9-T05（NEXT）：R9 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

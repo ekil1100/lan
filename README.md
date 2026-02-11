@@ -170,6 +170,11 @@ Parser demo:
 ./scripts/parse-tool-log-sample.sh
 ```
 
+## Ops Troubleshooting
+
+- 故障清单（install / upgrade / verify / preflight）：`docs/ops/troubleshooting.md`
+- 文档与脚本 `next:` 输出按同一口径维护
+
 ## Regression Entrypoints (Local + CI)
 
 Unified commands:
