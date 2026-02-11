@@ -158,6 +158,7 @@ pub const Agent = struct {
         // Check if response contains tool call indicators
         if (std.mem.indexOf(u8, response, "[Tool call") != null) {
             const ts_start = nowTs();
+            const started_ms = std.time.milliTimestamp();
             try writer.print("\n[tool][ts:{d}] start name=model_tool_call\n", .{ts_start});
 
             const lower = try std.ascii.allocLowerString(self.allocator, response);
@@ -166,13 +167,14 @@ pub const Agent = struct {
             const has_fail = std.mem.indexOf(u8, lower, "fail") != null or
                 std.mem.indexOf(u8, lower, "error") != null;
 
+            const duration_ms = std.time.milliTimestamp() - started_ms;
             if (has_fail) {
                 const summary = toolFailureSummary(response);
                 const hint = toolFailureHint(summary);
-                try writer.print("[tool][ts:{d}] end result=fail summary={s}\n", .{ nowTs(), summary });
+                try writer.print("[tool][ts:{d}] end result=fail duration_ms={d} summary={s}\n", .{ nowTs(), duration_ms, summary });
                 try writer.print("[tool] next: {s}\n", .{hint});
             } else {
-                try writer.print("[tool][ts:{d}] end result=success summary=tool call processed\n", .{nowTs()});
+                try writer.print("[tool][ts:{d}] end result=success duration_ms={d} summary=tool call processed\n", .{ nowTs(), duration_ms });
             }
 
             return try self.allocator.dupe(u8, "Tool execution completed.");

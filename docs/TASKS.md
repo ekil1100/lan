@@ -14,16 +14,7 @@
   - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
   - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
 
-- [ ] R3-T13（NEXT，TDD）Tool 调用耗时指标最小落地（duration_ms）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`scripts/`
-  - DoD：
-    1) 每次工具调用输出 `duration_ms`；
-    2) 成功/失败路径都记录耗时；
-    3) 不阻塞交互；
-    4) 三项命令验证通过。
-
-- [ ] R3-T14（BDD）Tool 观测日志格式稳定化（机器可解析）
+- [ ] R3-T14（NEXT，BDD）Tool 观测日志格式稳定化（机器可解析）
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`README.md`（如需）
   - DoD：
@@ -307,11 +298,19 @@
     3) 保持执行语义，仅统一输出结构。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-tools-regression.sh` 通过。
 
+- [x] R3-T13（TDD）Tool 调用耗时指标最小落地（duration_ms）
+  - 文件：`src/agent.zig`
+  - 验收：
+    1) 工具调用日志 `end` 行新增 `duration_ms` 字段；
+    2) success/fail 路径均输出耗时；
+    3) 仅日志增强，不引入阻塞交互。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T13（NEXT）：Tool 调用耗时指标最小落地（duration_ms）
+1. 立即执行 R3-T14（NEXT）：Tool 观测日志格式稳定化（机器可解析）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
