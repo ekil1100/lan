@@ -8,6 +8,7 @@ pub const ToolErrorCode = enum {
     fs_write_failed,
     process_spawn_failed,
     process_wait_failed,
+    process_timeout,
     directory_open_failed,
     directory_read_failed,
 };

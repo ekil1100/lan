@@ -371,7 +371,16 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
         allocator,
     );
 
-    const argv = &[_][]const u8{ "sh", "-c", cmd };
+    const timeout_seconds = 10;
+    const timeout_wrapper =
+        "sh -c \"$1\" & pid=$!; " ++
+        "(sleep " ++ "10" ++ "; kill -TERM $pid 2>/dev/null) & killer=$!; " ++
+        "wait $pid; status=$?; " ++
+        "kill $killer 2>/dev/null; wait $killer 2>/dev/null; " ++
+        "if [ $status -eq 143 ] || [ $status -eq 137 ]; then exit 124; fi; " ++
+        "exit $status";
+
+    const argv = &[_][]const u8{ "sh", "-c", timeout_wrapper, "sh", cmd };
     var child = std.process.Child.init(argv, allocator);
     child.stdout_behavior = .Pipe;
     child.stderr_behavior = .Pipe;
@@ -411,6 +420,17 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     };
 
     const exit_code = result.Exited;
+
+    if (exit_code == 124) {
+        const detail = try std.fmt.allocPrint(allocator, "command timed out after {d}s", .{timeout_seconds});
+        defer allocator.free(detail);
+        return try toolError(
+            .process_timeout,
+            detail,
+            "reduce command scope or increase timeout policy before retry",
+            allocator,
+        );
+    }
 
     if (stdout.items.len == 0) {
         return try std.fmt.allocPrint(allocator, "Command executed (exit code: {d})", .{exit_code});

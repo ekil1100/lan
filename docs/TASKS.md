@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R3-T03（NEXT，TDD）`exec` 工具超时保护（最小实现）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`（toolExec）
-  - DoD：
-    1) 支持默认超时（如 10s，可常量配置）；
-    2) 超时时返回可识别错误并给建议；
-    3) 不影响正常短命令执行；
-    4) 三项命令验证通过。
-
-- [ ] R3-T04（BDD）工具参数缺失文案统一（read/write/exec/list）
+- [ ] R3-T04（NEXT，BDD）工具参数缺失文案统一（read/write/exec/list）
   - 预计时长：1 小时
   - 改动范围：`src/agent.zig`、`README.md`（如需）
   - DoD：
@@ -195,11 +186,19 @@
     3) 不引入交互阻塞（仅输出日志文本）。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T03（TDD）`exec` 工具超时保护（最小实现）
+  - 文件：`src/agent.zig`、`src/tools.zig`、`scripts/repro-exec-timeout.sh`
+  - 验收：
+    1) `toolExec` 默认超时 10s（常量）生效；
+    2) 超时返回统一错误码：`[tool_error:process_timeout] ... | next: ...`；
+    3) 正常短命令路径不受影响。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/repro-exec-timeout.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T03（NEXT）：`exec` 工具超时保护（最小实现）
+1. 立即执行 R3-T04（NEXT）：工具参数缺失文案统一
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
