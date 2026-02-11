@@ -4,13 +4,52 @@
 
 ## In Progress
 
-- [ ] R3-T06（NEXT）R3 第二批原子任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R3 第二批设计说明（R3-T06）
+- **纳入范围**：
+  1) 工具失败路径回归扩展（离线可复现）；
+  2) `exec` 在 `stderr / exit-code / timeout` 的稳定性边界与判定优先级；
+  3) 本地与 CI 的统一回归入口与失败判定。
+- **排除范围**：
+  1) 不新增在线 API 依赖测试；
+  2) 不改动模型调用链路与 Skill Runtime；
+  3) 不重复已完成项（R3-T01 ~ R3-T05）。
+
+- [ ] R3-T07（NEXT，TDD，并行）工具失败路径回归扩展：非零退出码（离线）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`scripts/test-tools-regression.sh`
   - DoD：
-    1) 新增 3-5 个可执行原子任务；
-    2) 每项包含范围与 DoD；
-    3) 指定唯一 NEXT。
+    1) 新增非零退出码失败路径回归（离线可复现）；
+    2) 命中统一错误结构（含错误码与 next step）；
+    3) 可独立运行并输出 PASS/FAIL；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R3-T08（TDD，并行）exec 稳定性边界：`stderr/exit-code/timeout` 优先级固化
+  - 预计时长：1-2 小时
+  - 改动范围：`src/agent.zig`、`src/tools.zig`、`scripts/repro-exec-timeout.sh`
+  - DoD：
+    1) 明确并实现优先级规则（timeout > wait/spawn 错误 > exit-code > stderr 附加信息）；
+    2) 规则可通过测试/脚本验证；
+    3) 不改变正常短命令成功路径；
+    4) 三项命令验证通过。
+
+- [ ] R3-T09（BDD，串行）脚本与 CI 对齐：统一执行入口与失败判定
+  - 依赖：R3-T07 / R3-T08（先完成再对齐入口）
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`scripts/`
+  - DoD：
+    1) 定义统一入口命令（本地/CI 同一套）；
+    2) 明确通过标准与失败判定（exit code + PASS/FAIL 文本）；
+    3) CI 可直接复用本地入口；
+    4) 三项命令验证通过。
+
+- [ ] R3-T10（收敛）R3 第二批任务收口与依赖编排
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`（必要时 `docs/ROADMAP.md`）
+  - DoD：
+    1) 第二批任务总数控制在 3-5；
+    2) 并行/串行依赖关系明确；
+    3) 唯一 NEXT 明确；
+    4) 文档原子提交。
 
 ## Done
 
@@ -200,11 +239,16 @@
     3) 脚本不依赖在线 API key。
   - 验证：`./scripts/test-tools-regression.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T06（拆解）R3 第二批任务边界与任务包收敛
+  - 文件：`docs/TASKS.md`
+  - 结果：完成 A/B/C/D/E 收敛，产出 R3-T07 ~ R3-T10（3-5 个）并明确依赖关系
+  - 指定唯一 NEXT：R3-T07
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T06（NEXT）：R3 第二批原子任务拆解
+1. 立即执行 R3-T07（NEXT）：工具失败路径回归扩展（非零退出码）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
