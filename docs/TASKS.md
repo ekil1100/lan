@@ -24,16 +24,7 @@
   - R4-T05.B CI 复用本地回归入口：done
 
 ### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T08（NEXT，BDD）`lan skill update`（本地覆盖安装）最小闭环
-  - 预计时长：1-2 小时
-  - 改动范围：`src/main.zig`、`src/skills.zig`、`scripts/`
-  - DoD：
-    1) 支持 `lan skill update <local-dir>`；
-    2) 更新前后 list 版本可见变化；
-    3) 无目标 skill 时给 next-step；
-    4) 三项命令验证通过。
-
-- [ ] R4-T09（TDD）Skill 索引文件落地（metadata snapshot）
+- [ ] R4-T09（NEXT，TDD）Skill 索引文件落地（metadata snapshot）
   - 预计时长：1-2 小时
   - 改动范围：`src/skills.zig`、`~/.config/lan/skills/index.json`（逻辑）
   - DoD：

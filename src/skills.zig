@@ -13,6 +13,12 @@ pub fn addSkill(allocator: std.mem.Allocator, config_dir: []const u8, source_dir
     return addSkillFromRoot(allocator, skills_root, source_dir);
 }
 
+pub fn updateSkill(allocator: std.mem.Allocator, config_dir: []const u8, source_dir: []const u8) ![]const u8 {
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ config_dir, "skills" });
+    defer allocator.free(skills_root);
+    return updateSkillFromRoot(allocator, skills_root, source_dir);
+}
+
 pub fn removeSkill(allocator: std.mem.Allocator, config_dir: []const u8, skill_name: []const u8) ![]const u8 {
     const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ config_dir, "skills" });
     defer allocator.free(skills_root);
@@ -51,35 +57,86 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     return std.fmt.allocPrint(allocator, "Skill removed: name={s}\n", .{skill_name});
 }
 
-pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
+fn loadSourceManifest(allocator: std.mem.Allocator, source_dir: []const u8, action: []const u8) !struct { text: []const u8, manifest: skill_manifest.Manifest } {
     const src_manifest = try std.fs.path.join(allocator, &[_][]const u8{ source_dir, "manifest.json" });
     defer allocator.free(src_manifest);
 
     const src_text = std.fs.cwd().readFileAlloc(allocator, src_manifest, 64 * 1024) catch {
-        return allocator.dupe(u8,
-            "Skill install failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill add <path>`.\n",
-        );
+        return error.FileNotFound;
     };
-    defer allocator.free(src_text);
 
-    var manifest = skill_manifest.parseAndValidate(allocator, src_text) catch {
-        return allocator.dupe(u8,
-            "Skill install failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
-        );
+    const manifest = skill_manifest.parseAndValidate(allocator, src_text) catch {
+        allocator.free(src_text);
+        return error.InvalidData;
     };
-    defer manifest.deinit(allocator);
+
+    _ = action;
+    return .{ .text = src_text, .manifest = manifest };
+}
+
+pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
+    var loaded = loadSourceManifest(allocator, source_dir, "add") catch |err| switch (err) {
+        error.FileNotFound => {
+            return allocator.dupe(u8,
+                "Skill install failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill add <path>`.\n",
+            );
+        },
+        error.InvalidData => {
+            return allocator.dupe(u8,
+                "Skill install failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
+            );
+        },
+        else => return err,
+    };
+    defer allocator.free(loaded.text);
+    defer loaded.manifest.deinit(allocator);
 
     try std.fs.cwd().makePath(skills_root);
 
-    const dst_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, manifest.name });
+    const dst_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, loaded.manifest.name });
     defer allocator.free(dst_dir);
     try std.fs.cwd().makePath(dst_dir);
 
     const dst_manifest = try std.fs.path.join(allocator, &[_][]const u8{ dst_dir, "manifest.json" });
     defer allocator.free(dst_manifest);
-    try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = src_text });
+    try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
 
-    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\n", .{ manifest.name, manifest.version, dst_manifest });
+    return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
+}
+
+pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
+    var loaded = loadSourceManifest(allocator, source_dir, "update") catch |err| switch (err) {
+        error.FileNotFound => {
+            return allocator.dupe(u8,
+                "Skill update failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill update <path>`.\n",
+            );
+        },
+        error.InvalidData => {
+            return allocator.dupe(u8,
+                "Skill update failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
+            );
+        },
+        else => return err,
+    };
+    defer allocator.free(loaded.text);
+    defer loaded.manifest.deinit(allocator);
+
+    const target_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, loaded.manifest.name });
+    defer allocator.free(target_dir);
+
+    var existing = std.fs.cwd().openDir(target_dir, .{}) catch {
+        return std.fmt.allocPrint(allocator,
+            "Skill update failed: target not installed ({s})\nnext: run `lan skill list` then `lan skill add <path>` for first install.\n",
+            .{loaded.manifest.name},
+        );
+    };
+    existing.close();
+
+    const dst_manifest = try std.fs.path.join(allocator, &[_][]const u8{ target_dir, "manifest.json" });
+    defer allocator.free(dst_manifest);
+    try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
+
+    return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
 }
 
 pub fn listSkillsFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) ![]const u8 {
@@ -207,6 +264,100 @@ test "skill add returns next-step when manifest invalid" {
     const out = try addSkillFromRoot(allocator, skills_root, source_dir);
     defer allocator.free(out);
     try std.testing.expect(std.mem.indexOf(u8, out, "Skill install failed") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
+}
+
+test "skill update changes visible version in list" {
+    const allocator = std.testing.allocator;
+
+    const tmp_root = try std.fmt.allocPrint(allocator, ".lan_skill_update_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_root);
+    std.fs.cwd().makeDir(tmp_root) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_root) catch {};
+
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "installed" });
+    defer allocator.free(skills_root);
+
+    const src_v1 = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "src-v1" });
+    defer allocator.free(src_v1);
+    try std.fs.cwd().makePath(src_v1);
+    const m1 = try std.fs.path.join(allocator, &[_][]const u8{ src_v1, "manifest.json" });
+    defer allocator.free(m1);
+    const manifest_v1 =
+        \\{
+        \\  "name": "demo-skill",
+        \\  "version": "1.0.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+    try std.fs.cwd().writeFile(.{ .sub_path = m1, .data = manifest_v1 });
+
+    const src_v2 = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "src-v2" });
+    defer allocator.free(src_v2);
+    try std.fs.cwd().makePath(src_v2);
+    const m2 = try std.fs.path.join(allocator, &[_][]const u8{ src_v2, "manifest.json" });
+    defer allocator.free(m2);
+    const manifest_v2 =
+        \\{
+        \\  "name": "demo-skill",
+        \\  "version": "1.1.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+    try std.fs.cwd().writeFile(.{ .sub_path = m2, .data = manifest_v2 });
+
+    const add_out = try addSkillFromRoot(allocator, skills_root, src_v1);
+    defer allocator.free(add_out);
+
+    const upd_out = try updateSkillFromRoot(allocator, skills_root, src_v2);
+    defer allocator.free(upd_out);
+    try std.testing.expect(std.mem.indexOf(u8, upd_out, "Skill updated") != null);
+
+    const list_out = try listSkillsFromRoot(allocator, skills_root);
+    defer allocator.free(list_out);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "version=1.1.0") != null);
+}
+
+test "skill update returns next-step when target not installed" {
+    const allocator = std.testing.allocator;
+
+    const tmp_root = try std.fmt.allocPrint(allocator, ".lan_skill_update_nf_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_root);
+    std.fs.cwd().makeDir(tmp_root) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_root) catch {};
+
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "installed" });
+    defer allocator.free(skills_root);
+
+    const src = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "src" });
+    defer allocator.free(src);
+    try std.fs.cwd().makePath(src);
+    const m = try std.fs.path.join(allocator, &[_][]const u8{ src, "manifest.json" });
+    defer allocator.free(m);
+    const manifest_missing_target =
+        \\{
+        \\  "name": "demo-skill",
+        \\  "version": "1.1.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+    try std.fs.cwd().writeFile(.{ .sub_path = m, .data = manifest_missing_target });
+
+    const out = try updateSkillFromRoot(allocator, skills_root, src);
+    defer allocator.free(out);
+    try std.testing.expect(std.mem.indexOf(u8, out, "Skill update failed") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
 }
 
