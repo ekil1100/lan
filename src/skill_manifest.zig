@@ -4,8 +4,8 @@ pub const Manifest = struct {
     name: []const u8,
     version: []const u8,
     entry: []const u8,
-    tools: []const []const u8,
-    permissions: []const []const u8,
+    tools: [][]const u8,
+    permissions: [][]const u8,
 
     pub fn deinit(self: *Manifest, allocator: std.mem.Allocator) void {
         allocator.free(self.name);

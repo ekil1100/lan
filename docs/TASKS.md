@@ -14,16 +14,7 @@
   - R3-T16 观测与协议入口汇总（本地/CI）：done
 
 ### R4 第一批原子任务（Skill Runtime v1 启动）
-- [ ] R4-T02（NEXT，TDD）`lan skill list` 最小闭环（本地索引）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/`、`README.md`
-  - DoD：
-    1) 可列出已安装 skill（名称/版本/路径）；
-    2) 无 skill 时给出可操作提示；
-    3) 保持离线可运行；
-    4) 三项命令验证通过。
-
-- [ ] R4-T03（BDD）`lan skill add` 本地目录安装（无网络）
+- [ ] R4-T03（NEXT，BDD）`lan skill add` 本地目录安装（无网络）
   - 预计时长：1-2 小时
   - 改动范围：`src/`、`scripts/`
   - DoD：
@@ -369,11 +360,19 @@
     3) 增加 schema 校验测试（valid/invalid）。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T02（TDD）`lan skill list` 最小闭环（本地索引）
+  - 文件：`src/main.zig`、`src/skills.zig`
+  - 验收：
+    1) `lan skill list` 可列出已安装 skill 的 `name/version/path`；
+    2) 无 skill 时输出可操作 next-step 提示；
+    3) 全流程离线可运行。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./zig-out/bin/lan skill list` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T02（NEXT）：`lan skill list` 最小闭环（本地索引）
+1. 立即执行 R4-T03（NEXT）：`lan skill add` 本地目录安装（无网络）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
