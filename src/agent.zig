@@ -404,12 +404,24 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     var stdout = std.array_list.Managed(u8).init(allocator);
     defer stdout.deinit();
 
+    var stderr = std.array_list.Managed(u8).init(allocator);
+    defer stderr.deinit();
+
     if (child.stdout) |out| {
         var buf: [1024]u8 = undefined;
         while (true) {
             const n = out.read(&buf) catch break;
             if (n == 0) break;
             stdout.appendSlice(buf[0..n]) catch break;
+        }
+    }
+
+    if (child.stderr) |err_out| {
+        var buf: [1024]u8 = undefined;
+        while (true) {
+            const n = err_out.read(&buf) catch break;
+            if (n == 0) break;
+            stderr.appendSlice(buf[0..n]) catch break;
         }
     }
 
@@ -426,6 +438,11 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
 
     const exit_code = result.Exited;
 
+    // Priority order:
+    // 1) timeout
+    // 2) wait/spawn errors (already returned earlier)
+    // 3) non-zero exit code
+    // 4) stderr as attached diagnostic info
     if (exit_code == 124) {
         const detail = try std.fmt.allocPrint(allocator, "command timed out after {d}s", .{timeout_seconds});
         defer allocator.free(detail);
@@ -438,8 +455,17 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     }
 
     if (exit_code != 0) {
-        const detail = try std.fmt.allocPrint(allocator, "command exited with non-zero code: {d}", .{exit_code});
+        var detail = try std.fmt.allocPrint(allocator, "command exited with non-zero code: {d}", .{exit_code});
         defer allocator.free(detail);
+
+        if (stderr.items.len > 0) {
+            const stderr_trimmed = std.mem.trim(u8, stderr.items, " \n\r\t");
+            if (stderr_trimmed.len > 0) {
+                allocator.free(detail);
+                detail = try std.fmt.allocPrint(allocator, "command exited with non-zero code: {d}; stderr: {s}", .{ exit_code, stderr_trimmed });
+            }
+        }
+
         return try toolError(
             .process_nonzero_exit,
             detail,
@@ -563,6 +589,26 @@ test "tool exec non-zero exit returns unified error format" {
 
     try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_nonzero_exit]") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
+}
+
+test "tool exec non-zero exit includes stderr diagnostic" {
+    const allocator = std.testing.allocator;
+
+    const out = try toolExec(allocator, "{\"command\":\"sh -c 'echo boom 1>&2; exit 7'\"}");
+    defer allocator.free(out);
+
+    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_nonzero_exit]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "stderr: boom") != null);
+}
+
+test "tool exec timeout has higher priority than stderr/exit-code" {
+    const allocator = std.testing.allocator;
+
+    const out = try toolExec(allocator, "{\"command\":\"sh -c 'echo slowerr 1>&2; sleep 11; exit 7'\"}");
+    defer allocator.free(out);
+
+    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_timeout]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "process_nonzero_exit") == null);
 }
 
 test "tool regression v1 covers read/write/list/exec basic paths" {
