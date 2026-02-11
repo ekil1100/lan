@@ -59,25 +59,13 @@
   - R6-T05 第一批回归入口与 CI 对齐：done
 
 ### R7 第一批原子任务（安装升级机制强化）
-- [ ] R7-T05（NEXT，串行）R7 第一批回归入口与 CI 对齐
-  - 依赖：R7-T01~R7-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R7-T06（NEXT）R7 第一批收口与下一批任务拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义统一入口执行 R7 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
-  - 依赖：R7-T01~R7-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义统一入口执行 R7 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
-  - 依赖：R6-T01~R6-T04
-  - 预计时长：1 小时
+    1) 判定 R7 第一批状态（done/remaining）；
+    2) 若 close-ready，产出下一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
     1) 定义统一入口执行 R6 第一批回归；
@@ -646,11 +634,19 @@
     3) 与 route/tool_event 风格一致（`install_event key=value ...`）。
   - 验证：`./scripts/parse-install-upgrade-log-sample.sh` / `zig build` / `zig build test` / `make smoke` / `scripts/test-install-local.sh` / `scripts/test-upgrade-local.sh` 通过。
 
+- [x] R7-T05（串行）R7 第一批回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r7-install-upgrade-suite.sh`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) 本地统一入口：`make r7-install-upgrade-regression`（覆盖 R7-T01~R7-T04）；
+    2) PASS/FAIL 判定：exit code + `[r7-install-upgrade-suite] PASS/FAIL`；
+    3) CI 复用同一入口命令（`make r7-install-upgrade-regression`）。
+  - 验证：`make r7-install-upgrade-regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R7-T05（NEXT）：R7 第一批回归入口与 CI 对齐
+1. 立即执行 R7-T06（NEXT）：R7 第一批收口与下一批任务拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

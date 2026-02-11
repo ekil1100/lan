@@ -9,7 +9,7 @@ mkdir -p "$tmp_dir"
 
 pkg_out="$(./scripts/package-release.sh 2>&1 || true)"
 echo "$pkg_out" | grep -q "\[package\] PASS artifact=" || { echo "[install-conflict] FAIL reason=package-failed"; echo "$pkg_out"; exit 1; }
-pkg="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\(.*\)$/\1/p')"
+pkg="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\([^ ]*\).*/\1/p')"
 
 # conflict 1: target path is a file
 file_target="$tmp_dir/target-file"
