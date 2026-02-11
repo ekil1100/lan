@@ -32,14 +32,65 @@
   - R4-T10 权限声明显示与提示：done
   - R4-T11 第二批回归入口与 CI 对齐：done
 
-### R5 第一批原子任务（多模型编排启动）
-- [ ] R5-T06（NEXT）R5 第一批收口与下一批任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R5 第一批收口结论（R5-T06）
+- **收口判据**：
+  1) R5-T01~R5-T05 均达到 DoD 且有对应回归入口；
+  2) 本地与 CI 使用同一回归命令（无双维护）；
+  3) route schema / fallback / mode / route_event 四项能力均可离线复现。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R5-T01 Provider 配置 schema v1：done
+  - R5-T02 Provider fallback 最小闭环：done
+  - R5-T03 路由策略 speed|quality：done
+  - R5-T04 路由日志标准化：done
+  - R5-T05 第一批回归入口与 CI 对齐：done
+
+### R6 第一批原子任务（发布与生态启动）
+- [ ] R6-T01（NEXT，TDD）CLI 版本与构建元信息输出（`lan --version`）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/main.zig`、`build.zig`、`README.md`
   - DoD：
-    1) 判定 R5 第一批状态（done/remaining）；
-    2) 若 close-ready，产出下一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 输出版本号、commit short SHA、构建时间；
+    2) 无网络依赖，离线可运行；
+    3) 增加最小回归断言；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R6-T02（BDD）发布包最小闭环（macOS/Linux）
+  - 预计时长：1-2 小时
+  - 改动范围：`Makefile`、`scripts/`、`.github/workflows/ci.yml`
+  - DoD：
+    1) 生成可分发压缩包（含二进制与 README）；
+    2) 文件命名包含平台与版本；
+    3) 提供离线自检脚本 PASS/FAIL；
+    4) 三项命令验证通过。
+
+- [ ] R6-T03（TDD）安装脚本 v1（本地 tarball 安装）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/install.sh`、`README.md`
+  - DoD：
+    1) 支持从本地包安装到目标目录；
+    2) 安装失败提示 next-step；
+    3) 增加离线回归断言；
+    4) 三项命令验证通过。
+
+- [ ] R6-T04（BDD）升级脚本 v1（保留配置）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/upgrade.sh`、`scripts/`
+  - DoD：
+    1) 支持升级二进制并保留 `~/.config/lan/`；
+    2) 升级前后版本可观测；
+    3) 异常路径给 next-step；
+    4) 三项命令验证通过。
+
+- [ ] R6-T05（串行）R6 第一批回归入口与 CI 对齐
+  - 依赖：R6-T01~R6-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R6 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
   - 依赖：R5-T01~R5-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -516,11 +567,18 @@
     3) CI 复用同一入口命令（`make r5-routing-regression`）。
   - 验证：`make r5-routing-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R5-T06（并行预拆）R5 第一批收口与 R6 启动拆解草案
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已写明 R5 第一批收口判据与 close-ready 结论；
+    2) 预拆 R6 第一批 5 个原子任务（R6-T01~R6-T05）；
+    3) 唯一 NEXT 已切换到 R6-T01。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R5-T06（NEXT）：R5 第一批收口与下一批任务拆解
+1. 立即执行 R6-T01（NEXT）：CLI 版本与构建元信息输出（`lan --version`）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
