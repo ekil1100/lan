@@ -99,6 +99,58 @@ pub fn main() !void {
         return;
     }
 
+    // lan history search <keyword> — filter history by keyword
+    if (args.len >= 4 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "search")) {
+        const keyword = args[3];
+        var cfg_s = try Config.load(allocator);
+        defer cfg_s.deinit();
+        const hp = try std.fs.path.join(allocator, &[_][]const u8{ cfg_s.config_dir, "history.json" });
+        defer allocator.free(hp);
+        const raw = std.fs.cwd().readFileAlloc(allocator, hp, 4 * 1024 * 1024) catch |err| {
+            var eb: [4096]u8 = undefined;
+            var ew2 = std.fs.File.stdout().writer(&eb);
+            try ew2.interface.print("History search failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew2.interface.flush();
+            return;
+        };
+        defer allocator.free(raw);
+
+        // Simple line-based search: output matching JSON objects
+        var sb: [8192]u8 = undefined;
+        var sw = std.fs.File.stdout().writer(&sb);
+        try sw.interface.writeAll("[\n");
+        var first = true;
+        var i: usize = 0;
+        while (i < raw.len) {
+            // Find each {"role": line
+            if (std.mem.startsWith(u8, raw[i..], "{\"role\":") or
+                (i + 2 < raw.len and raw[i] == ' ' and raw[i + 1] == ' ' and std.mem.startsWith(u8, raw[i + 2..], "{\"role\":")))
+            {
+                // Find end of this JSON object line
+                var end = i;
+                while (end < raw.len and raw[end] != '\n') : (end += 1) {}
+                const line = raw[i..end];
+                // Strip trailing comma if present
+                const trimmed = if (line.len > 0 and line[line.len - 1] == ',') line[0 .. line.len - 1] else line;
+                // Check if keyword appears in line (case-sensitive)
+                if (std.mem.indexOf(u8, trimmed, keyword) != null) {
+                    if (!first) try sw.interface.writeAll(",\n");
+                    first = false;
+                    // Trim leading whitespace
+                    var start: usize = 0;
+                    while (start < trimmed.len and (trimmed[start] == ' ' or trimmed[start] == '\t')) : (start += 1) {}
+                    try sw.interface.writeAll(trimmed[start..]);
+                }
+                i = end + 1;
+            } else {
+                i += 1;
+            }
+        }
+        try sw.interface.writeAll("\n]\n");
+        try sw.interface.flush();
+        return;
+    }
+
     // lan history export — dump history as JSON with role/content/timestamp
     if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "export")) {
         var cfg = try Config.load(allocator);
