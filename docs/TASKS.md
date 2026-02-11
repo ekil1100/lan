@@ -85,16 +85,7 @@
   - R8-T05 第一批回归入口与 CI 对齐：done
 
 ### R9 第一批原子任务（发布后运维体验）
-- [ ] R9-T01（NEXT，TDD）安装后健康检查脚本（binary/config/log）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/healthcheck.sh`、`scripts/`
-  - DoD：
-    1) 检查 lan 可执行、配置目录可读写、关键日志路径可写；
-    2) 输出 PASS/FAIL + next-step；
-    3) 离线可运行；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R9-T02（BDD）自修复建议模板（按失败类型映射）
+- [ ] R9-T02（NEXT，BDD）自修复建议模板（按失败类型映射）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/`、`docs/`
   - DoD：
@@ -768,11 +759,19 @@
     2) 预拆 R9 第一批 5 个原子任务（R9-T01~R9-T05）；
     3) 唯一 NEXT 已切换到 R9-T01。
 
+- [x] R9-T01（TDD）预检结果结构化输出（JSON + 文本双通道）
+  - 文件：`scripts/preflight.sh`、`scripts/test-preflight.sh`、`scripts/test-preflight-json.sh`
+  - 验收：
+    1) `preflight --json` 输出稳定字段（ok/reason/target/next）；
+    2) 失败时文本输出保留 `next-step`；
+    3) JSON 与文本语义一致（同 reason/next）。
+  - 验证：`./scripts/test-preflight.sh` / `./scripts/test-preflight-json.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R9-T01（NEXT）：安装后健康检查脚本（binary/config/log）
+1. 立即执行 R9-T02（NEXT）：自修复建议模板（按失败类型映射）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
