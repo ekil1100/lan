@@ -4,16 +4,7 @@
 
 ## In Progress
 
-- [ ] R3-T02（NEXT，BDD）Tool 调用日志最小落地（时间/工具名/结果）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`src/tui.zig`
-  - DoD：
-    1) 每次工具调用至少输出 start/end 与成功/失败；
-    2) 失败时带错误摘要与 next step；
-    3) 不引入交互阻塞；
-    4) 三项命令验证通过。
-
-- [ ] R3-T03（TDD）`exec` 工具超时保护（最小实现）
+- [ ] R3-T03（NEXT，TDD）`exec` 工具超时保护（最小实现）
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`（toolExec）
   - DoD：
@@ -196,11 +187,19 @@
     3) 不改变工具语义，仅统一错误输出结构。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T02（BDD）Tool 调用日志最小落地（时间/工具名/结果）
+  - 文件：`src/agent.zig`
+  - 验收：
+    1) 工具调用链路输出 `start/end`，包含 `ts`、`name`、`result`；
+    2) fail 路径输出 `summary` + `next`；
+    3) 不引入交互阻塞（仅输出日志文本）。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T02（NEXT）：Tool 调用日志最小落地（时间/工具名/结果）
+1. 立即执行 R3-T03（NEXT）：`exec` 工具超时保护（最小实现）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

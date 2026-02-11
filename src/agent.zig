@@ -156,7 +156,8 @@ pub const Agent = struct {
 
         // Check if response contains tool call indicators
         if (std.mem.indexOf(u8, response, "[Tool call") != null) {
-            try writer.writeAll("\n[tool] start: model requested a tool call\n");
+            const ts_start = nowTs();
+            try writer.print("\n[tool][ts:{d}] start name=model_tool_call\n", .{ts_start});
 
             const lower = try std.ascii.allocLowerString(self.allocator, response);
             defer self.allocator.free(lower);
@@ -167,10 +168,10 @@ pub const Agent = struct {
             if (has_fail) {
                 const summary = toolFailureSummary(response);
                 const hint = toolFailureHint(summary);
-                try writer.print("[tool] fail: {s}\n", .{summary});
-                try writer.print("[tool] tip: {s}\n", .{hint});
+                try writer.print("[tool][ts:{d}] end result=fail summary={s}\n", .{ nowTs(), summary });
+                try writer.print("[tool] next: {s}\n", .{hint});
             } else {
-                try writer.writeAll("[tool] success: tool call processed\n");
+                try writer.print("[tool][ts:{d}] end result=success summary=tool call processed\n", .{nowTs()});
             }
 
             return try self.allocator.dupe(u8, "Tool execution completed.");
@@ -279,6 +280,10 @@ pub const Agent = struct {
         }
     }
 };
+
+fn nowTs() i64 {
+    return std.time.timestamp();
+}
 
 fn toolFailureSummary(response: []const u8) []const u8 {
     if (std.mem.indexOf(u8, response, "Unknown tool")) |_| return "unknown tool requested";
