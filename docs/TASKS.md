@@ -85,16 +85,7 @@
   - R8-T05 第一批回归入口与 CI 对齐：done
 
 ### R9 第一批原子任务（发布后运维体验）
-- [ ] R9-T03（NEXT，TDD）离线诊断打包（support bundle stub）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/support-bundle.sh`、`scripts/`
-  - DoD：
-    1) 打包版本信息、配置摘要（脱敏）、最近日志；
-    2) 产物命名包含时间戳与平台；
-    3) 离线可运行；
-    4) 三项命令验证通过。
-
-- [ ] R9-T04（BDD）运维文档最小闭环（故障排查清单）
+- [ ] R9-T04（NEXT，BDD）运维文档最小闭环（故障排查清单）
   - 预计时长：1-2 小时
   - 改动范围：`README.md`、`docs/`
   - DoD：
@@ -766,11 +757,19 @@
     3) 输出格式与现有发布流程兼容。
   - 验证：`./scripts/test-release-notes.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R9-T03（TDD）离线诊断打包（support bundle stub）
+  - 文件：`scripts/support-bundle.sh`、`scripts/test-support-bundle.sh`
+  - 验收：
+    1) 打包版本信息、配置摘要（脱敏）、最近日志；
+    2) 产物命名包含时间戳+平台；
+    3) 离线可运行。
+  - 验证：`./scripts/test-support-bundle.sh` / `./scripts/support-bundle.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R9-T03（NEXT）：离线诊断打包（support bundle stub）
+1. 立即执行 R9-T04（NEXT）：运维文档最小闭环（故障排查清单）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
