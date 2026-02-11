@@ -14,16 +14,15 @@
   - R3-T16 观测与协议入口汇总（本地/CI）：done
 
 ### R4 第一批原子任务（Skill Runtime v1 启动）
-- [ ] R4-T04（NEXT，BDD）`lan skill remove` 卸载与状态一致性
-  - 预计时长：1-2 小时
-  - 改动范围：`src/`、`scripts/`
+- [ ] R4-T05（NEXT，串行）R4 第一批回归入口与 CI 对齐
+  - 依赖：R4-T01~R4-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 支持按名称卸载 skill；
-    2) list 与索引状态保持一致；
-    3) 错误路径（不存在/权限）可解释；
+    1) 定义统一入口执行 R4 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
     4) 三项命令验证通过。
-
-- [ ] R4-T05（串行）R4 第一批回归入口与 CI 对齐
   - 依赖：R4-T01~R4-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -367,11 +366,19 @@
     3) 提供可复现 PASS/FAIL 脚本。
   - 验证：`./scripts/test-skill-add-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T04（BDD）`lan skill remove` 卸载与状态一致性
+  - 文件：`src/main.zig`、`src/skills.zig`、`scripts/test-skill-remove-local.sh`
+  - 验收：
+    1) 支持 `lan skill remove <name>` 按名称卸载；
+    2) 卸载后 `lan skill list` 与索引状态一致；
+    3) 错误路径（不存在/权限）返回可解释 `next:` 提示。
+  - 验证：`./scripts/test-skill-remove-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T04（NEXT）：`lan skill remove` 卸载与状态一致性
+1. 立即执行 R4-T05（NEXT）：R4 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
