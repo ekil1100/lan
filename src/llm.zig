@@ -80,8 +80,12 @@ pub const LLMClient = struct {
         };
     }
 
-    fn fallbackHint(self: *LLMClient, primary: Provider, fallback: Provider) ![]const u8 {
-        return std.fmt.allocPrint(self.allocator, "[fallback] primary={s} fallback={s}\n", .{ primary.toString(), fallback.toString() });
+    fn routeEventLine(self: *LLMClient, phase: []const u8, provider: Provider, result: []const u8, reason: []const u8, duration_ms: i64) ![]const u8 {
+        return std.fmt.allocPrint(
+            self.allocator,
+            "route_event phase={s} provider={s} model={s} result={s} reason={s} duration_ms={d}\n",
+            .{ phase, provider.toString(), selectModelForProvider(provider), result, reason, duration_ms },
+        );
     }
 
     pub fn chat(self: *LLMClient, messages: []const Message) ![]const u8 {
@@ -101,8 +105,14 @@ pub const LLMClient = struct {
         var attempts: u8 = 0;
         const max_attempts: u8 = self.config.route_retry + 1;
         while (attempts < max_attempts) : (attempts += 1) {
-            const primary_result = self.chatByProvider(preferred, messages);
-            return primary_result catch |primary_err| {
+            const primary_start = std.time.milliTimestamp();
+            if (self.chatByProvider(preferred, messages)) |primary_ok_result| {
+                const primary_duration = std.time.milliTimestamp() - primary_start;
+                const primary_ok = try self.routeEventLine("end", preferred, "success", "primary_success", primary_duration);
+                defer self.allocator.free(primary_ok);
+                return try std.mem.concat(self.allocator, u8, &[_][]const u8{ primary_ok, primary_ok_result });
+            } else |primary_err| {
+                const primary_duration = std.time.milliTimestamp() - primary_start;
                 if (attempts + 1 < max_attempts) {
                     std.Thread.sleep(200 * std.time.ns_per_ms);
                     continue;
@@ -110,13 +120,19 @@ pub const LLMClient = struct {
 
                 if (secondary == preferred) return primary_err;
 
+                const fallback_start = std.time.milliTimestamp();
                 const fallback_result = self.chatByProvider(secondary, messages) catch {
                     return primary_err;
                 };
-                const hint = try self.fallbackHint(preferred, secondary);
-                defer self.allocator.free(hint);
-                return try std.mem.concat(self.allocator, u8, &[_][]const u8{ hint, fallback_result });
-            };
+                const fallback_duration = std.time.milliTimestamp() - fallback_start;
+
+                const primary_fail = try self.routeEventLine("end", preferred, "fail", "primary_error", primary_duration);
+                defer self.allocator.free(primary_fail);
+                const fallback_ok = try self.routeEventLine("end", secondary, "success", "fallback_success", fallback_duration);
+                defer self.allocator.free(fallback_ok);
+
+                return try std.mem.concat(self.allocator, u8, &[_][]const u8{ primary_fail, fallback_ok, fallback_result });
+            }
         }
 
         return error.MaxRetriesExceeded;
@@ -662,7 +678,7 @@ test "SSE parser tolerates malformed lines" {
     }
 }
 
-test "provider fallback hint format is observable and stable" {
+test "route event log format is observable and stable" {
     const allocator = std.testing.allocator;
     var cfg = Config{
         .allocator = allocator,
@@ -682,7 +698,7 @@ test "provider fallback hint format is observable and stable" {
     var client = LLMClient.init(allocator, &cfg);
     defer client.deinit();
 
-    const hint = try client.fallbackHint(.kimi, .openai);
-    defer allocator.free(hint);
-    try std.testing.expectEqualStrings("[fallback] primary=kimi fallback=openai\n", hint);
+    const line = try client.routeEventLine("end", .kimi, "success", "primary_success", 42);
+    defer allocator.free(line);
+    try std.testing.expectEqualStrings("route_event phase=end provider=kimi model=kimi-k2-0711-preview result=success reason=primary_success duration_ms=42\n", line);
 }

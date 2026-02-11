@@ -33,16 +33,15 @@
   - R4-T11 第二批回归入口与 CI 对齐：done
 
 ### R5 第一批原子任务（多模型编排启动）
-- [ ] R5-T04（NEXT，BDD）多模型路由日志标准化（机器可解析）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`README.md`、`scripts/`
+- [ ] R5-T05（NEXT，串行）R5 第一批回归入口与 CI 对齐
+  - 依赖：R5-T01~R5-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 路由日志字段固定（phase/provider/model/result/reason/duration_ms）；
-    2) 提供脚本解析样例与 PASS/FAIL 断言；
-    3) 与现有 tool_event 风格一致；
+    1) 定义统一入口执行 R5 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
     4) 三项命令验证通过。
-
-- [ ] R5-T05（串行）R5 第一批回归入口与 CI 对齐
   - 依赖：R5-T01~R5-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -503,11 +502,19 @@
     3) 保持默认兼容（未知 mode 回落 speed，默认配置可继续运行）。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-provider-fallback.sh` 通过。
 
+- [x] R5-T04（BDD）多模型路由日志标准化（机器可解析）
+  - 文件：`src/llm.zig`、`scripts/parse-route-log-sample.sh`
+  - 验收：
+    1) 路由日志字段固定：`phase/provider/model/result/reason/duration_ms`；
+    2) 提供脚本解析样例并输出 PASS/FAIL；
+    3) 与 `tool_event` 风格一致（`route_event key=value ...`）。
+  - 验证：`./scripts/parse-route-log-sample.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R5-T04（NEXT）：多模型路由日志标准化（机器可解析）
+1. 立即执行 R5-T05（NEXT）：R5 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
