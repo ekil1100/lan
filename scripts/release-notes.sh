@@ -17,29 +17,49 @@ fi
 
 mkdir -p "$(dirname "$OUT")"
 
-logs="$(git log --pretty=format:'- %h %s' "$RANGE" 2>/dev/null || true)"
-if [[ -z "$logs" ]]; then
-  logs="- (no commits in range)"
-fi
+# Collect commits and auto-categorize by conventional commit prefix
+feats="" fixes="" docs="" ci="" other=""
 
-cat > "$OUT" <<EOF
-# Release Notes (stub)
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  sha="${line%% *}"
+  msg="${line#* }"
+  entry="- ${sha} ${msg}"
+  case "$msg" in
+    feat*|Feature*|add*|Add*) feats+="${entry}"$'\n' ;;
+    fix*|Fix*|bugfix*) fixes+="${entry}"$'\n' ;;
+    docs*|doc*|Docs*|Doc*) docs+="${entry}"$'\n' ;;
+    ci*|build*|CI*|Build*) ci+="${entry}"$'\n' ;;
+    *) other+="${entry}"$'\n' ;;
+  esac
+done < <(git log --pretty=format:'%h %s' "$RANGE" 2>/dev/null || true)
 
-- Version: ${VERSION}
-- Date: ${RELEASE_DATE}
-- Commit: ${RELEASE_COMMIT}
+section() {
+  local title="$1" content="$2"
+  if [[ -n "$content" ]]; then
+    printf "## %s\n%s\n" "$title" "$content"
+  fi
+}
 
-## New
-- TODO: summarize new features
+{
+  cat <<EOF
+# Release Notes — ${VERSION}
 
-## Fixes
-- TODO: summarize bug fixes
+- **Version**: ${VERSION}
+- **Date**: ${RELEASE_DATE}
+- **Commit**: ${RELEASE_COMMIT}
 
-## Known Issues
-- TODO: list known issues / follow-ups
-
-## Commit Summary (${RANGE})
-${logs}
 EOF
+
+  section "✨ Features" "$feats"
+  section "🐛 Fixes" "$fixes"
+  section "📝 Documentation" "$docs"
+  section "🔧 CI / Build" "$ci"
+  section "📦 Other" "$other"
+
+  if [[ -z "$feats$fixes$docs$ci$other" ]]; then
+    echo "_(no commits in range)_"
+  fi
+} > "$OUT"
 
 echo "[release-notes] PASS output=${OUT} version=${VERSION} date=${RELEASE_DATE} commit=${RELEASE_COMMIT}"
