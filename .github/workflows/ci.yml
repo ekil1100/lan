@@ -50,6 +50,9 @@ jobs:
       - name: R8 Release Experience Suite
         run: make r8-release-experience-regression
 
+      - name: R9 Ops Readiness Suite
+        run: make r9-ops-readiness-regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:
