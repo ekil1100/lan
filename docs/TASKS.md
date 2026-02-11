@@ -46,16 +46,15 @@
   - R5-T05 第一批回归入口与 CI 对齐：done
 
 ### R6 第一批原子任务（发布与生态启动）
-- [ ] R6-T04（NEXT，BDD）升级脚本 v1（保留配置）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/upgrade.sh`、`scripts/`
+- [ ] R6-T05（NEXT，串行）R6 第一批回归入口与 CI 对齐
+  - 依赖：R6-T01~R6-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 支持升级二进制并保留 `~/.config/lan/`；
-    2) 升级前后版本可观测；
-    3) 异常路径给 next-step；
+    1) 定义统一入口执行 R6 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
     4) 三项命令验证通过。
-
-- [ ] R6-T05（串行）R6 第一批回归入口与 CI 对齐
   - 依赖：R6-T01~R6-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -571,11 +570,19 @@
     3) 提供离线 PASS/FAIL 回归断言。
   - 验证：`./scripts/test-install-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R6-T04（BDD）升级脚本 v1（保留配置）
+  - 文件：`scripts/upgrade.sh`、`scripts/test-upgrade-local.sh`
+  - 验收：
+    1) 支持升级二进制并保留配置目录；
+    2) 升级前后版本可观测（before/after）；
+    3) 异常路径输出 `next:` 提示。
+  - 验证：`./scripts/test-upgrade-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R6-T04（NEXT）：升级脚本 v1（保留配置）
+1. 立即执行 R6-T05（NEXT）：R6 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
