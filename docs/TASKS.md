@@ -864,6 +864,13 @@
     2) 预拆 R11 第一批 5 个原子任务（范围+DoD+预计时长+依赖）；
     3) 唯一 NEXT 切换到 R11-T01。
 
+- [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
+  - 文件：`docs/ROADMAP.md`
+  - 结果：
+    1) 增加“剩余≤2任务按小时估时”规则；
+    2) 增加正常/重跑两档示例；
+    3) 口径与 #overview 模板字段对齐（样本/平均/P50/P90）。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
