@@ -72,23 +72,27 @@ zig build
 
 ## UI Preview
 
-```
-┌────────────────────────────────────────────────────────┐
-│  🤖 Lan Agent v0.3                                      │
-├────────────────────────────────────────────────────────┤
-│  Streaming: ON  Tools: ON  Model: kimi-k2-0711-preview │
-├────────────────────────────────────────────────────────┤
-│ Commands                                               │
-│   /help    Show this help                              │
-│   /clear   Clear conversation                          │
-│   ...                                                  │
-├────────────────────────────────────────────────────────┤
+```text
+╔══════════════════════════════════════╗
+║  Lan Agent v0.3                      ║
+╚══════════════════════════════════════╝
 
-▸ Hello, can you help me?
-◆ Hello! I'd be happy to help you with anything you need.
-  Just let me know what you'd like to work on!
+> /help
+Commands:
+  /help   Toggle this help
+  /clear  Clear chat history (keeps system message)
+  /exit   Exit Lan
 
-▸ 
+> /clear
+History cleared (system message kept).
+
+> hello
+[error:config] missing API key
+next: set MOONSHOT_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY,
+      or configure ~/.config/lan/config.json
+
+> /exit
+Thanks for using Lan! Goodbye!
 ```
 
 ## Available Tools
