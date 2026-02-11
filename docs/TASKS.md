@@ -14,15 +14,13 @@
   - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
   - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
 
-- [ ] R3-T16（NEXT，BDD，串行）观测与协议入口汇总（本地/CI）
-  - 依赖：R3-T12~R3-T15
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R3-T17（NEXT）R3 第三批收口与 R4 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义统一入口执行本批协议+观测回归；
-    2) 明确通过/失败判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
+    1) 第三批任务状态可判定（done/remaining）；
+    2) 若 close-ready，产出 R4 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 ## Done
 
@@ -304,11 +302,19 @@
     3) 离线可运行。
   - 验证：`./scripts/test-tool-protocol-structure.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T16（BDD，串行）观测与协议入口汇总（本地/CI）
+  - 文件：`Makefile`、`.github/workflows/ci.yml`、`scripts/test-regression-suite.sh`
+  - 验收：
+    1) 统一入口：`make protocol-observability`（本地）+ `make regression`（总入口）；
+    2) 通过/失败判定明确：exit code + `[protocol-observability-suite] PASS` / FAIL 摘要；
+    3) CI 复用本地入口（新增 `Protocol + Observability Suite` 步骤）。
+  - 验证：`make protocol-observability` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T16（NEXT）：观测与协议入口汇总（本地/CI）
+1. 立即执行 R3-T17（NEXT）：R3 第三批收口与 R4 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

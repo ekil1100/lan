@@ -15,6 +15,11 @@ cases=(
   "./scripts/test-tools-regression.sh"
 )
 
+protocol_observability_cases=(
+  "./scripts/parse-tool-log-sample.sh"
+  "./scripts/test-tool-protocol-structure.sh"
+)
+
 current_case=""
 
 on_error() {
@@ -43,3 +48,17 @@ for c in "${cases[@]}"; do
 done
 
 echo "[regression-suite] PASS"
+
+for c in "${protocol_observability_cases[@]}"; do
+  current_case="$c"
+  echo "[protocol-observability] running: $c"
+
+  if [[ "${REGRESSION_FAIL_AT:-}" == "$c" ]]; then
+    echo "[protocol-observability] injected failure at: $c"
+    false
+  fi
+
+  "$c"
+done
+
+echo "[protocol-observability-suite] PASS"

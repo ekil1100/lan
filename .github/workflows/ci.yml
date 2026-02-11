@@ -32,6 +32,9 @@ jobs:
       - name: Regression Suite
         run: make regression
 
+      - name: Protocol + Observability Suite
+        run: make protocol-observability
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:
