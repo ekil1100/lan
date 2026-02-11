@@ -99,7 +99,24 @@ cat docs/release/beta-feedback-template.md
 
 ---
 
-## 4) 快速判定（可否继续试用）
+## 4) Runbook 命令一键自检（建议先跑）
+
+```bash
+./scripts/check-beta-runbook-commands.sh "$HOME/.local/bin"
+```
+
+期望输出（成功）：
+
+```text
+[runbook-check] SUMMARY pass=<n> total=<m> pass_rate=100%
+[runbook-check] PASS all_cases_passed
+```
+
+失败时会输出：
+- 失败命令清单：`[runbook-check] FAILED_CASES ...`
+- 修复建议：`next: ...`
+
+## 5) 快速判定（可否继续试用）
 
 - 满足以下条件可继续试用：
   1) `verify-beta-candidate` PASS

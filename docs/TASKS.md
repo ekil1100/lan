@@ -980,6 +980,14 @@
     3) README/TASKS 补充人话说明。
   - 验证：`./scripts/test-snapshot-beta-acceptance.sh` 通过。
 
+- [x] R12-C（并行）Beta 试用 runbook 命令自检脚本
+  - 文件：`scripts/check-beta-runbook-commands.sh`、`scripts/test-check-beta-runbook-commands.sh`、`docs/release/beta-trial-runbook.md`
+  - 验收：
+    1) 提供 runbook 关键命令一键自检脚本；
+    2) 输出通过率与失败命令清单；
+    3) 失败输出 `next:` 修复建议。
+  - 验证：`./scripts/test-check-beta-runbook-commands.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
