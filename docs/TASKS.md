@@ -4,12 +4,12 @@
 
 ## In Progress
 
-- [ ] R3-T11（NEXT）R3 第三批原子任务拆解（聚焦 Tool 协议与可观测性）
+- [ ] R3-T12（NEXT）R3 第三批原子任务拆解（聚焦 Tool 协议与可观测性）
   - 预计时长：0.5-1 小时
   - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
     1) 新增 3-5 个可执行任务（范围 + DoD + 预计时长）；
-    2) 任务不与已完成 R3-T01~T10 重叠；
+    2) 任务不与已完成 R3-T01~T11 重叠；
     3) 指定唯一 NEXT。
 
 ## Done
@@ -237,11 +237,20 @@
     3) 唯一 NEXT 已切换到 R3-T11。
   - 说明：本次为文档原子收口提交。
 
+- [x] R3-T11（验收增强）回归入口失败判定补强
+  - 文件：`scripts/test-regression-suite.sh`
+  - 验收：
+    1) 任一子脚本失败即立即非零退出（ERR trap）；
+    2) 输出统一失败摘要：`[regression-suite] FAIL case=<name> exit=<code>`；
+    3) 本地可复现失败演示：
+       - `REGRESSION_FAIL_AT=./scripts/test-commands.sh ./scripts/test-regression-suite.sh` → `exit 1`；
+    4) 正常路径保持 `[regression-suite] PASS`。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T11（NEXT）：R3 第三批原子任务拆解（Tool 协议与可观测性）
+1. 立即执行 R3-T12（NEXT）：R3 第三批原子任务拆解（Tool 协议与可观测性）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
