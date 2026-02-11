@@ -5,6 +5,7 @@ const Tool = @import("llm.zig").Tool;
 const ToolCall = @import("llm.zig").ToolCall;
 const ToolErrorCode = @import("tools.zig").ToolErrorCode;
 const toolError = @import("tools.zig").toolError;
+const toolSuccess = @import("tools.zig").toolSuccess;
 
 pub const ToolHandler = struct {
     name: []const u8,
@@ -325,7 +326,8 @@ fn toolReadFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
             allocator,
         );
     };
-    return content;
+    defer allocator.free(content);
+    return try toolSuccess("read_ok", content, "tool=read_file", allocator);
 }
 
 fn toolWriteFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
@@ -365,7 +367,9 @@ fn toolWriteFile(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
         );
     };
 
-    return try std.fmt.allocPrint(allocator, "Successfully wrote to {s}", .{path});
+    const detail = try std.fmt.allocPrint(allocator, "wrote file: {s}", .{path});
+    defer allocator.free(detail);
+    return try toolSuccess("write_ok", detail, "tool=write_file", allocator);
 }
 
 fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
@@ -475,12 +479,21 @@ fn toolExec(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     }
 
     if (stdout.items.len == 0) {
-        return try std.fmt.allocPrint(allocator, "Command executed (exit code: {d})", .{exit_code});
+        const detail = try std.fmt.allocPrint(allocator, "command executed (exit code: {d})", .{exit_code});
+        defer allocator.free(detail);
+        return try toolSuccess("exec_ok", detail, "tool=exec", allocator);
     }
 
-    return allocator.dupe(u8, stdout.items) catch {
-        return try allocator.dupe(u8, "Error: Failed to allocate output");
+    const stdout_owned = allocator.dupe(u8, stdout.items) catch {
+        return try toolError(
+            .invalid_argument,
+            "failed to allocate exec output",
+            "retry with shorter output",
+            allocator,
+        );
     };
+    defer allocator.free(stdout_owned);
+    return try toolSuccess("exec_ok", stdout_owned, "tool=exec", allocator);
 }
 
 fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
@@ -529,12 +542,19 @@ fn toolListDir(allocator: std.mem.Allocator, args: []const u8) ![]const u8 {
     }
 
     if (result.items.len == 0) {
-        return try allocator.dupe(u8, "Empty directory");
+        return try toolSuccess("list_ok", "empty directory", "tool=list_dir", allocator);
     }
 
-    return allocator.dupe(u8, result.items) catch {
-        return try allocator.dupe(u8, "Error: Failed to allocate output");
+    const listing = allocator.dupe(u8, result.items) catch {
+        return try toolError(
+            .invalid_argument,
+            "failed to allocate list output",
+            "retry with smaller directory",
+            allocator,
+        );
     };
+    defer allocator.free(listing);
+    return try toolSuccess("list_ok", listing, "tool=list_dir", allocator);
 }
 
 fn extractJsonString(json: []const u8, key: []const u8) ?[]const u8 {
@@ -562,23 +582,23 @@ test "tool missing-argument errors are unified for read/write/exec/list" {
 
     const r1 = try toolReadFile(allocator, "{}");
     defer allocator.free(r1);
-    try std.testing.expect(std.mem.indexOf(u8, r1, "[tool_error:missing_argument]") != null);
-    try std.testing.expect(std.mem.indexOf(u8, r1, "next:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r1, "ok=false;code=missing_argument;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r1, "next=") != null);
 
     const r2 = try toolWriteFile(allocator, "{}");
     defer allocator.free(r2);
-    try std.testing.expect(std.mem.indexOf(u8, r2, "[tool_error:missing_argument]") != null);
-    try std.testing.expect(std.mem.indexOf(u8, r2, "next:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r2, "ok=false;code=missing_argument;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r2, "next=") != null);
 
     const r3 = try toolExec(allocator, "{}");
     defer allocator.free(r3);
-    try std.testing.expect(std.mem.indexOf(u8, r3, "[tool_error:missing_argument]") != null);
-    try std.testing.expect(std.mem.indexOf(u8, r3, "next:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r3, "ok=false;code=missing_argument;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r3, "next=") != null);
 
     const r4 = try toolListDir(allocator, "{}");
     defer allocator.free(r4);
-    try std.testing.expect(std.mem.indexOf(u8, r4, "[tool_error:missing_argument]") != null);
-    try std.testing.expect(std.mem.indexOf(u8, r4, "next:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r4, "ok=false;code=missing_argument;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r4, "next=") != null);
 }
 
 test "tool exec non-zero exit returns unified error format" {
@@ -587,8 +607,8 @@ test "tool exec non-zero exit returns unified error format" {
     const out = try toolExec(allocator, "{\"command\":\"sh -c 'exit 7'\"}");
     defer allocator.free(out);
 
-    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_nonzero_exit]") != null);
-    try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "ok=false;code=process_nonzero_exit;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "next=") != null);
 }
 
 test "tool exec non-zero exit includes stderr diagnostic" {
@@ -597,7 +617,7 @@ test "tool exec non-zero exit includes stderr diagnostic" {
     const out = try toolExec(allocator, "{\"command\":\"sh -c 'echo boom 1>&2; exit 7'\"}");
     defer allocator.free(out);
 
-    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_nonzero_exit]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "ok=false;code=process_nonzero_exit;") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "stderr: boom") != null);
 }
 
@@ -607,7 +627,7 @@ test "tool exec timeout has higher priority than stderr/exit-code" {
     const out = try toolExec(allocator, "{\"command\":\"sh -c 'echo slowerr 1>&2; sleep 11; exit 7'\"}");
     defer allocator.free(out);
 
-    try std.testing.expect(std.mem.indexOf(u8, out, "[tool_error:process_timeout]") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "ok=false;code=process_timeout;") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "process_nonzero_exit") == null);
 }
 
@@ -630,21 +650,24 @@ test "tool regression v1 covers read/write/list/exec basic paths" {
     defer allocator.free(write_args);
     const w = try toolWriteFile(allocator, write_args);
     defer allocator.free(w);
-    try std.testing.expect(std.mem.indexOf(u8, w, "Successfully wrote") != null);
+    try std.testing.expect(std.mem.indexOf(u8, w, "ok=true;code=write_ok;") != null);
 
     const read_args = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{file_path});
     defer allocator.free(read_args);
     const r = try toolReadFile(allocator, read_args);
     defer allocator.free(r);
-    try std.testing.expectEqualStrings("hello_tool", r);
+    try std.testing.expect(std.mem.indexOf(u8, r, "ok=true;code=read_ok;") != null);
+    try std.testing.expect(std.mem.indexOf(u8, r, "hello_tool") != null);
 
     const list_args = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{tmp_dir_name});
     defer allocator.free(list_args);
     const l = try toolListDir(allocator, list_args);
     defer allocator.free(l);
+    try std.testing.expect(std.mem.indexOf(u8, l, "ok=true;code=list_ok;") != null);
     try std.testing.expect(std.mem.indexOf(u8, l, "sample.txt") != null);
 
     const e = try toolExec(allocator, "{\"command\":\"echo lan_exec_ok\"}");
     defer allocator.free(e);
+    try std.testing.expect(std.mem.indexOf(u8, e, "ok=true;code=exec_ok;") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "lan_exec_ok") != null);
 }

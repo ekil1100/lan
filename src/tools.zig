@@ -14,8 +14,22 @@ pub const ToolErrorCode = enum {
     directory_read_failed,
 };
 
+pub fn toolResponse(allocator: std.mem.Allocator, ok: bool, code: []const u8, detail: []const u8, next_step: []const u8, meta: []const u8) ![]const u8 {
+    return std.fmt.allocPrint(allocator, "ok={s};code={s};detail={s};next={s};meta={s}", .{
+        if (ok) "true" else "false",
+        code,
+        detail,
+        next_step,
+        meta,
+    });
+}
+
 pub fn toolError(code: ToolErrorCode, detail: []const u8, next_step: []const u8, allocator: std.mem.Allocator) ![]const u8 {
-    return std.fmt.allocPrint(allocator, "[tool_error:{s}] {s} | next: {s}", .{ @tagName(code), detail, next_step });
+    return toolResponse(allocator, false, @tagName(code), detail, next_step, "-");
+}
+
+pub fn toolSuccess(code: []const u8, detail: []const u8, meta: []const u8, allocator: std.mem.Allocator) ![]const u8 {
+    return toolResponse(allocator, true, code, detail, "-", meta);
 }
 
 pub const Tool = struct {
