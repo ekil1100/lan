@@ -1,6 +1,16 @@
 const std = @import("std");
 const skill_manifest = @import("skill_manifest.zig");
 
+const IndexEntry = struct {
+    name: []const u8,
+    version: []const u8,
+    path: []const u8,
+};
+
+const IndexFile = struct {
+    skills: []IndexEntry,
+};
+
 pub fn listSkills(allocator: std.mem.Allocator, config_dir: []const u8) ![]const u8 {
     const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ config_dir, "skills" });
     defer allocator.free(skills_root);
@@ -54,6 +64,7 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
         else => return err,
     };
 
+    try refreshIndexFromRoot(allocator, skills_root);
     return std.fmt.allocPrint(allocator, "Skill removed: name={s}\n", .{skill_name});
 }
 
@@ -101,6 +112,7 @@ pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, s
     defer allocator.free(dst_manifest);
     try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
 
+    try refreshIndexFromRoot(allocator, skills_root);
     return std.fmt.allocPrint(allocator, "Skill installed: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
 }
 
@@ -136,26 +148,63 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     defer allocator.free(dst_manifest);
     try std.fs.cwd().writeFile(.{ .sub_path = dst_manifest, .data = loaded.text });
 
+    try refreshIndexFromRoot(allocator, skills_root);
     return std.fmt.allocPrint(allocator, "Skill updated: name={s} version={s} path={s}\n", .{ loaded.manifest.name, loaded.manifest.version, dst_manifest });
 }
 
-pub fn listSkillsFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) ![]const u8 {
+fn formatNoSkills(allocator: std.mem.Allocator) ![]const u8 {
+    return allocator.dupe(u8,
+        "No skills installed.\nnext: add a valid manifest at ~/.config/lan/skills/<skill-name>/manifest.json then rerun `lan skill list`.\n",
+    );
+}
+
+fn tryListFromIndex(allocator: std.mem.Allocator, skills_root: []const u8) !?[]const u8 {
+    const index_path = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, "index.json" });
+    defer allocator.free(index_path);
+
+    const index_text = std.fs.cwd().readFileAlloc(allocator, index_path, 256 * 1024) catch return null;
+    defer allocator.free(index_text);
+
+    var parsed = std.json.parseFromSlice(IndexFile, allocator, index_text, .{}) catch return null;
+    defer parsed.deinit();
+
+    if (parsed.value.skills.len == 0) {
+        return try formatNoSkills(allocator);
+    }
+
     var out = std.ArrayList(u8).empty;
     defer out.deinit(allocator);
 
+    for (parsed.value.skills) |s| {
+        try out.writer(allocator).print("- name={s} version={s} path={s}\n", .{ s.name, s.version, s.path });
+    }
+
+    const owned = try out.toOwnedSlice(allocator);
+    return @as([]const u8, owned);
+}
+
+fn refreshIndexFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) !void {
+    var entries = std.ArrayList(IndexEntry).empty;
+    defer {
+        for (entries.items) |e| {
+            allocator.free(e.name);
+            allocator.free(e.version);
+            allocator.free(e.path);
+        }
+        entries.deinit(allocator);
+    }
+
     var dir = std.fs.cwd().openDir(skills_root, .{ .iterate = true }) catch |err| switch (err) {
         error.FileNotFound => {
-            return allocator.dupe(u8,
-                "No skills installed.\nnext: create ~/.config/lan/skills/<skill-name>/manifest.json then run `lan skill list` again.\n",
-            );
+            try std.fs.cwd().makePath(skills_root);
+            try writeIndex(allocator, skills_root, &[_]IndexEntry{});
+            return;
         },
         else => return err,
     };
     defer dir.close();
 
     var it = dir.iterate();
-    var count: usize = 0;
-
     while (try it.next()) |entry| {
         if (entry.kind != .directory) continue;
 
@@ -168,17 +217,99 @@ pub fn listSkillsFromRoot(allocator: std.mem.Allocator, skills_root: []const u8)
         var manifest = skill_manifest.parseAndValidate(allocator, text) catch continue;
         defer manifest.deinit(allocator);
 
-        try out.writer(allocator).print("- name={s} version={s} path={s}\n", .{ manifest.name, manifest.version, manifest_path });
-        count += 1;
+        try entries.append(allocator, .{
+            .name = try allocator.dupe(u8, manifest.name),
+            .version = try allocator.dupe(u8, manifest.version),
+            .path = try allocator.dupe(u8, manifest_path),
+        });
     }
 
-    if (count == 0) {
-        return allocator.dupe(u8,
-            "No skills installed.\nnext: add a valid manifest at ~/.config/lan/skills/<skill-name>/manifest.json then rerun `lan skill list`.\n",
-        );
+    try writeIndex(allocator, skills_root, entries.items);
+}
+
+fn writeIndex(allocator: std.mem.Allocator, skills_root: []const u8, skills: []const IndexEntry) !void {
+    const index_path = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, "index.json" });
+    defer allocator.free(index_path);
+
+    var out = std.ArrayList(u8).empty;
+    defer out.deinit(allocator);
+
+    try out.appendSlice(allocator, "{\"skills\":[");
+    for (skills, 0..) |s, i| {
+        if (i != 0) try out.appendSlice(allocator, ",");
+        try out.writer(allocator).print("{{\"name\":\"{s}\",\"version\":\"{s}\",\"path\":\"{s}\"}}", .{ s.name, s.version, s.path });
+    }
+    try out.appendSlice(allocator, "]}");
+
+    const payload = try out.toOwnedSlice(allocator);
+    defer allocator.free(payload);
+
+    try std.fs.cwd().writeFile(.{ .sub_path = index_path, .data = payload });
+}
+
+pub fn listSkillsFromRoot(allocator: std.mem.Allocator, skills_root: []const u8) ![]const u8 {
+    if (try tryListFromIndex(allocator, skills_root)) |from_index| {
+        return from_index;
     }
 
-    return out.toOwnedSlice(allocator);
+    try refreshIndexFromRoot(allocator, skills_root);
+
+    if (try tryListFromIndex(allocator, skills_root)) |from_refreshed_index| {
+        return from_refreshed_index;
+    }
+
+    return try formatNoSkills(allocator);
+}
+
+test "skill list prefers index and falls back to scan when index invalid" {
+    const allocator = std.testing.allocator;
+
+    const tmp_root = try std.fmt.allocPrint(allocator, ".lan_skill_index_pref_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_root);
+    std.fs.cwd().makeDir(tmp_root) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_root) catch {};
+
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "installed" });
+    defer allocator.free(skills_root);
+
+    const source_dir = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "source" });
+    defer allocator.free(source_dir);
+    try std.fs.cwd().makePath(source_dir);
+
+    const source_manifest = try std.fs.path.join(allocator, &[_][]const u8{ source_dir, "manifest.json" });
+    defer allocator.free(source_manifest);
+    const manifest_text =
+        \\{
+        \\  "name": "demo-skill",
+        \\  "version": "1.0.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+    try std.fs.cwd().writeFile(.{ .sub_path = source_manifest, .data = manifest_text });
+
+    const add_out = try addSkillFromRoot(allocator, skills_root, source_dir);
+    defer allocator.free(add_out);
+
+    const skill_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, "demo-skill" });
+    defer allocator.free(skill_dir);
+    try std.fs.cwd().deleteTree(skill_dir);
+
+    const from_index = try listSkillsFromRoot(allocator, skills_root);
+    defer allocator.free(from_index);
+    try std.testing.expect(std.mem.indexOf(u8, from_index, "name=demo-skill") != null);
+
+    const index_path = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, "index.json" });
+    defer allocator.free(index_path);
+    try std.fs.cwd().writeFile(.{ .sub_path = index_path, .data = "{" });
+
+    const fallback = try listSkillsFromRoot(allocator, skills_root);
+    defer allocator.free(fallback);
+    try std.testing.expect(std.mem.indexOf(u8, fallback, "No skills installed") != null);
 }
 
 test "skill list returns actionable hint when empty" {

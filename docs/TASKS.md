@@ -24,16 +24,7 @@
   - R4-T05.B CI 复用本地回归入口：done
 
 ### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T09（NEXT，TDD）Skill 索引文件落地（metadata snapshot）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/skills.zig`、`~/.config/lan/skills/index.json`（逻辑）
-  - DoD：
-    1) add/remove/update 后自动刷新 index；
-    2) list 优先读取 index，异常时回退扫描目录；
-    3) 离线可运行；
-    4) 三项命令验证通过。
-
-- [ ] R4-T10（BDD）Skill 权限声明显示与提示
+- [ ] R4-T10（NEXT，BDD）Skill 权限声明显示与提示
   - 预计时长：1-2 小时
   - 改动范围：`src/main.zig`、`src/skills.zig`、`README.md`
   - DoD：
@@ -440,11 +431,19 @@
     3) 无目标 skill 时返回 `next:` 提示。
   - 验证：`./scripts/test-skill-update-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T09（TDD）Skill 索引文件落地（metadata snapshot）
+  - 文件：`src/skills.zig`
+  - 验收：
+    1) add/remove/update 成功后自动刷新 `~/.config/lan/skills/index.json`；
+    2) `lan skill list` 优先读取 index，index 异常时自动回退目录扫描并重建；
+    3) 离线可运行。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-remove-local.sh` / `scripts/test-skill-update-local.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T09（NEXT）：Skill 索引文件落地（metadata snapshot）
+1. 立即执行 R4-T10（NEXT）：Skill 权限声明显示与提示
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
