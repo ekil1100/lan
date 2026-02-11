@@ -124,15 +124,13 @@
   - R11-T05 第一批回归入口与 CI 对齐：done
 
 ### R12 第一批原子任务（Beta 小规模试用执行）
-- [ ] R12-T05（NEXT，串行）R12 第一批回归入口与 CI 对齐
-  - 依赖：R12-T01~R12-T04（串行收口）
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R12-T06（NEXT）R12 第一批收口与 R13 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义统一入口执行 R12 第一批回归；
-    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
-    3) CI 复用本地入口命令；
-    4) 三项命令验证通过。
+    1) 判定 R12 第一批状态（done/remaining）；
+    2) 若 close-ready，产出 R13 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 
 ## Done
@@ -956,6 +954,14 @@
     2) 风险项包含 owner/mitigation action/due time；
     3) 与试用汇总脚本口径一致（pass_rate/failed_items/pending_items）。
 
+- [x] R12-T05（串行）R12 第一批回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r12-beta-trial-execution-suite.sh`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) 本地统一入口：`make r12-beta-trial-execution-regression`（覆盖 R12-T01~R12-T04）；
+    2) PASS/FAIL 判定：exit code + `[r12-beta-trial-execution-suite] PASS/FAIL`；
+    3) CI 复用同一入口命令（`make r12-beta-trial-execution-regression`）。
+  - 验证：`make r12-beta-trial-execution-regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -974,7 +980,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R12-T05（NEXT）：R12 第一批回归入口与 CI 对齐
+1. 立即执行 R12-T06（NEXT）：R12 第一批收口与 R13 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
