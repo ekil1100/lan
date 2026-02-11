@@ -1007,6 +1007,14 @@
     2) 预拆 R13 第一批 4 个原子任务（含目标/DoD/预计时长/依赖）；
     3) 唯一 NEXT 切换到 R13-T01。
 
+- [x] R13-T02（并行）Go/No-Go 模板校验器（字段完整性）
+  - 文件：`scripts/validate-beta-go-no-go.sh`、`scripts/test-validate-beta-go-no-go.sh`、`docs/release/beta-go-no-go-template.md`
+  - 验收：
+    1) 校验 owner/mitigation/due/pass_rate 等关键字段；
+    2) 缺失时非0退出并输出 next-step；
+    3) 文档补一条可复现命令。
+  - 验证：`./scripts/test-validate-beta-go-no-go.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：

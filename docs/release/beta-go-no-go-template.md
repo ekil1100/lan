@@ -39,6 +39,12 @@
 ./scripts/summarize-beta-trial.sh <tracker-file-or-dir> dist/beta-trial-summary
 ```
 
+模板字段完整性校验：
+
+```bash
+./scripts/validate-beta-go-no-go.sh <go-no-go-report.md>
+```
+
 - Summary JSON 路径：`<dist/beta-trial-summary/summary-*.json>`
 - pass_rate：`<xx%>`
 - failed_items：`<...>`
