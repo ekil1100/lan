@@ -543,3 +543,41 @@ test "tool missing-argument errors are unified for read/write/exec/list" {
     try std.testing.expect(std.mem.indexOf(u8, r4, "[tool_error:missing_argument]") != null);
     try std.testing.expect(std.mem.indexOf(u8, r4, "next:") != null);
 }
+
+test "tool regression v1 covers read/write/list/exec basic paths" {
+    const allocator = std.testing.allocator;
+
+    const tmp_dir_name = try std.fmt.allocPrint(allocator, ".lan_tool_regression_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_dir_name);
+
+    std.fs.cwd().makeDir(tmp_dir_name) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_dir_name) catch {};
+
+    const file_path = try std.fmt.allocPrint(allocator, "{s}/sample.txt", .{tmp_dir_name});
+    defer allocator.free(file_path);
+
+    const write_args = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\",\"content\":\"hello_tool\"}}", .{file_path});
+    defer allocator.free(write_args);
+    const w = try toolWriteFile(allocator, write_args);
+    defer allocator.free(w);
+    try std.testing.expect(std.mem.indexOf(u8, w, "Successfully wrote") != null);
+
+    const read_args = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{file_path});
+    defer allocator.free(read_args);
+    const r = try toolReadFile(allocator, read_args);
+    defer allocator.free(r);
+    try std.testing.expectEqualStrings("hello_tool", r);
+
+    const list_args = try std.fmt.allocPrint(allocator, "{{\"path\":\"{s}\"}}", .{tmp_dir_name});
+    defer allocator.free(list_args);
+    const l = try toolListDir(allocator, list_args);
+    defer allocator.free(l);
+    try std.testing.expect(std.mem.indexOf(u8, l, "sample.txt") != null);
+
+    const e = try toolExec(allocator, "{\"command\":\"echo lan_exec_ok\"}");
+    defer allocator.free(e);
+    try std.testing.expect(std.mem.indexOf(u8, e, "lan_exec_ok") != null);
+}

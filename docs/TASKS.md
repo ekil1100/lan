@@ -4,14 +4,13 @@
 
 ## In Progress
 
-- [ ] R3-T05（NEXT，TDD）工具行为回归脚本 v1（read/write/list/exec）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/`
+- [ ] R3-T06（NEXT）R3 第二批原子任务拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 新增可重复脚本覆盖四个内置工具基础路径；
-    2) 输出 PASS/FAIL，适合本地/CI 批跑；
-    3) 脚本不依赖在线 API key；
-    4) 三项命令验证通过。
+    1) 新增 3-5 个可执行原子任务；
+    2) 每项包含范围与 DoD；
+    3) 指定唯一 NEXT。
 
 ## Done
 
@@ -193,11 +192,19 @@
     3) 可复现脚本：`./scripts/repro-missing-args.sh`。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/repro-missing-args.sh` 通过。
 
+- [x] R3-T05（TDD）工具行为回归脚本 v1（read/write/list/exec）
+  - 文件：`src/agent.zig`、`scripts/test-tools-regression.sh`
+  - 验收：
+    1) 覆盖 read/write/list/exec 四工具基础成功路径；
+    2) 脚本输出 PASS/FAIL，适合本地/CI 批跑；
+    3) 脚本不依赖在线 API key。
+  - 验证：`./scripts/test-tools-regression.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T05（NEXT）：工具行为回归脚本 v1（read/write/list/exec）
+1. 立即执行 R3-T06（NEXT）：R3 第二批原子任务拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
