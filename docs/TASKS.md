@@ -434,6 +434,14 @@
     2) 已产出 R4 第二批 5 个原子任务（R4-T07~R4-T11）；
     3) 唯一 NEXT 已切换到 R4-T07。
 
+- [x] R4-2.A（并行）skill remove 异常路径补强（权限/不存在/非法名）
+  - 文件：`src/skills.zig`、`scripts/test-skill-remove-abnormal.sh`
+  - 验收：
+    1) 覆盖 3 类异常路径并输出 next-step（not found / invalid name / permission）；
+    2) 新增离线 PASS/FAIL 回归脚本；
+    3) 保持 add/list/remove 状态一致性基线校验。
+  - 验证：`./scripts/test-skill-remove-abnormal.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 

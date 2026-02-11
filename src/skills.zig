@@ -20,6 +20,13 @@ pub fn removeSkill(allocator: std.mem.Allocator, config_dir: []const u8, skill_n
 }
 
 pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, skill_name: []const u8) ![]const u8 {
+    if (skill_name.len == 0 or std.mem.indexOf(u8, skill_name, "/") != null or std.mem.eql(u8, skill_name, ".") or std.mem.eql(u8, skill_name, "..")) {
+        return std.fmt.allocPrint(allocator,
+            "Skill remove failed: invalid name ({s})\nnext: use a plain skill name (e.g. demo-skill) and retry `lan skill remove <name>`.\n",
+            .{skill_name},
+        );
+    }
+
     const skill_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, skill_name });
     defer allocator.free(skill_dir);
 
@@ -263,6 +270,15 @@ test "skill remove shows hint when skill not found" {
     const out = try removeSkillFromRoot(allocator, skills_root, "missing-skill");
     defer allocator.free(out);
     try std.testing.expect(std.mem.indexOf(u8, out, "Skill remove failed") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
+}
+
+test "skill remove shows hint when skill name is invalid" {
+    const allocator = std.testing.allocator;
+
+    const out = try removeSkillFromRoot(allocator, ".", "../bad");
+    defer allocator.free(out);
+    try std.testing.expect(std.mem.indexOf(u8, out, "invalid name") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
 }
 
