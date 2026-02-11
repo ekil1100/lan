@@ -17,7 +17,9 @@ echo "$out" | grep -q "\[beta-snapshot\] PASS" || { echo "[beta-snapshot-test] F
 snap_dir="$(echo "$out" | sed -n 's/^\[beta-snapshot\] PASS out=\([^ ]*\).*/\1/p')"
 [[ -f "$snap_dir/results.jsonl" ]] || { echo "[beta-snapshot-test] FAIL reason=results-jsonl-missing"; exit 1; }
 [[ -f "$snap_dir/summary.txt" ]] || { echo "[beta-snapshot-test] FAIL reason=summary-missing"; exit 1; }
+[[ -f "$snap_dir/report-mapping.json" ]] || { echo "[beta-snapshot-test] FAIL reason=report-mapping-missing"; exit 1; }
 grep -q '"case":"checklist"' "$snap_dir/results.jsonl" || { echo "[beta-snapshot-test] FAIL reason=case-missing"; exit 1; }
 grep -q 'Human Summary' "$snap_dir/summary.txt" || { echo "[beta-snapshot-test] FAIL reason=human-summary-missing"; exit 1; }
+grep -q '"trial_ready":"true"' "$snap_dir/report-mapping.json" || { echo "[beta-snapshot-test] FAIL reason=mapping-trial-ready-missing"; exit 1; }
 
 echo "[beta-snapshot-test] PASS reason=snapshot-machine-human-output-covered"

@@ -46,6 +46,15 @@ run_case "acceptance" "./scripts/run-beta-acceptance.sh '$PKG_PATH' '$TARGET_DIR
 pass_count="$(grep -c '"status":"PASS"' "$run_dir/results.jsonl" || true)"
 fail_count="$(grep -c '"status":"FAIL"' "$run_dir/results.jsonl" || true)"
 
+# compatibility mapping to acceptance report fields
+pass_items="$(grep '"status":"PASS"' "$run_dir/results.jsonl" | sed -E 's/.*"case":"([^"]+)".*/\1/' | paste -sd ',' - || true)"
+fail_items="$(grep '"status":"FAIL"' "$run_dir/results.jsonl" | sed -E 's/.*"case":"([^"]+)".*/\1/' | paste -sd ',' - || true)"
+next_items="$(grep '"status":"FAIL"' "$run_dir/results.jsonl" | sed -E 's/.*"case":"([^"]+)".*"next":"([^"]+)".*/\1=>\2/' | paste -sd '|' - || true)"
+
+cat > "$run_dir/report-mapping.json" <<EOF
+{"candidate":{"package":"$PKG_PATH","snapshot_ts":"$ts"},"pass_items":"${pass_items:--}","fail_items":"${fail_items:--}","next_steps":"${next_items:--}","trial_ready":"$([[ "$fail_count" -eq 0 ]] && echo true || echo false)"}
+EOF
+
 summary="$run_dir/summary.txt"
 {
   echo "beta_snapshot_ts=$ts"
@@ -54,6 +63,7 @@ summary="$run_dir/summary.txt"
   echo "pass_count=$pass_count"
   echo "fail_count=$fail_count"
   echo "report=$run_dir/acceptance-report.md"
+  echo "report_mapping=$run_dir/report-mapping.json"
   echo ""
   echo "Human Summary"
   echo "- PASS: $pass_count"

@@ -80,7 +80,18 @@
 
 ---
 
-## 7) 回写任务状态（建议）
+## 7) 快照字段对齐（与 `snapshot-beta-acceptance`）
+
+快照产物与模板字段映射：
+- `results.jsonl`（case/status/next/log）
+  - → 3) 通过项、4) 失败项、5) next-step
+- `summary.txt`（Human Summary + 统计）
+  - → 6) 是否可试用（结论草稿）
+- `report-mapping.json`（兼容映射）
+  - `pass_items` / `fail_items` / `next_steps` / `trial_ready`
+  - → 模板 3/4/5/6 段可直接填充
+
+## 8) 回写任务状态（建议）
 
 - 若可试用：更新 `docs/TASKS.md` 对应阶段为 ready-for-beta-trial
 - 若不可试用：把失败项拆成原子任务，并指定唯一 NEXT

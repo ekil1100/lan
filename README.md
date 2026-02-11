@@ -206,6 +206,11 @@ Output contract:
 - success: `[beta-acceptance] PASS ...`
 - fail: `[beta-acceptance] FAIL case=... ...` + `next: ...`
 
+Snapshot/report alignment (human + machine):
+- Run `./scripts/snapshot-beta-acceptance.sh <artifact.tar.gz> [target-dir] [out-dir]`
+- Outputs include `results.jsonl`, `summary.txt`, and `report-mapping.json`
+- These map directly to `docs/release/beta-acceptance-report-template.md`
+
 ## Regression Entrypoints (Local + CI)
 
 Unified commands:

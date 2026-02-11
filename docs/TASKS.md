@@ -972,6 +972,14 @@
     3) 更新验收脚本断言并通过。
   - 验证：`./scripts/test-post-install-health.sh` / `./scripts/post-install-health.sh ./zig-out/bin/lan` 通过。
 
+- [x] R12-B（并行）Beta 验收快照与报告模板对齐检查
+  - 文件：`scripts/snapshot-beta-acceptance.sh`、`scripts/test-snapshot-beta-acceptance.sh`、`docs/release/beta-acceptance-report-template.md`、`README.md`
+  - 验收：
+    1) 快照字段与报告模板逐项对齐；
+    2) 缺失字段通过 `report-mapping.json` 补齐兼容映射；
+    3) README/TASKS 补充人话说明。
+  - 验证：`./scripts/test-snapshot-beta-acceptance.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
