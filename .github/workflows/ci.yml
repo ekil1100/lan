@@ -38,6 +38,9 @@ jobs:
       - name: R4 Skill Suite
         run: make r4-skill-regression
 
+      - name: R5 Routing Suite
+        run: make r5-routing-regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:
