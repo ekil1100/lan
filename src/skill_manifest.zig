@@ -37,6 +37,8 @@ pub const ValidationError = error{
     EmptyName,
     EmptyVersion,
     EmptyEntry,
+    InvalidVersionFormat,
+    InvalidEntryPath,
 };
 
 pub fn parseAndValidate(allocator: std.mem.Allocator, json_text: []const u8) !Manifest {
@@ -54,6 +56,8 @@ pub fn parseAndValidate(allocator: std.mem.Allocator, json_text: []const u8) !Ma
     if (name.len == 0) return ValidationError.EmptyName;
     if (version.len == 0) return ValidationError.EmptyVersion;
     if (entry.len == 0) return ValidationError.EmptyEntry;
+    if (!isValidSemver(version)) return ValidationError.InvalidVersionFormat;
+    if (!isSafeEntryPath(entry)) return ValidationError.InvalidEntryPath;
 
     var manifest = Manifest{
         .name = try allocator.dupe(u8, name),
@@ -72,6 +76,37 @@ pub fn parseAndValidate(allocator: std.mem.Allocator, json_text: []const u8) !Ma
     }
 
     return manifest;
+}
+
+fn isValidSemver(version: []const u8) bool {
+    // Minimal semver: <major>.<minor>.<patch>, numeric only.
+    var parts: usize = 0;
+    var start: usize = 0;
+
+    while (start <= version.len) {
+        const rel_dot = std.mem.indexOfScalar(u8, version[start..], '.') orelse (version.len - start);
+        const end = start + rel_dot;
+        const segment = version[start..end];
+
+        if (segment.len == 0) return false;
+        for (segment) |c| {
+            if (c < '0' or c > '9') return false;
+        }
+
+        parts += 1;
+        if (end == version.len) break;
+        start = end + 1;
+    }
+
+    return parts == 3;
+}
+
+fn isSafeEntryPath(entry: []const u8) bool {
+    if (entry.len == 0) return false;
+    if (std.mem.startsWith(u8, entry, "/")) return false;
+    if (std.mem.indexOf(u8, entry, "..") != null) return false;
+    if (std.mem.indexOfScalar(u8, entry, '\\') != null) return false;
+    return true;
 }
 
 test "skill manifest schema v1 accepts valid sample" {
@@ -109,4 +144,34 @@ test "skill manifest schema v1 rejects invalid sample" {
     ;
 
     try std.testing.expectError(ValidationError.EmptyName, parseAndValidate(allocator, invalid_sample));
+}
+
+test "skill manifest schema v1 rejects invalid version format" {
+    const allocator = std.testing.allocator;
+    const invalid_version =
+        \\{
+        \\  "name": "example-skill",
+        \\  "version": "1.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+
+    try std.testing.expectError(ValidationError.InvalidVersionFormat, parseAndValidate(allocator, invalid_version));
+}
+
+test "skill manifest schema v1 rejects unsafe entry path" {
+    const allocator = std.testing.allocator;
+    const invalid_entry =
+        \\{
+        \\  "name": "example-skill",
+        \\  "version": "1.0.0",
+        \\  "entry": "../run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+
+    try std.testing.expectError(ValidationError.InvalidEntryPath, parseAndValidate(allocator, invalid_entry));
 }

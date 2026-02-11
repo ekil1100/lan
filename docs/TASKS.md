@@ -24,16 +24,7 @@
   - R4-T05.B CI 复用本地回归入口：done
 
 ### R4 第二批原子任务（Skill Runtime v1 扩展）
-- [ ] R4-T07（NEXT，TDD）Skill manifest 字段边界校验补强
-  - 预计时长：1-2 小时
-  - 改动范围：`src/skill_manifest.zig`、`docs/skills/`
-  - DoD：
-    1) 增加版本号/entry 路径格式边界校验；
-    2) 补 2 组非法样例与测试；
-    3) 不影响现有合法样例；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R4-T08（BDD）`lan skill update`（本地覆盖安装）最小闭环
+- [ ] R4-T08（NEXT，BDD）`lan skill update`（本地覆盖安装）最小闭环
   - 预计时长：1-2 小时
   - 改动范围：`src/main.zig`、`src/skills.zig`、`scripts/`
   - DoD：
@@ -442,11 +433,19 @@
     3) 保持 add/list/remove 状态一致性基线校验。
   - 验证：`./scripts/test-skill-remove-abnormal.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T07（TDD）Skill manifest 字段边界校验补强
+  - 文件：`src/skill_manifest.zig`、`docs/skills/manifest.invalid.version.json`、`docs/skills/manifest.invalid.entry.json`
+  - 验收：
+    1) 增加版本号与 entry 路径边界校验（InvalidVersionFormat / InvalidEntryPath）；
+    2) 补充 2 组非法样例与测试；
+    3) 现有合法样例保持通过。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T07（NEXT）：Skill manifest 字段边界校验补强
+1. 立即执行 R4-T08（NEXT）：`lan skill update`（本地覆盖安装）最小闭环
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

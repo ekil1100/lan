@@ -1,0 +1,7 @@
+{
+  "name": "example-skill",
+  "version": "1.0.0",
+  "entry": "../run.sh",
+  "tools": ["read"],
+  "permissions": ["workspace.read"]
+}
