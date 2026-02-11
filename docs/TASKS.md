@@ -168,36 +168,48 @@
   - R15-T03 README Beta 更新：done
   - R15-T04 release-notes 自动分类：done
 
-### R16 第一批原子任务（待拆解）
-- [ ] R16-T00（NEXT）R16 第一批任务拆解
+### R16 第一批收口结论（R16-T04）
+- **收口判据**：
+  1) R16-T00~R16-T03 全部达到 DoD；
+  2) 跨平台 release matrix + CI lint + 安装验证 + 贡献文档全部就绪。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R16-T00 跨平台 release matrix：done
+  - R16-T01 CI lint/format 检查：done
+  - R16-T02 安装验证脚本：done
+  - R16-T03 CONTRIBUTING.md 更新：done
+
+### R17 第一批原子任务（Beta 质量强化）
+- [ ] R17-T01（NEXT，并行）端到端 release 打包验证（本地模拟 tag → package → install → health）
   - 预计时长：1-2 小时
-  - 改动范围：`.github/workflows/release.yml`
+  - 改动范围：`scripts/test-e2e-release.sh`
   - DoD：
-    1) release workflow 增加 matrix 构建（至少 ubuntu-latest + macos-latest）；
-    2) 每个平台产出独立 artifact 并上传到同一 GitHub Release；
-    3) workflow 语法校验通过。
+    1) 模拟 tag 触发的完整链路（package → install → post-install-health）；
+    2) 输出 PASS/FAIL；
+    3) 可离线执行。
 
-- [ ] R15-T02（并行）Beta 反馈收集模板与 issue template
+- [ ] R17-T02（并行）CI 增加跨平台 smoke（macos runner）
+  - 预计时长：1 小时
+  - 改动范围：`.github/workflows/ci.yml`
+  - DoD：
+    1) CI 增加 macos-latest runner（至少 build + test + smoke）；
+    2) 保持现有 ubuntu 步骤不变。
+
+- [ ] R17-T03（并行）Beta known-issues 文档（从已知限制提取）
   - 预计时长：0.5-1 小时
-  - 改动范围：`.github/ISSUE_TEMPLATE/`、`docs/`
+  - 改动范围：`docs/release/known-issues.md`
   - DoD：
-    1) 新增 bug report 和 feature request issue template；
-    2) 包含环境信息/复现步骤/严重等级字段。
+    1) 从 CHANGELOG/announcement 已知限制提取并结构化；
+    2) 每项含状态/workaround/跟踪 issue。
 
-- [ ] R15-T03（串行，依赖 T02）README Beta 文档更新
+- [ ] R17-T04（串行收口）R17 第一批回归入口与 CI 对齐
+  - 依赖：R17-T01~R17-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`README.md`
+  - 改动范围：`Makefile`、`scripts/test-r17-*.sh`、`docs/TASKS.md`
   - DoD：
-    1) 增加 Beta 状态徽章；
-    2) 安装说明更新为 release 下载方式；
-    3) 反馈渠道入口。
-
-- [ ] R15-T04（并行）release-notes.sh 增强为自动分类
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/release-notes.sh`、`scripts/test-release-notes.sh`
-  - DoD：
-    1) 自动从 commit message 提取 feat/fix/docs/ci 分类；
-    2) 生成结构化 release notes；
+    1) 新增统一入口；
+    2) 输出统一 PASS/FAIL；
+    3) TASKS 写清依赖（T01~T03 → T04）。
     3) 保持向后兼容（同样参数接口）。
 
 
@@ -1096,6 +1108,26 @@
   - 文件：`scripts/release-notes.sh`、`scripts/test-release-notes.sh`
   - 验收：自动分类 feat/fix/docs/ci/other；向后兼容参数接口。
 
+- [x] R16-T00（串行）跨平台 release matrix 构建
+  - 文件：`.github/workflows/release.yml`
+  - 验收：matrix ubuntu+macos；独立 artifact 上传；publish job 合并发布。
+
+- [x] R16-T01（并行）CI 增加 lint/format 检查
+  - 文件：`.github/workflows/ci.yml`、`src/skills.zig`、`src/tui.zig`
+  - 验收：CI `zig fmt --check src/` 步骤通过；修复已有格式问题。
+
+- [x] R16-T02（串行）Beta 用户安装验证脚本
+  - 文件：`scripts/verify-install.sh`
+  - 验收：从 GitHub Release 下载/解压/验证版本/安装；输出 PASS/FAIL。
+
+- [x] R16-T03（并行）CONTRIBUTING.md 补充开发流程
+  - 文件：`CONTRIBUTING.md`
+  - 验收：commit convention + PR flow + 本地测试命令 + 回归 make targets。
+
+- [x] R16-T04（收口）R16 收口与 R17 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R16 close-ready；R17 第一批 4 个原子任务已拆；NEXT → R17-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1129,7 +1161,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R16-T00（NEXT）：R16 第一批任务拆解
+1. 立即执行 R17-T01（NEXT）：端到端 release 打包验证
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
