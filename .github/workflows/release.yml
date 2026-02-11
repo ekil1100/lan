@@ -1,0 +1,51 @@
+name: CD Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.15.2
+
+      - name: Build
+        run: zig build
+
+      - name: Test
+        run: zig build test
+
+      - name: Smoke
+        run: make smoke
+
+      - name: Package release artifact
+        run: make package-release
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ github.ref_name }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          RELEASE_DATE="$(git show -s --format=%cI "$GITHUB_SHA")"
+          ./scripts/release-notes.sh "HEAD~20..HEAD" dist/release-notes.md "$VERSION" "$RELEASE_DATE" "$RELEASE_COMMIT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          body_path: dist/release-notes.md
+          files: |
+            dist/*.tar.gz
+            dist/*.sha256
+            dist/*.manifest
