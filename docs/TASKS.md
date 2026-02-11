@@ -84,35 +84,66 @@
   - R8-T04 release notes stub：done
   - R8-T05 第一批回归入口与 CI 对齐：done
 
-### R9 第一批原子任务（发布后运维体验）
-- [ ] R9-T06（NEXT）R9 第一批收口与 R10 启动拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R9 第一批收口结论（R9-T06）
+- **收口判据**：
+  1) R9-T01~R9-T05 全部达到 DoD 且有离线回归；
+  2) 本地与 CI 复用同一回归入口（无双维护）；
+  3) 预检/发布说明/诊断包/故障清单形成最小运维闭环。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R9-T01 预检 JSON+文本双通道：done
+  - R9-T02 发布说明模板参数化：done
+  - R9-T03 离线诊断打包 support bundle：done
+  - R9-T04 运维故障清单：done
+  - R9-T05 第一批回归入口与 CI 对齐：done
+
+### R10 第一批原子任务（Beta 准入落地）
+- [ ] R10-T01（NEXT，并行）Beta 准入清单执行脚本（checklist runner）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/check-beta-readiness.sh`、`scripts/`
   - DoD：
-    1) 判定 R9 第一批状态（done/remaining）；
-    2) 若 close-ready，产出 R10 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
-  - 依赖：R8-T01~R8-T04
+    1) 聚合执行 Beta 清单中的关键验收命令；
+    2) 输出 PASS/FAIL + 分项结果；
+    3) 支持离线执行；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R10-T02（并行，BDD）Beta 证据索引生成（evidence index）
+  - 依赖：R10-T01
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/generate-beta-evidence-index.sh`、`docs/release/`
+  - DoD：
+    1) 生成证据索引（命令、输出摘要、证据路径）；
+    2) 与 beta-entry-checklist 一一对应；
+    3) 离线可运行；
+    4) 三项命令验证通过。
+
+- [ ] R10-T03（并行，TDD）发布健康检查脚本（post-install health）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/post-install-health.sh`、`scripts/`
+  - DoD：
+    1) 检查 binary/config/log 最小可用性；
+    2) 输出结构化 PASS/FAIL + next-step；
+    3) 与故障清单口径一致；
+    4) 三项命令验证通过。
+
+- [ ] R10-T04（并行，BDD）Beta 运维手册（runbook）最小版
+  - 依赖：R10-T02,R10-T03
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/release/beta-runbook.md`、`README.md`
+  - DoD：
+    1) 覆盖准入检查、回滚、常见故障处理；
+    2) 每项附对应脚本/证据路径；
+    3) 与现有脚本输出一致；
+    4) 三项命令验证通过。
+
+- [ ] R10-T05（串行）R10 第一批回归入口与 CI 对齐
+  - 依赖：R10-T01~R10-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 定义统一入口执行 R8 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义统一入口执行 R6 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
-  - 依赖：R5-T01~R5-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义统一入口执行 R5 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
+    1) 定义统一入口执行 R10 第一批回归；
+    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
+    3) CI 复用本地入口命令；
     4) 三项命令验证通过。
 
 ## Done
@@ -770,6 +801,13 @@
     3) CI 复用同一入口命令（`make r9-ops-readiness-regression`）。
   - 验证：`make r9-ops-readiness-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R9-T06（收口）R9 第一批收口与 R10 启动拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已给出 R9 第一批 done/remaining 收口结论（close-ready）；
+    2) 预拆 R10 第一批 5 个原子任务（含依赖与串并行关系）；
+    3) 唯一 NEXT 切换到 R10-T01。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -781,7 +819,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R9-T06（NEXT）：R9 第一批收口与 R10 启动拆解
+1. 立即执行 R10-T01（NEXT）：Beta 准入清单执行脚本（checklist runner）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
