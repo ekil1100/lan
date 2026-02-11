@@ -14,16 +14,7 @@
   - R3-T16 观测与协议入口汇总（本地/CI）：done
 
 ### R4 第一批原子任务（Skill Runtime v1 启动）
-- [ ] R4-T03（NEXT，BDD）`lan skill add` 本地目录安装（无网络）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/`、`scripts/`
-  - DoD：
-    1) 支持从本地目录安装 skill；
-    2) 安装前做 manifest 校验，失败给 next-step；
-    3) 提供可复现脚本（PASS/FAIL）；
-    4) 三项命令验证通过。
-
-- [ ] R4-T04（BDD）`lan skill remove` 卸载与状态一致性
+- [ ] R4-T04（NEXT，BDD）`lan skill remove` 卸载与状态一致性
   - 预计时长：1-2 小时
   - 改动范围：`src/`、`scripts/`
   - DoD：
@@ -368,11 +359,19 @@
     3) 全流程离线可运行。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./zig-out/bin/lan skill list` 通过。
 
+- [x] R4-T03（BDD）`lan skill add` 本地目录安装（无网络）
+  - 文件：`src/main.zig`、`src/skills.zig`、`scripts/test-skill-add-local.sh`
+  - 验收：
+    1) 支持 `lan skill add <local-dir>` 本地安装；
+    2) 安装前执行 manifest 校验，失败返回 `next:` 提示；
+    3) 提供可复现 PASS/FAIL 脚本。
+  - 验证：`./scripts/test-skill-add-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T03（NEXT）：`lan skill add` 本地目录安装（无网络）
+1. 立即执行 R4-T04（NEXT）：`lan skill remove` 卸载与状态一致性
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

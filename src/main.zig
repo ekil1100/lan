@@ -27,6 +27,27 @@ pub fn main() !void {
         return;
     }
 
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "skill") and std.mem.eql(u8, args[2], "add")) {
+        var buf: [4096]u8 = undefined;
+        var writer = std.fs.File.stdout().writer(&buf);
+
+        if (args.len < 4) {
+            try writer.interface.print("Skill install failed: missing path\nnext: run `lan skill add <local-dir>`\n", .{});
+            try writer.interface.flush();
+            return;
+        }
+
+        var config = try Config.load(allocator);
+        defer config.deinit();
+
+        const output = try skills.addSkill(allocator, config.config_dir, args[3]);
+        defer allocator.free(output);
+
+        try writer.interface.print("{s}", .{output});
+        try writer.interface.flush();
+        return;
+    }
+
     var config = try Config.load(allocator);
     defer config.deinit();
 
