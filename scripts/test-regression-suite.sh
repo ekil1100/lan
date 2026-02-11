@@ -18,6 +18,7 @@ cases=(
 protocol_observability_cases=(
   "./scripts/parse-tool-log-sample.sh"
   "./scripts/test-tool-protocol-structure.sh"
+  "./scripts/check-tool-protocol-compat.sh"
 )
 
 current_case=""

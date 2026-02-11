@@ -362,6 +362,14 @@
     2) 已产出 R4 第一批 5 个原子任务（R4-T01~R4-T05）；
     3) 唯一 NEXT 已切换到 R4-T01。
 
+- [x] R4-1.A（并行）Tool 协议字段兼容性检查脚本
+  - 文件：`scripts/check-tool-protocol-compat.sh`、`Makefile`、`scripts/test-regression-suite.sh`
+  - 验收：
+    1) 新增离线检查脚本，校验 v1 字段完整性 + 兼容约束；
+    2) 输出 PASS/FAIL，并在失败时给出字段/约束原因明细；
+    3) 已接入 `make protocol-observability` 与总回归入口。
+  - 验证：`make protocol-observability` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 

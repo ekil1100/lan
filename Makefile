@@ -29,6 +29,7 @@ regression: build
 protocol-observability: build
 	./scripts/parse-tool-log-sample.sh
 	./scripts/test-tool-protocol-structure.sh
+	./scripts/check-tool-protocol-compat.sh
 
 clean:
 	rm -rf .zig-cache zig-out
