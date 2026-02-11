@@ -770,6 +770,13 @@
     3) CI 复用同一入口命令（`make r9-ops-readiness-regression`）。
   - 验证：`make r9-ops-readiness-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
+  - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
+  - 验收：
+    1) 新增 Beta 准入清单（能力/回归/稳定性/发布支持）；
+    2) 每项包含“验收命令 + 证据路径”；
+    3) 与 ROADMAP 的 MVP→Beta→1.0 口径一致。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
