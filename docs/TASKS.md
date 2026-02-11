@@ -804,6 +804,12 @@
     3) 支持离线执行。
   - 验证：`./scripts/test-post-install-health.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R10-T04（并行）Beta 候选验收报告模板（人话版）
+  - 文件：`docs/release/beta-acceptance-report-template.md`、`docs/release/beta-entry-checklist.md`
+  - 验收：
+    1) 模板固定“通过项/失败项/next-step/是否可试用”；
+    2) 与 beta checklist 与一键验证入口口径一致。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -822,7 +828,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R10-T04（NEXT）：Beta 运维手册（runbook）最小版
+1. 立即执行 R10-T05（NEXT）：R10 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

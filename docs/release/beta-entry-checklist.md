@@ -102,3 +102,6 @@
 **总体结论：**
 - 若四项均 PASS：可从 MVP 进入 Beta
 - 任一 FAIL：维持 MVP，按失败项补齐后复核
+
+> 验收报告请使用：`docs/release/beta-acceptance-report-template.md`
+> 其中命令口径与 `./scripts/verify-beta-candidate.sh`、`./scripts/check-beta-readiness.sh` 保持一致。
