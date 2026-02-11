@@ -14,16 +14,7 @@
   - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
   - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
 
-- [ ] R3-T12（NEXT，TDD）Tool 协议响应结构 v1（统一字段）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/tools.zig`、`src/agent.zig`
-  - DoD：
-    1) 统一成功/失败响应字段（如 `ok/code/detail/next/meta`）；
-    2) read/write/list/exec 输出结构一致；
-    3) 不改变执行语义，仅协议结构统一；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R3-T13（TDD）Tool 调用耗时指标最小落地（duration_ms）
+- [ ] R3-T13（NEXT，TDD）Tool 调用耗时指标最小落地（duration_ms）
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`scripts/`
   - DoD：
@@ -308,11 +299,19 @@
     2) 并行/串行依赖顺序已显式写入“R3 第三批设计说明”；
     3) 与 ROADMAP 当前阶段状态一致（R3 进行中）。
 
+- [x] R3-T12（TDD）Tool 协议响应结构 v1（统一字段）
+  - 文件：`src/tools.zig`、`src/agent.zig`
+  - 验收：
+    1) 成功/失败统一字段：`ok/code/detail/next/meta`；
+    2) read/write/list/exec 四工具输出结构一致；
+    3) 保持执行语义，仅统一输出结构。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-tools-regression.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T12（NEXT）：Tool 协议响应结构 v1（统一字段）
+1. 立即执行 R3-T13（NEXT）：Tool 调用耗时指标最小落地（duration_ms）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
