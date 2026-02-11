@@ -13,19 +13,59 @@
   - R3-T15 Tool 协议回归脚本 v1：done
   - R3-T16 观测与协议入口汇总（本地/CI）：done
 
-### R4 第一批原子任务（Skill Runtime v1 启动）
-- [ ] R4-T06（NEXT）R4 第一批收口与第二批任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R4 第一批收口结论（R4-T06）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R4-T01 Skill manifest schema v1：done
+  - R4-T02 `lan skill list` 本地索引：done
+  - R4-T03 `lan skill add` 本地目录安装：done
+  - R4-T04 `lan skill remove` 卸载一致性：done
+  - R4-T05.A 本地回归入口定义：done
+  - R4-T05.B CI 复用本地回归入口：done
+
+### R4 第二批原子任务（Skill Runtime v1 扩展）
+- [ ] R4-T07（NEXT，TDD）Skill manifest 字段边界校验补强
+  - 预计时长：1-2 小时
+  - 改动范围：`src/skill_manifest.zig`、`docs/skills/`
   - DoD：
-    1) 判定 R4 第一批状态（done/remaining）；
-    2) 若 close-ready，产出 R4 第二批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
-  - 依赖：R4-T01~R4-T04
+    1) 增加版本号/entry 路径格式边界校验；
+    2) 补 2 组非法样例与测试；
+    3) 不影响现有合法样例；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R4-T08（BDD）`lan skill update`（本地覆盖安装）最小闭环
+  - 预计时长：1-2 小时
+  - 改动范围：`src/main.zig`、`src/skills.zig`、`scripts/`
+  - DoD：
+    1) 支持 `lan skill update <local-dir>`；
+    2) 更新前后 list 版本可见变化；
+    3) 无目标 skill 时给 next-step；
+    4) 三项命令验证通过。
+
+- [ ] R4-T09（TDD）Skill 索引文件落地（metadata snapshot）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/skills.zig`、`~/.config/lan/skills/index.json`（逻辑）
+  - DoD：
+    1) add/remove/update 后自动刷新 index；
+    2) list 优先读取 index，异常时回退扫描目录；
+    3) 离线可运行；
+    4) 三项命令验证通过。
+
+- [ ] R4-T10（BDD）Skill 权限声明显示与提示
+  - 预计时长：1-2 小时
+  - 改动范围：`src/main.zig`、`src/skills.zig`、`README.md`
+  - DoD：
+    1) list 输出权限摘要（permissions）；
+    2) add/update 成功后显示权限提示；
+    3) 不执行权限拦截，仅做可观测提示；
+    4) 三项命令验证通过。
+
+- [ ] R4-T11（串行）R4 第二批回归入口与 CI 对齐
+  - 依赖：R4-T07~R4-T10
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 定义统一入口执行 R4 第一批回归；
+    1) 定义 R4 第二批统一回归入口；
     2) 明确 PASS/FAIL 判定；
     3) CI 复用本地入口；
     4) 三项命令验证通过。
@@ -387,11 +427,18 @@
     2) 与本地入口命令完全一致，无双维护；
     3) R4-T05 进度更新：A/B 全部完成，第一批回归入口对齐完成。
 
+- [x] R4-T06（收口）R4 第一批收口与第二批任务拆解
+  - 文件：`docs/TASKS.md`
+  - 结论：
+    1) R4 第一批（R4-T01~R4-T05）全部 done，close-ready；
+    2) 已产出 R4 第二批 5 个原子任务（R4-T07~R4-T11）；
+    3) 唯一 NEXT 已切换到 R4-T07。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T06（NEXT）：R4 第一批收口与第二批任务拆解
+1. 立即执行 R4-T07（NEXT）：Skill manifest 字段边界校验补强
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
