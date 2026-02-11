@@ -72,16 +72,7 @@
   - R7-T05 第一批回归入口与 CI 对齐：done
 
 ### R8 第一批原子任务（文档与分发体验收敛）
-- [ ] R8-T02（NEXT，TDD）发布产物索引页生成（dist/index.txt）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/package-release.sh`、`scripts/`
-  - DoD：
-    1) 打包后自动生成 dist/index.txt（产物+checksum+manifest）；
-    2) 索引内容可机器解析；
-    3) 增加离线校验脚本；
-    4) 三项命令验证通过。
-
-- [ ] R8-T03（BDD）安装前预检脚本（env/path/permissions）
+- [ ] R8-T03（NEXT，BDD）安装前预检脚本（env/path/permissions）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/preflight.sh`、`scripts/`
   - DoD：
@@ -699,11 +690,19 @@
     3) 新增离线 PASS/FAIL 回归脚本覆盖平台默认路径与冲突场景。
   - 验证：`./scripts/test-install-platform-path.sh` / `./scripts/test-install-path-conflict.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R8-T02（并行，BDD）升级脚本回滚日志与校验增强
+  - 文件：`scripts/upgrade.sh`、`scripts/test-upgrade-local.sh`、`scripts/parse-install-upgrade-log-sample.sh`
+  - 验收：
+    1) 回滚路径输出结构化日志（phase/action/result/reason/duration_ms）；
+    2) 升级前后二进制可执行性校验；
+    3) 失败路径输出明确 `next:`。
+  - 验证：`./scripts/parse-install-upgrade-log-sample.sh` / `./scripts/test-upgrade-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R8-T02（NEXT）：发布产物索引页生成（dist/index.txt）
+1. 立即执行 R8-T03（NEXT）：安装前预检脚本（env/path/permissions）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

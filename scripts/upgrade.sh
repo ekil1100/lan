@@ -49,6 +49,7 @@ fi
 
 new_bin="$(find "$tmp_dir" -name lan -type f | head -n 1)"
 if [[ -z "$new_bin" ]]; then
+  log_event "end" "upgrade" "$PKG_PATH" "fail" "binary_missing"
   echo "Upgrade failed: binary lan not found in package"
   echo "next: ensure package includes lan binary and retry"
   exit 1
@@ -63,9 +64,11 @@ fi
 if ! cp "$new_bin" "$BIN_DIR/lan"; then
   if [[ -n "$backup_path" && -f "$backup_path" ]]; then
     cp "$backup_path" "$BIN_DIR/lan"
+    log_event "end" "rollback" "$BIN_DIR/lan" "success" "copy_failed_restored_backup"
     echo "Upgrade rollback: restored previous binary"
     echo "next: check disk permissions and retry upgrade"
   else
+    log_event "end" "rollback" "$BIN_DIR/lan" "fail" "copy_failed_no_backup"
     echo "Upgrade rollback: no previous binary to restore"
     echo "next: run install script to recover binary"
   fi
@@ -80,12 +83,21 @@ if [[ "$after_version" == "unknown" ]]; then
   if [[ -n "$backup_path" && -f "$backup_path" ]]; then
     cp "$backup_path" "$BIN_DIR/lan"
     chmod +x "$BIN_DIR/lan"
+    log_event "end" "rollback" "$BIN_DIR/lan" "success" "post_upgrade_exec_check_failed_restored_backup"
     echo "Upgrade rollback: restored previous binary"
     echo "next: package may be corrupted; rebuild package and retry"
   else
+    log_event "end" "rollback" "$BIN_DIR/lan" "fail" "post_upgrade_exec_check_failed_no_backup"
     echo "Upgrade rollback: no previous binary to restore"
     echo "next: run install script with a valid package"
   fi
+  exit 1
+fi
+
+if [[ ! -x "$BIN_DIR/lan" ]]; then
+  log_event "end" "upgrade" "$BIN_DIR/lan" "fail" "binary_not_executable"
+  echo "Upgrade failed: binary is not executable"
+  echo "next: run chmod +x on the binary or rerun upgrade"
   exit 1
 fi
 

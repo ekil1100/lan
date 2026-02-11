@@ -42,6 +42,9 @@ cp README.md "$bad_pkg_dir/README.md"
 tar -czf "$tmp_dir/bad.tgz" -C "$tmp_dir/badpkg" "lan-0.1.0-macos-arm64"
 
 rb_out="$(./scripts/upgrade.sh "$tmp_dir/bad.tgz" "$tmp_dir/bin" "$tmp_dir/config" 2>&1 || true)"
+echo "$rb_out" | grep -q "install_event phase=end action=rollback" || { echo "[upgrade-test] FAIL reason=rollback-structured-log-missing"; echo "$rb_out"; exit 1; }
+echo "$rb_out" | grep -q "result=success" || { echo "[upgrade-test] FAIL reason=rollback-result-missing"; echo "$rb_out"; exit 1; }
+echo "$rb_out" | grep -q "reason=post_upgrade_exec_check_failed_restored_backup" || { echo "[upgrade-test] FAIL reason=rollback-reason-missing"; echo "$rb_out"; exit 1; }
 echo "$rb_out" | grep -q "Upgrade rollback: restored previous binary" || { echo "[upgrade-test] FAIL reason=rollback-message-missing"; echo "$rb_out"; exit 1; }
 echo "$rb_out" | grep -q "next:" || { echo "[upgrade-test] FAIL reason=rollback-next-missing"; echo "$rb_out"; exit 1; }
 
