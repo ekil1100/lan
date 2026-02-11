@@ -187,35 +187,43 @@
   - R17-T03 Beta known-issues 文档：done
   - R17-T04 回归入口与 CI 对齐：done
 
-### R18 第一批原子任务（Beta 功能迭代）
-- [ ] R18-T01（NEXT，并行）Skill 示例包（内置 hello-world skill）
-  - 预计时长：1-2 小时
-  - 改动范围：`skills/hello-world/`、`docs/skills/`
-  - DoD：
-    1) 提供完整 skill 示例（manifest + 入口）；
-    2) `lan skill add ./skills/hello-world` 可正常安装；
-    3) 文档说明如何创建自定义 skill。
+### R18 第一批收口结论（R18-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R18-T01 Skill 示例包：done
+  - R18-T02 Provider 健康检查：done
+  - R18-T03 会话历史导出：done
+  - R18-T04 回归入口与 CI 对齐：done
 
-- [ ] R18-T02（并行）Provider 健康检查端点
+### R19 第一批原子任务（Beta 稳定性与体验）
+- [ ] R19-T01（NEXT，并行）会话历史搜索（关键词过滤）
   - 预计时长：1-2 小时
-  - 改动范围：`src/llm.zig`、`scripts/test-provider-health.sh`
+  - 改动范围：`src/main.zig`、`scripts/test-history-search.sh`
   - DoD：
-    1) 新增 provider 可达性检测（超时/连通性）；
-    2) 输出 PASS/FAIL + latency；
-    3) 可被 preflight 脚本调用。
-
-- [ ] R18-T03（并行）会话历史导出（JSON 格式）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`scripts/`
-  - DoD：
-    1) `lan history export` 输出 JSON 格式会话记录；
-    2) 含 role/content/timestamp 字段；
+    1) `lan history search <keyword>` 输出匹配的消息；
+    2) 输出 JSON 格式；
     3) 回归测试覆盖。
 
-- [ ] R18-T04（串行收口）R18 第一批回归入口与 CI 对齐
-  - 依赖：R18-T01~R18-T03
+- [ ] R19-T02（并行）Preflight 集成 provider 健康检查
+  - 预计时长：1 小时
+  - 改动范围：`scripts/preflight.sh`、`scripts/test-preflight-provider.sh`
+  - DoD：
+    1) preflight 增加 provider 可达性检查项；
+    2) 不可达时标记 WARN（不阻塞整体 PASS）；
+    3) 回归测试覆盖。
+
+- [ ] R19-T03（并行）错误码标准化与文档
+  - 预计时长：1-2 小时
+  - 改动范围：`docs/errors.md`、`src/`
+  - DoD：
+    1) 定义统一错误码表（E001~E0xx）；
+    2) 每个错误含描述/next-step/严重等级；
+    3) 至少覆盖安装/升级/provider/skill 四类。
+
+- [ ] R19-T04（串行收口）R19 第一批回归入口与 CI 对齐
+  - 依赖：R19-T01~R19-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r18-*.sh`、`docs/TASKS.md`
+  - 改动范围：`Makefile`、`scripts/test-r19-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1157,6 +1165,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R17 close-ready；R18 第一批 4 个原子任务已拆；NEXT → R18-T01。
 
+- [x] R18-T01（并行）Skill 示例包（hello-world）
+  - 文件：`skills/hello-world/`、`docs/skills/creating-skills.md`
+  - 验收：manifest + entry；skill add/remove 验证通过；创建指南文档。
+
+- [x] R18-T02（并行）Provider 健康检查
+  - 文件：`scripts/check-provider-health.sh`、`scripts/test-provider-health.sh`
+  - 验收：可达性检测 + latency；PASS/FAIL 输出；401/403 视为可达。
+
+- [x] R18-T03（并行）会话历史导出
+  - 文件：`src/main.zig`、`scripts/test-history-export.sh`
+  - 验收：`lan history export` 输出 JSON；含 role/content。
+
+- [x] R18-T04（串行收口）R18 回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r18-feature-suite.sh`
+  - 验收：`make r18-feature-regression` 通过。
+
+- [x] R18-T05（收口）R18 收口与 R19 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R18 close-ready；R19 第一批 4 个原子任务已拆；NEXT → R19-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1190,7 +1218,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R18-T01（NEXT）：Skill 示例包（内置 hello-world skill）
+1. 立即执行 R19-T01（NEXT）：会话历史搜索（关键词过滤）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
