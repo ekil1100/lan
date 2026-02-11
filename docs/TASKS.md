@@ -46,16 +46,7 @@
   - R5-T05 第一批回归入口与 CI 对齐：done
 
 ### R6 第一批原子任务（发布与生态启动）
-- [ ] R6-T02（NEXT，BDD）发布包最小闭环（macOS/Linux）
-  - 预计时长：1-2 小时
-  - 改动范围：`Makefile`、`scripts/`、`.github/workflows/ci.yml`
-  - DoD：
-    1) 生成可分发压缩包（含二进制与 README）；
-    2) 文件命名包含平台与版本；
-    3) 提供离线自检脚本 PASS/FAIL；
-    4) 三项命令验证通过。
-
-- [ ] R6-T03（TDD）安装脚本 v1（本地 tarball 安装）
+- [ ] R6-T03（NEXT，TDD）安装脚本 v1（本地 tarball 安装）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/install.sh`、`README.md`
   - DoD：
@@ -573,11 +564,19 @@
     3) 新增最小回归断言脚本（PASS/FAIL）。
   - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-version.sh` 通过。
 
+- [x] R6-T02（BDD）发布包最小闭环（macOS/Linux）
+  - 文件：`Makefile`、`scripts/package-release.sh`、`scripts/test-package-release.sh`
+  - 验收：
+    1) 生成包含二进制与 README 的可分发压缩包；
+    2) 产物命名包含平台与版本（`lan-<ver>-<os>-<arch>.tar.gz`）；
+    3) 提供离线自检脚本 PASS/FAIL。
+  - 验证：`./scripts/test-package-release.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R6-T02（NEXT）：发布包最小闭环（macOS/Linux）
+1. 立即执行 R6-T03（NEXT）：安装脚本 v1（本地 tarball 安装）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
