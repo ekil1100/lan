@@ -23,7 +23,7 @@ echo "$mac_out" | grep -q "Install success: $tmp_dir/home/bin/lan" || { echo "[i
 # conflict + next-step still present
 echo x > "$tmp_dir/target-file"
 bad_out="$(HOME="$tmp_dir/home" ./scripts/install.sh "$pkg" "$tmp_dir/target-file" 2>&1 || true)"
-echo "$bad_out" | grep -q "Install failed: target path is a file" || { echo "[install-platform] FAIL reason=conflict-check-missing"; echo "$bad_out"; exit 1; }
+echo "$bad_out" | grep -Eq "Install failed: target path is a file|\[preflight\] FAIL reason=target_not_directory" || { echo "[install-platform] FAIL reason=conflict-check-missing"; echo "$bad_out"; exit 1; }
 echo "$bad_out" | grep -q "next:" || { echo "[install-platform] FAIL reason=next-step-missing"; echo "$bad_out"; exit 1; }
 
 echo "[install-platform] PASS reason=platform-default-and-conflict-check-ok"

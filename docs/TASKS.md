@@ -72,15 +72,13 @@
   - R7-T05 第一批回归入口与 CI 对齐：done
 
 ### R8 第一批原子任务（文档与分发体验收敛）
-- [ ] R8-T05（NEXT，串行）R8 第一批回归入口与 CI 对齐
-  - 依赖：R8-T01~R8-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+- [ ] R8-T06（NEXT）R8 第一批收口与 R9 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 定义统一入口执行 R8 第一批回归；
-    2) 明确 PASS/FAIL 判定；
-    3) CI 复用本地入口；
-    4) 三项命令验证通过。
+    1) 判定 R8 第一批状态（done/remaining）；
+    2) 若 close-ready，产出 R9 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
   - 依赖：R8-T01~R8-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -704,11 +702,19 @@
     3) 全流程离线可运行。
   - 验证：`./scripts/test-release-notes.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R8-T05（串行）R8 第一批回归入口与 CI 对齐
+  - 文件：`Makefile`、`scripts/test-r8-release-experience-suite.sh`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) 本地统一入口：`make r8-release-experience-regression`（覆盖 R8-T01~R8-T04）；
+    2) PASS/FAIL 判定：exit code + `[r8-release-experience-suite] PASS/FAIL`；
+    3) CI 复用同一入口命令（`make r8-release-experience-regression`）。
+  - 验证：`make r8-release-experience-regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R8-T05（NEXT）：R8 第一批回归入口与 CI 对齐
+1. 立即执行 R8-T06（NEXT）：R8 第一批收口与 R9 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

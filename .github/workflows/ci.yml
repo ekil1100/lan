@@ -47,6 +47,9 @@ jobs:
       - name: R7 Install/Upgrade Suite
         run: make r7-install-upgrade-regression
 
+      - name: R8 Release Experience Suite
+        run: make r8-release-experience-regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:
