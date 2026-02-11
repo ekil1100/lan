@@ -33,16 +33,7 @@
   - R4-T11 第二批回归入口与 CI 对齐：done
 
 ### R5 第一批原子任务（多模型编排启动）
-- [ ] R5-T01（NEXT，TDD）Provider 配置 schema v1（路由最小字段）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/config.zig`、`docs/`
-  - DoD：
-    1) 定义 provider 路由最小字段（primary/fallback/timeout/retry）；
-    2) 提供 1 份合法 + 1 份非法配置样例；
-    3) 增加 schema 校验测试；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R5-T02（BDD）Provider fallback 最小闭环（网络失败触发）
+- [ ] R5-T02（NEXT，BDD）Provider fallback 最小闭环（网络失败触发）
   - 预计时长：1-2 小时
   - 改动范围：`src/llm.zig`、`scripts/`
   - DoD：
@@ -506,11 +497,19 @@
     3) 增加最小回归断言（含稳定顺序字符串断言）。
   - 验证：`zig build` / `zig build test` / `make smoke` / `scripts/test-skill-add-local.sh` / `scripts/test-skill-update-local.sh` 通过。
 
+- [x] R5-T01（TDD）Provider 配置 schema v1（路由最小字段）
+  - 文件：`src/config.zig`、`docs/config/provider-route.valid.json`、`docs/config/provider-route.invalid.json`
+  - 验收：
+    1) 定义路由最小字段：`primary/fallback/timeout_ms/retry`；
+    2) 提供 1 份合法 + 1 份非法配置样例；
+    3) 新增 schema 校验测试（valid/invalid）。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R5-T01（NEXT）：Provider 配置 schema v1（路由最小字段）
+1. 立即执行 R5-T02（NEXT）：Provider fallback 最小闭环（网络失败触发）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

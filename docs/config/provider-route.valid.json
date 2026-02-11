@@ -1,0 +1,6 @@
+{
+  "primary": "kimi",
+  "fallback": "openai",
+  "timeout_ms": 12000,
+  "retry": 2
+}

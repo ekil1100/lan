@@ -21,6 +21,58 @@ pub const Provider = enum {
     }
 };
 
+pub const ProviderRoute = struct {
+    primary: Provider,
+    fallback: Provider,
+    timeout_ms: u32,
+    retry: u8,
+
+    pub fn deinit(_: *ProviderRoute, _: std.mem.Allocator) void {}
+};
+
+const RawProviderRoute = struct {
+    primary: ?[]const u8 = null,
+    fallback: ?[]const u8 = null,
+    timeout_ms: ?u32 = null,
+    retry: ?u8 = null,
+};
+
+pub const RouteValidationError = error{
+    MissingPrimary,
+    MissingFallback,
+    MissingTimeout,
+    MissingRetry,
+    InvalidProvider,
+    InvalidTimeout,
+    InvalidRetry,
+};
+
+pub fn parseProviderRouteSchemaV1(allocator: std.mem.Allocator, json_text: []const u8) !ProviderRoute {
+    var parsed = try std.json.parseFromSlice(RawProviderRoute, allocator, json_text, .{});
+    defer parsed.deinit();
+
+    const raw = parsed.value;
+    const primary_s = raw.primary orelse return RouteValidationError.MissingPrimary;
+    const fallback_s = raw.fallback orelse return RouteValidationError.MissingFallback;
+    const timeout_ms = raw.timeout_ms orelse return RouteValidationError.MissingTimeout;
+    const retry = raw.retry orelse return RouteValidationError.MissingRetry;
+
+    if (timeout_ms == 0 or timeout_ms > 120_000) return RouteValidationError.InvalidTimeout;
+    if (retry > 5) return RouteValidationError.InvalidRetry;
+
+    const primary = parseProviderStrict(primary_s) orelse return RouteValidationError.InvalidProvider;
+    const fallback = parseProviderStrict(fallback_s) orelse return RouteValidationError.InvalidProvider;
+
+    return .{ .primary = primary, .fallback = fallback, .timeout_ms = timeout_ms, .retry = retry };
+}
+
+fn parseProviderStrict(str: []const u8) ?Provider {
+    if (std.mem.eql(u8, str, "kimi")) return .kimi;
+    if (std.mem.eql(u8, str, "anthropic")) return .anthropic;
+    if (std.mem.eql(u8, str, "openai")) return .openai;
+    return null;
+}
+
 pub const Config = struct {
     allocator: std.mem.Allocator,
     provider: Provider,
@@ -149,3 +201,35 @@ pub const Config = struct {
         return allocator.dupe(u8, json[val_start .. val_start + end]) catch return null;
     }
 };
+
+test "provider route schema v1 accepts valid sample" {
+    const allocator = std.testing.allocator;
+    const valid =
+        \\{
+        \\  "primary": "kimi",
+        \\  "fallback": "openai",
+        \\  "timeout_ms": 12000,
+        \\  "retry": 2
+        \\}
+    ;
+
+    const route = try parseProviderRouteSchemaV1(allocator, valid);
+    try std.testing.expect(route.primary == .kimi);
+    try std.testing.expect(route.fallback == .openai);
+    try std.testing.expectEqual(@as(u32, 12000), route.timeout_ms);
+    try std.testing.expectEqual(@as(u8, 2), route.retry);
+}
+
+test "provider route schema v1 rejects invalid sample" {
+    const allocator = std.testing.allocator;
+    const invalid =
+        \\{
+        \\  "primary": "bad-provider",
+        \\  "fallback": "openai",
+        \\  "timeout_ms": 0,
+        \\  "retry": 9
+        \\}
+    ;
+
+    try std.testing.expectError(RouteValidationError.InvalidTimeout, parseProviderRouteSchemaV1(allocator, invalid));
+}
