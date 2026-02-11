@@ -815,6 +815,13 @@
     2) 每项包含“验收命令 + 证据路径”；
     3) 与 ROADMAP 的 MVP→Beta→1.0 口径一致。
 
+- [x] R10-Prep-B（并行）Beta 候选打包与验证说明（人话版）
+  - 文件：`docs/release/beta-candidate-install-verify.md`、`docs/release/beta-entry-checklist.md`
+  - 验收：
+    1) 增加试用者视角安装/验证说明；
+    2) 命令示例覆盖 install/verify/preflight；
+    3) 与脚本输出口径一致。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 

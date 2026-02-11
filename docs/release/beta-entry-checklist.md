@@ -69,6 +69,13 @@
 
 ## D. 发布支持（出问题能定位）
 
+0) 面向试用者的安装/验证说明可直接使用
+- 验收命令：
+  - `cat docs/release/beta-candidate-install-verify.md`
+- 证据路径：
+  - `docs/release/beta-candidate-install-verify.md`
+
+
 1) 故障清单文档齐全且和脚本一致
 - 验收命令：
   - `rg "next:" docs/ops/troubleshooting.md`
