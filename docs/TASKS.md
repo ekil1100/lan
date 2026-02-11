@@ -203,35 +203,43 @@
   - R19-T03 错误码标准化：done
   - R19-T04 回归入口与 CI 对齐：done
 
-### R20 第一批原子任务（Beta 打磨与跨平台）
-- [ ] R20-T01（NEXT，并行）Linux amd64 交叉编译验证
-  - 预计时长：1-2 小时
-  - 改动范围：`Makefile`、`scripts/test-cross-compile.sh`
-  - DoD：
-    1) 本地 macOS 可交叉编译 Linux x86_64 目标；
-    2) 产出二进制可在 CI ubuntu runner 上执行；
-    3) 回归脚本覆盖。
+### R20 第一批收口结论（R20-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R20-T01 Linux 交叉编译：done
+  - R20-T02 配置校验：done
+  - R20-T03 历史清除：done
+  - R20-T04 回归入口：done
 
-- [ ] R20-T02（并行）配置文件模板与校验
+### R21 第一批原子任务（Beta 用户体验）
+- [ ] R21-T01（NEXT，并行）`lan config init` 交互式配置初始化
   - 预计时长：1-2 小时
-  - 改动范围：`docs/config/`、`scripts/validate-config.sh`
+  - 改动范围：`src/main.zig`、`scripts/test-config-init.sh`
   - DoD：
-    1) 提供默认配置文件模板（provider/route/skill 相关）；
-    2) 校验脚本检查必填字段和格式；
-    3) 输出 PASS/FAIL + 缺失项。
-
-- [ ] R20-T03（并行）会话历史清除命令
-  - 预计时长：0.5-1 小时
-  - 改动范围：`src/main.zig`、`scripts/test-history-clear.sh`
-  - DoD：
-    1) `lan history clear` 清除历史文件；
-    2) 确认清除后 `lan history export` 返回空数组；
+    1) `lan config init` 从模板生成默认配置文件；
+    2) 若已存在则提示并跳过（不覆盖）；
     3) 回归测试覆盖。
 
-- [ ] R20-T04（串行收口）R20 第一批回归入口与 CI 对齐
-  - 依赖：R20-T01~R20-T03
+- [ ] R21-T02（并行）`lan doctor` 综合诊断命令
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/lan-doctor.sh`、`scripts/test-lan-doctor.sh`
+  - DoD：
+    1) 一键运行 preflight + config validate + provider health；
+    2) 汇总输出 PASS/WARN/FAIL 各项结果；
+    3) 回归测试覆盖。
+
+- [ ] R21-T03（并行）支持包增强（含历史摘要和配置快照）
+  - 预计时长：1 小时
+  - 改动范围：`scripts/support-bundle.sh`、`scripts/test-support-bundle.sh`
+  - DoD：
+    1) 支持包新增历史消息数统计和配置快照（脱敏）；
+    2) 不泄露 API key；
+    3) 回归测试覆盖。
+
+- [ ] R21-T04（串行收口）R21 第一批回归入口与 CI 对齐
+  - 依赖：R21-T01~R21-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r20-*.sh`、`docs/TASKS.md`
+  - 改动范围：`Makefile`、`scripts/test-r21-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1213,6 +1221,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R19 close-ready；R20 第一批 4 个原子任务已拆；NEXT → R20-T01。
 
+- [x] R20-T01（并行）Linux 交叉编译验证
+  - 文件：`scripts/test-cross-compile.sh`
+  - 验收：ELF 64-bit x86-64 产出验证通过。
+
+- [x] R20-T02（并行）配置文件模板与校验
+  - 文件：`docs/config/config.template.json`、`scripts/validate-config.sh`、`scripts/test-validate-config.sh`
+  - 验收：模板 + 校验 PASS/FAIL + 缺失项输出。
+
+- [x] R20-T03（并行）会话历史清除
+  - 文件：`src/main.zig`、`scripts/test-history-clear.sh`
+  - 验收：clear + export 空数组验证通过。
+
+- [x] R20-T04（串行收口）R20 回归入口
+  - 文件：`Makefile`、`scripts/test-r20-crossplatform-suite.sh`
+  - 验收：`make r20-crossplatform-regression` 通过。
+
+- [x] R20-T05（收口）R20 收口与 R21 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R20 close-ready；R21 第一批 4 个原子任务已拆；NEXT → R21-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1246,7 +1274,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R20-T01（NEXT）：Linux amd64 交叉编译验证
+1. 立即执行 R21-T01（NEXT）：`lan config init` 交互式配置初始化
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
