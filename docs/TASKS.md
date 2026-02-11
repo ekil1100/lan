@@ -14,16 +14,7 @@
   2) 不改动模型调用链路与 Skill Runtime；
   3) 不重复已完成项（R3-T01 ~ R3-T05）。
 
-- [ ] R3-T08（NEXT，TDD，并行）exec 稳定性边界：`stderr/exit-code/timeout` 优先级固化
-  - 预计时长：1-2 小时
-  - 改动范围：`src/agent.zig`、`src/tools.zig`、`scripts/repro-exec-timeout.sh`
-  - DoD：
-    1) 明确并实现优先级规则（timeout > wait/spawn 错误 > exit-code > stderr 附加信息）；
-    2) 规则可通过测试/脚本验证；
-    3) 不改变正常短命令成功路径；
-    4) 三项命令验证通过。
-
-- [ ] R3-T09（BDD，串行）脚本与 CI 对齐：统一执行入口与失败判定
+- [ ] R3-T09（NEXT，BDD，串行）脚本与 CI 对齐：统一执行入口与失败判定
   - 依赖：R3-T07 / R3-T08（先完成再对齐入口）
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`scripts/`
@@ -243,11 +234,19 @@
     3) 脚本输出 PASS/FAIL：`./scripts/test-tools-fail-nonzero.sh`。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T08（TDD，并行）exec 稳定性边界：`stderr/exit-code/timeout` 优先级固化
+  - 文件：`src/agent.zig`、`src/tools.zig`、`scripts/test-exec-priority.sh`
+  - 验收：
+    1) 明确并实现优先级规则：timeout > wait/spawn 错误 > exit-code > stderr 附加信息；
+    2) 规则通过测试/脚本验证（含 stderr 与 timeout 优先级）；
+    3) 正常短命令成功路径保持不变。
+  - 验证：`./scripts/test-exec-priority.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T08（NEXT）：exec 稳定性边界（stderr/exit-code/timeout）
+1. 立即执行 R3-T09（NEXT）：脚本与 CI 对齐（统一入口与失败判定）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
