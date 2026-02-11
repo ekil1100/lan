@@ -9,7 +9,7 @@ TARGET = $(BUILD_DIR)/lan
 all: build
 
 build:
-	$(ZIG) build
+	$(ZIG) build -Dversion=0.1.0 -Dcommit=$$(git rev-parse --short HEAD 2>/dev/null || echo dev) -Dbuild-time=$$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 run: build
 	$(ZIG) build run

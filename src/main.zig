@@ -4,6 +4,7 @@ const Agent = @import("agent.zig").Agent;
 const Config = @import("config.zig").Config;
 const _skill_manifest = @import("skill_manifest.zig");
 const skills = @import("skills.zig");
+const build_info = @import("build_info");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -12,6 +13,14 @@ pub fn main() !void {
 
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
+
+    if (args.len >= 2 and std.mem.eql(u8, args[1], "--version")) {
+        var buf: [4096]u8 = undefined;
+        var writer = std.fs.File.stdout().writer(&buf);
+        try writer.interface.print("lan version={s} commit={s} build_time={s}\n", .{ build_info.version, build_info.commit, build_info.build_time });
+        try writer.interface.flush();
+        return;
+    }
 
     if (args.len >= 3 and std.mem.eql(u8, args[1], "skill") and std.mem.eql(u8, args[2], "list")) {
         var config = try Config.load(allocator);

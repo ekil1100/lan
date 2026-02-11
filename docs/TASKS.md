@@ -46,16 +46,7 @@
   - R5-T05 第一批回归入口与 CI 对齐：done
 
 ### R6 第一批原子任务（发布与生态启动）
-- [ ] R6-T01（NEXT，TDD）CLI 版本与构建元信息输出（`lan --version`）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/main.zig`、`build.zig`、`README.md`
-  - DoD：
-    1) 输出版本号、commit short SHA、构建时间；
-    2) 无网络依赖，离线可运行；
-    3) 增加最小回归断言；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R6-T02（BDD）发布包最小闭环（macOS/Linux）
+- [ ] R6-T02（NEXT，BDD）发布包最小闭环（macOS/Linux）
   - 预计时长：1-2 小时
   - 改动范围：`Makefile`、`scripts/`、`.github/workflows/ci.yml`
   - DoD：
@@ -574,11 +565,19 @@
     2) 预拆 R6 第一批 5 个原子任务（R6-T01~R6-T05）；
     3) 唯一 NEXT 已切换到 R6-T01。
 
+- [x] R6-T01（TDD）CLI 版本与构建元信息输出（`lan --version`）
+  - 文件：`build.zig`、`Makefile`、`src/main.zig`、`scripts/test-version.sh`
+  - 验收：
+    1) `lan --version` 输出 `version/commit/build_time`；
+    2) 离线可运行，无网络依赖；
+    3) 新增最小回归断言脚本（PASS/FAIL）。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-version.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R6-T01（NEXT）：CLI 版本与构建元信息输出（`lan --version`）
+1. 立即执行 R6-T02（NEXT）：发布包最小闭环（macOS/Linux）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
