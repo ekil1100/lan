@@ -103,7 +103,8 @@ test "skill manifest schema v1 rejects invalid sample" {
         \\  "name": "",
         \\  "version": "1.0.0",
         \\  "entry": "run.sh",
-        \\  "tools": ["read"]
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
         \\}
     ;
 
