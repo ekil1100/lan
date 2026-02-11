@@ -14,13 +14,14 @@ JSON
 
 pkg_out="$(./scripts/package-release.sh 2>&1 || true)"
 echo "$pkg_out" | grep -q "\[package\] PASS artifact=" || { echo "[upgrade-test] FAIL reason=package-failed"; echo "$pkg_out"; exit 1; }
-pkg="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\(.*\)$/\1/p')"
+pkg="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\([^ ]*\).*/\1/p')"
 
 # First install as baseline
 ./scripts/install.sh "$pkg" "$tmp_dir/bin" >/dev/null 2>&1 || { echo "[upgrade-test] FAIL reason=baseline-install-failed"; exit 1; }
 
 up_out="$(./scripts/upgrade.sh "$pkg" "$tmp_dir/bin" "$tmp_dir/config" 2>&1 || true)"
 echo "$up_out" | grep -q "Upgrade success:" || { echo "[upgrade-test] FAIL reason=upgrade-failed"; echo "$up_out"; exit 1; }
+echo "$up_out" | grep -q "install_event phase=end action=upgrade" || { echo "[upgrade-test] FAIL reason=upgrade-event-missing"; echo "$up_out"; exit 1; }
 echo "$up_out" | grep -q "version_before:" || { echo "[upgrade-test] FAIL reason=version-before-missing"; echo "$up_out"; exit 1; }
 echo "$up_out" | grep -q "version_after:" || { echo "[upgrade-test] FAIL reason=version-after-missing"; echo "$up_out"; exit 1; }
 

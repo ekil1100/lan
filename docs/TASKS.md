@@ -59,16 +59,15 @@
   - R6-T05 第一批回归入口与 CI 对齐：done
 
 ### R7 第一批原子任务（安装升级机制强化）
-- [ ] R7-T04（NEXT，BDD）安装/升级说明文档收敛
-  - 预计时长：1-2 小时
-  - 改动范围：`README.md`、`docs/`
+- [ ] R7-T05（NEXT，串行）R7 第一批回归入口与 CI 对齐
+  - 依赖：R7-T01~R7-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
-    1) 文档覆盖 install/upgrade/package 常见路径；
-    2) 包含失败场景 next-step 指南；
-    3) 与脚本行为一致；
+    1) 定义统一入口执行 R7 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
     4) 三项命令验证通过。
-
-- [ ] R7-T05（串行）R7 第一批回归入口与 CI 对齐
   - 依赖：R7-T01~R7-T04
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
@@ -639,11 +638,19 @@
     3) 校验失败路径输出 `next:` 提示。
   - 验证：`./scripts/test-package-release.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R7-T04（并行，BDD）安装/升级日志标准化（机器可解析）
+  - 文件：`scripts/install.sh`、`scripts/upgrade.sh`、`scripts/parse-install-upgrade-log-sample.sh`、`scripts/test-install-local.sh`、`scripts/test-upgrade-local.sh`
+  - 验收：
+    1) 固定日志字段：`phase/action/target/result/reason/duration_ms`；
+    2) 提供解析样例与 PASS/FAIL 断言；
+    3) 与 route/tool_event 风格一致（`install_event key=value ...`）。
+  - 验证：`./scripts/parse-install-upgrade-log-sample.sh` / `zig build` / `zig build test` / `make smoke` / `scripts/test-install-local.sh` / `scripts/test-upgrade-local.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R7-T04（NEXT）：安装/升级说明文档收敛
+1. 立即执行 R7-T05（NEXT）：R7 第一批回归入口与 CI 对齐
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

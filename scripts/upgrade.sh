@@ -7,13 +7,23 @@ PKG_PATH="${1:-}"
 BIN_DIR="${2:-$HOME/.local/bin}"
 CONFIG_DIR="${3:-$HOME/.config/lan}"
 
+started_at=$(date +%s)
+log_event() {
+  local phase="$1" action="$2" target="$3" result="$4" reason="$5"
+  local now=$(date +%s)
+  local duration_ms=$(( (now - started_at) * 1000 ))
+  echo "install_event phase=${phase} action=${action} target=${target} result=${result} reason=${reason} duration_ms=${duration_ms}"
+}
+
 if [[ -z "$PKG_PATH" ]]; then
+  log_event "end" "upgrade" "-" "fail" "missing_package_path"
   echo "Upgrade failed: missing package path"
   echo "next: run ./scripts/upgrade.sh <local-tarball> [bin-dir] [config-dir]"
   exit 1
 fi
 
 if [[ ! -f "$PKG_PATH" ]]; then
+  log_event "end" "upgrade" "$PKG_PATH" "fail" "package_not_found"
   echo "Upgrade failed: package not found ($PKG_PATH)"
   echo "next: run ./scripts/package-release.sh then retry with generated artifact"
   exit 1
@@ -31,6 +41,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 mkdir -p "$tmp_dir"
 
 if ! tar -xzf "$PKG_PATH" -C "$tmp_dir"; then
+  log_event "end" "upgrade" "$PKG_PATH" "fail" "invalid_tarball"
   echo "Upgrade failed: invalid tarball"
   echo "next: regenerate package via ./scripts/package-release.sh and retry"
   exit 1
@@ -78,6 +89,7 @@ if [[ "$after_version" == "unknown" ]]; then
   exit 1
 fi
 
+log_event "end" "upgrade" "$BIN_DIR/lan" "success" "upgrade_completed"
 echo "Upgrade success: bin=$BIN_DIR/lan"
 echo "version_before: $before_version"
 echo "version_after: $after_version"

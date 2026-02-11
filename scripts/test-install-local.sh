@@ -9,10 +9,11 @@ mkdir -p "$tmp_dir"
 
 pkg_out="$(./scripts/package-release.sh 2>&1 || true)"
 echo "$pkg_out" | grep -q "\[package\] PASS artifact=" || { echo "[install-test] FAIL reason=package-failed"; echo "$pkg_out"; exit 1; }
-pkg_path="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\(.*\)$/\1/p')"
+pkg_path="$(echo "$pkg_out" | sed -n 's/^\[package\] PASS artifact=\([^ ]*\).*/\1/p')"
 
 ok_out="$(./scripts/install.sh "$pkg_path" "$tmp_dir/bin" 2>&1 || true)"
 echo "$ok_out" | grep -q "Install success:" || { echo "[install-test] FAIL reason=install-success-missing"; echo "$ok_out"; exit 1; }
+echo "$ok_out" | grep -q "install_event phase=end action=install" || { echo "[install-test] FAIL reason=install-event-missing"; echo "$ok_out"; exit 1; }
 [[ -x "$tmp_dir/bin/lan" ]] || { echo "[install-test] FAIL reason=installed-binary-missing"; exit 1; }
 
 ver_out="$($tmp_dir/bin/lan --version 2>&1 || true)"
