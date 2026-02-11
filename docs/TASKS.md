@@ -161,7 +161,7 @@
     3) 与试用汇总口径一致。
 
 - [ ] R12-T05（串行）R12 第一批回归入口与 CI 对齐
-  - 依赖：R12-T01~R12-T04
+  - 依赖：R12-T01~R12-T04（串行收口）
   - 预计时长：1 小时
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
@@ -169,41 +169,7 @@
     2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
     3) CI 复用本地入口命令；
     4) 三项命令验证通过。
-  - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
-  - DoD：
-    1) 模板覆盖严重级别、复现步骤、环境信息；
-    2) 与当前故障清单/next-step 口径一致；
-    3) 文档人话可读。
 
-- [ ] R11-T03（并行，TDD）Beta 回滚演练脚本
-  - 依赖：R11-T01
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/rehearse-beta-rollback.sh`、`scripts/`
-  - DoD：
-    1) 演练升级失败后的恢复流程；
-    2) 输出 PASS/FAIL + next-step；
-    3) 离线可执行；
-    4) 三项命令验证通过。
-
-- [ ] R11-T04（并行，BDD）Beta 试用 runbook（最小版）
-  - 依赖：R11-T02,R11-T03
-  - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-trial-runbook.md`
-  - DoD：
-    1) 覆盖验收、回滚、问题上报三条主路径；
-    2) 每条路径附命令和证据路径；
-    3) 与脚本输出保持一致。
-
-- [ ] R11-T05（串行）R11 第一批回归入口与 CI 对齐
-  - 依赖：R11-T01~R11-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义统一入口执行 R11 第一批回归；
-    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
-    3) CI 复用本地入口命令；
-    4) 三项命令验证通过。
 
 ## Done
 
@@ -987,6 +953,14 @@
     2) 输出通过率与失败命令清单；
     3) 失败输出 `next:` 修复建议。
   - 验证：`./scripts/test-check-beta-runbook-commands.sh` 通过。
+
+- [x] R12-D（串行）R12 第一批回归入口与 CI 对齐预留
+  - 文件：`scripts/test-r12-beta-trial-ops-suite.sh`、`Makefile`、`docs/TASKS.md`
+  - 验收：
+    1) 预定义回归入口命令骨架：`make r12-beta-trial-ops-regression`；
+    2) PASS/FAIL 判定与日志标记：`[r12-beta-trial-ops-suite] PASS/FAIL ...`；
+    3) TASKS 依赖顺序写清（R12-T01~T04 → R12-T05）。
+  - 验证：`./scripts/test-r12-beta-trial-ops-suite.sh` / `make r12-beta-trial-ops-regression` 通过。
 
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
