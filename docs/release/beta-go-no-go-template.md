@@ -33,6 +33,12 @@
 
 ## 3) 汇总输入（来自 trial summary）
 
+可复现命令（支持跨批次目录聚合）：
+
+```bash
+./scripts/summarize-beta-trial.sh <tracker-file-or-dir> dist/beta-trial-summary
+```
+
 - Summary JSON 路径：`<dist/beta-trial-summary/summary-*.json>`
 - pass_rate：`<xx%>`
 - failed_items：`<...>`

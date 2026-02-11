@@ -26,4 +26,21 @@ text="$(echo "$out" | sed -n 's/^\[beta-trial-summary\] FAIL .* text=\([^ ]*\) f
 grep -q '"pass_rate":' "$json" || { echo "[beta-trial-summary-test] FAIL reason=pass-rate-missing"; exit 1; }
 grep -q 'failed_items:' "$text" || { echo "[beta-trial-summary-test] FAIL reason=failed-items-missing"; exit 1; }
 
+# multi-batch input (directory) should aggregate and PASS
+mkdir -p "$tmp_dir/multi"
+cat > "$tmp_dir/multi/b1.md" <<'EOF'
+| Batch | Device ID | Owner | OS/Version | Arch | Lan Version | Package | Install Path | Status | Issue Severity | Issue Link/Note | Last Update |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| B1 | D1 | like | macOS | arm64 | v | p | ~/.local/bin | Pass | - | - | now |
+EOF
+cat > "$tmp_dir/multi/b2.md" <<'EOF'
+| Batch | Device ID | Owner | OS/Version | Arch | Lan Version | Package | Install Path | Status | Issue Severity | Issue Link/Note | Last Update |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| B2 | D2 | like | macOS | arm64 | v | p | ~/.local/bin | Running | - | - | now |
+EOF
+multi_out="$(./scripts/summarize-beta-trial.sh "$tmp_dir/multi" "$tmp_dir/out2" 2>&1 || true)"
+echo "$multi_out" | grep -q "\[beta-trial-summary\] PASS" || { echo "[beta-trial-summary-test] FAIL reason=multi-pass-missing"; echo "$multi_out"; exit 1; }
+multi_json="$(echo "$multi_out" | sed -n 's/^\[beta-trial-summary\] PASS json=\([^ ]*\).*/\1/p')"
+grep -q '"batch_count":2' "$multi_json" || { echo "[beta-trial-summary-test] FAIL reason=batch-count-missing"; cat "$multi_json"; exit 1; }
+
 echo "[beta-trial-summary-test] PASS reason=machine-human-summary-covered"
