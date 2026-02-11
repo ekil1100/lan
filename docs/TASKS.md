@@ -58,14 +58,65 @@
   - R6-T04 升级脚本 v1：done
   - R6-T05 第一批回归入口与 CI 对齐：done
 
-### R7 第一批原子任务（安装升级机制强化）
-- [ ] R7-T06（NEXT）R7 第一批收口与下一批任务拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R7 第一批收口结论（R7-T06）
+- **收口判据**：
+  1) R7-T01~R7-T05 全部达到 DoD 且具备离线回归验证；
+  2) 本地与 CI 复用同一入口命令，无双维护；
+  3) 安装/升级/校验/日志四类能力形成闭环。
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R7-T01 安装路径冲突检查：done
+  - R7-T02 升级失败回滚：done
+  - R7-T03 checksum + manifest 校验：done
+  - R7-T04 安装/升级日志标准化：done
+  - R7-T05 第一批回归入口与 CI 对齐：done
+
+### R8 第一批原子任务（文档与分发体验收敛）
+- [ ] R8-T01（NEXT，BDD）README 安装/升级一页式指引重构
+  - 预计时长：1-2 小时
+  - 改动范围：`README.md`
   - DoD：
-    1) 判定 R7 第一批状态（done/remaining）；
-    2) 若 close-ready，产出下一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 将 package/install/upgrade/verify 命令集中到单节；
+    2) 增加失败场景 next-step 对照；
+    3) 与脚本当前行为一致；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R8-T02（TDD）发布产物索引页生成（dist/index.txt）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/package-release.sh`、`scripts/`
+  - DoD：
+    1) 打包后自动生成 dist/index.txt（产物+checksum+manifest）；
+    2) 索引内容可机器解析；
+    3) 增加离线校验脚本；
+    4) 三项命令验证通过。
+
+- [ ] R8-T03（BDD）安装前预检脚本（env/path/permissions）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/preflight.sh`、`scripts/`
+  - DoD：
+    1) 预检 shell、目标路径、写权限、sha 工具可用性；
+    2) 输出 PASS/FAIL + next-step；
+    3) 与 install/upgrade 脚本协同；
+    4) 三项命令验证通过。
+
+- [ ] R8-T04（TDD）最小变更日志生成（release notes stub）
+  - 预计时长：1-2 小时
+  - 改动范围：`scripts/`、`docs/`
+  - DoD：
+    1) 基于 git log 生成简版发布说明；
+    2) 包含新增/修复/已知问题模板；
+    3) 离线可运行；
+    4) 三项命令验证通过。
+
+- [ ] R8-T05（串行）R8 第一批回归入口与 CI 对齐
+  - 依赖：R8-T01~R8-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R8 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
   - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
   - DoD：
     1) 定义统一入口执行 R6 第一批回归；
@@ -642,11 +693,18 @@
     3) CI 复用同一入口命令（`make r7-install-upgrade-regression`）。
   - 验证：`make r7-install-upgrade-regression` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R7-T06（并行预拆）R7 第一批收口与 R8 启动草案
+  - 文件：`docs/TASKS.md`
+  - 结果：
+    1) 已给出 R7 第一批收口判据与 done/remaining 结论（close-ready）；
+    2) 预拆 R8 第一批 5 个原子任务（R8-T01~R8-T05）；
+    3) 唯一 NEXT 已切换到 R8-T01。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R7-T06（NEXT）：R7 第一批收口与下一批任务拆解
+1. 立即执行 R8-T01（NEXT）：README 安装/升级一页式指引重构
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
