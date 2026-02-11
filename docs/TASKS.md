@@ -98,25 +98,13 @@
   - R9-T05 第一批回归入口与 CI 对齐：done
 
 ### R10 第一批原子任务（Beta 准入落地）
-- [ ] R10-T04（NEXT，并行，BDD）Beta 运维手册（runbook）最小版
-  - 依赖：R10-T02,R10-T03
-  - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-runbook.md`、`README.md`
+- [ ] R10-T06（NEXT）R10 第一批收口与 R11 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 覆盖准入检查、回滚、常见故障处理；
-    2) 每项附对应脚本/证据路径；
-    3) 与现有脚本输出一致；
-    4) 三项命令验证通过。
-
-- [ ] R10-T05（串行）R10 第一批回归入口与 CI 对齐
-  - 依赖：R10-T01~R10-T04
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
-  - DoD：
-    1) 定义统一入口执行 R10 第一批回归；
-    2) 明确 PASS/FAIL 判定（exit code + 统一标记）；
-    3) CI 复用本地入口命令；
-    4) 三项命令验证通过。
+    1) 判定 R10 第一批状态（done/remaining）；
+    2) 若 close-ready，产出 R11 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 ## Done
 
@@ -810,6 +798,14 @@
     1) 模板固定“通过项/失败项/next-step/是否可试用”；
     2) 与 beta checklist 与一键验证入口口径一致。
 
+- [x] R10-T05（串行）Beta 候选一键验收总入口（整合 checklist/verify/health/report）
+  - 文件：`scripts/run-beta-acceptance.sh`、`scripts/test-run-beta-acceptance.sh`、`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - 验收：
+    1) 单入口串联 checklist runner + beta verify + post-install health + acceptance report；
+    2) 输出统一 PASS/FAIL + 失败 `next:`；
+    3) CI 复用同一入口命令（`make r10-beta-acceptance-regression`）。
+  - 验证：`./scripts/test-run-beta-acceptance.sh` / `make r10-beta-acceptance-regression` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -828,7 +824,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R10-T05（NEXT）：R10 第一批回归入口与 CI 对齐
+1. 立即执行 R10-T06（NEXT）：R10 第一批收口与 R11 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

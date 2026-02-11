@@ -4,7 +4,7 @@ ZIG ?= zig
 BUILD_DIR = zig-out/bin
 TARGET = $(BUILD_DIR)/lan
 
-.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression r7-install-upgrade-regression r8-release-experience-regression r9-ops-readiness-regression package-release clean install fmt
+.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression r7-install-upgrade-regression r8-release-experience-regression r9-ops-readiness-regression r10-beta-acceptance-regression package-release clean install fmt
 
 all: build
 
@@ -48,6 +48,11 @@ r8-release-experience-regression: build
 
 r9-ops-readiness-regression: build
 	./scripts/test-r9-ops-readiness-suite.sh
+
+r10-beta-acceptance-regression: build
+	@pkg="$$(./scripts/package-release.sh 2>&1 | sed -n 's/^\[package\] PASS artifact=\([^ ]*\).*/\1/p')"; \
+	if [ -z "$$pkg" ]; then echo "[r10-beta-acceptance-regression] FAIL reason=package-artifact-missing"; exit 1; fi; \
+	./scripts/run-beta-acceptance.sh "$$pkg" "$(HOME)/.local/bin"
 
 package-release: build
 	./scripts/package-release.sh

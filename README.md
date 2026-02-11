@@ -190,6 +190,22 @@ Output contract:
 - success: `[beta-candidate-verify] PASS ...`
 - fail: `[beta-candidate-verify] FAIL case=... ...` + `next: ...`
 
+## Beta Candidate One-Command Acceptance
+
+```bash
+./scripts/run-beta-acceptance.sh <artifact.tar.gz> [target-dir] [report-out]
+```
+
+This entry chains:
+- `check-beta-readiness`
+- `verify-beta-candidate`
+- `post-install-health`
+- acceptance report template generation
+
+Output contract:
+- success: `[beta-acceptance] PASS ...`
+- fail: `[beta-acceptance] FAIL case=... ...` + `next: ...`
+
 ## Regression Entrypoints (Local + CI)
 
 Unified commands:
