@@ -124,17 +124,16 @@
   - R11-T05 第一批回归入口与 CI 对齐：done
 
 ### R12 第一批原子任务（Beta 小规模试用执行）
-- [ ] R12-T03（NEXT，并行，TDD）Beta 试用结果汇总脚本（summary generator）
-  - 依赖：R12-T02
+- [ ] R12-T04（NEXT，并行，BDD）Beta 风险清单（go/no-go）模板
+  - 依赖：R12-T03
   - 预计时长：1-2 小时
-  - 改动范围：`scripts/summarize-beta-trial.sh`、`scripts/`
+  - 改动范围：`docs/release/beta-go-no-go-template.md`
   - DoD：
-    1) 从试用记录生成通过/失败统计；
-    2) 输出机读字段 + 人话摘要；
-    3) 离线可执行；
-    4) 三项命令验证通过。
+    1) 固定风险项（阻塞/高风险/可接受风险）；
+    2) 每项附证据路径与责任人；
+    3) 与试用汇总口径一致。
 
-- [ ] R12-T04（并行，BDD）Beta 风险清单（go/no-go）模板
+- [ ] R12-T05（串行）R12 第一批回归入口与 CI 对齐
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-trial-tracker-template.md`
   - DoD：
@@ -978,6 +977,14 @@
     2) 字段与反馈模板一致（severity/环境信息/状态）；
     3) 文档人话可读。
 
+- [x] R12-T03（并行，TDD）Beta 试用结果汇总脚本（summary generator）
+  - 文件：`scripts/summarize-beta-trial.sh`、`scripts/test-summarize-beta-trial.sh`
+  - 验收：
+    1) 汇总通过率/失败项/待处理项；
+    2) 输出统一报告（机读 json + 人读 text）；
+    3) 失败项附 `next-step`。
+  - 验证：`./scripts/test-summarize-beta-trial.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -996,7 +1003,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R12-T03（NEXT）：Beta 试用结果汇总脚本（summary generator）
+1. 立即执行 R12-T04（NEXT）：Beta 风险清单（go/no-go）模板
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
