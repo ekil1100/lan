@@ -124,16 +124,15 @@
   - R11-T05 第一批回归入口与 CI 对齐：done
 
 ### R12 第一批原子任务（Beta 小规模试用执行）
-- [ ] R12-T01（NEXT，并行，TDD）Beta 试用环境自检脚本（trial precheck）
+- [ ] R12-T02（NEXT，并行，BDD）Beta 试用登记表模板（批次/设备/状态）
   - 预计时长：1-2 小时
-  - 改动范围：`scripts/trial-precheck.sh`、`scripts/`
+  - 改动范围：`docs/release/beta-trial-tracker-template.md`
   - DoD：
-    1) 检查包路径、可执行权限、反馈模板可用性；
-    2) 输出 PASS/FAIL + next-step；
-    3) 离线可执行；
-    4) 三项命令验证通过。
+    1) 字段覆盖试用批次、设备、执行状态、问题链接；
+    2) 可直接复制使用；
+    3) 与 runbook/反馈模板口径一致。
 
-- [ ] R12-T02（并行，BDD）Beta 试用登记表模板（批次/设备/状态）
+- [ ] R12-T03（并行，TDD）Beta 试用结果汇总脚本（summary generator）
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-trial-tracker-template.md`
   - DoD：
@@ -962,6 +961,14 @@
     3) TASKS 依赖顺序写清（R12-T01~T04 → R12-T05）。
   - 验证：`./scripts/test-r12-beta-trial-ops-suite.sh` / `make r12-beta-trial-ops-regression` 通过。
 
+- [x] R12-T01（并行，TDD）Beta 试用环境自检脚本（trial precheck）
+  - 文件：`scripts/trial-precheck.sh`、`scripts/test-trial-precheck.sh`
+  - 验收：
+    1) 一键自检覆盖环境/路径/基础依赖；
+    2) 输出统一 PASS/FAIL + next-step；
+    3) 机读字段（json lines）与人类摘要（summary）并存。
+  - 验证：`./scripts/test-trial-precheck.sh` 通过。
+
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
   - 验收：
@@ -980,7 +987,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R12-T01（NEXT）：Beta 试用环境自检脚本（trial precheck）
+1. 立即执行 R12-T02（NEXT）：Beta 试用登记表模板（批次/设备/状态）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
