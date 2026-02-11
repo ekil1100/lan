@@ -13,6 +13,37 @@ pub fn addSkill(allocator: std.mem.Allocator, config_dir: []const u8, source_dir
     return addSkillFromRoot(allocator, skills_root, source_dir);
 }
 
+pub fn removeSkill(allocator: std.mem.Allocator, config_dir: []const u8, skill_name: []const u8) ![]const u8 {
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ config_dir, "skills" });
+    defer allocator.free(skills_root);
+    return removeSkillFromRoot(allocator, skills_root, skill_name);
+}
+
+pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, skill_name: []const u8) ![]const u8 {
+    const skill_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, skill_name });
+    defer allocator.free(skill_dir);
+
+    var existing_dir = std.fs.cwd().openDir(skill_dir, .{}) catch {
+        return std.fmt.allocPrint(allocator,
+            "Skill remove failed: not found ({s})\nnext: run `lan skill list` to check installed names, then retry `lan skill remove <name>`.\n",
+            .{skill_name},
+        );
+    };
+    existing_dir.close();
+
+    std.fs.cwd().deleteTree(skill_dir) catch |err| switch (err) {
+        error.AccessDenied, error.PermissionDenied => {
+            return std.fmt.allocPrint(allocator,
+                "Skill remove failed: permission denied ({s})\nnext: check directory permissions under ~/.config/lan/skills and retry.\n",
+                .{skill_name},
+            );
+        },
+        else => return err,
+    };
+
+    return std.fmt.allocPrint(allocator, "Skill removed: name={s}\n", .{skill_name});
+}
+
 pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, source_dir: []const u8) ![]const u8 {
     const src_manifest = try std.fs.path.join(allocator, &[_][]const u8{ source_dir, "manifest.json" });
     defer allocator.free(src_manifest);
@@ -169,6 +200,69 @@ test "skill add returns next-step when manifest invalid" {
     const out = try addSkillFromRoot(allocator, skills_root, source_dir);
     defer allocator.free(out);
     try std.testing.expect(std.mem.indexOf(u8, out, "Skill install failed") != null);
+    try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
+}
+
+test "skill remove keeps list state consistent" {
+    const allocator = std.testing.allocator;
+
+    const tmp_root = try std.fmt.allocPrint(allocator, ".lan_skill_remove_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_root);
+    std.fs.cwd().makeDir(tmp_root) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_root) catch {};
+
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "installed" });
+    defer allocator.free(skills_root);
+
+    const src_dir = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "source" });
+    defer allocator.free(src_dir);
+    try std.fs.cwd().makePath(src_dir);
+
+    const src_manifest = try std.fs.path.join(allocator, &[_][]const u8{ src_dir, "manifest.json" });
+    defer allocator.free(src_manifest);
+    const manifest_text =
+        \\{
+        \\  "name": "demo-skill",
+        \\  "version": "1.0.0",
+        \\  "entry": "run.sh",
+        \\  "tools": ["read"],
+        \\  "permissions": ["workspace.read"]
+        \\}
+    ;
+    try std.fs.cwd().writeFile(.{ .sub_path = src_manifest, .data = manifest_text });
+
+    const add_out = try addSkillFromRoot(allocator, skills_root, src_dir);
+    defer allocator.free(add_out);
+
+    const rm_out = try removeSkillFromRoot(allocator, skills_root, "demo-skill");
+    defer allocator.free(rm_out);
+    try std.testing.expect(std.mem.indexOf(u8, rm_out, "Skill removed") != null);
+
+    const list_out = try listSkillsFromRoot(allocator, skills_root);
+    defer allocator.free(list_out);
+    try std.testing.expect(std.mem.indexOf(u8, list_out, "No skills installed") != null);
+}
+
+test "skill remove shows hint when skill not found" {
+    const allocator = std.testing.allocator;
+
+    const tmp_root = try std.fmt.allocPrint(allocator, ".lan_skill_remove_nf_{d}", .{std.time.timestamp()});
+    defer allocator.free(tmp_root);
+    std.fs.cwd().makeDir(tmp_root) catch |err| switch (err) {
+        error.PathAlreadyExists => {},
+        else => return err,
+    };
+    defer std.fs.cwd().deleteTree(tmp_root) catch {};
+
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ tmp_root, "installed" });
+    defer allocator.free(skills_root);
+
+    const out = try removeSkillFromRoot(allocator, skills_root, "missing-skill");
+    defer allocator.free(out);
+    try std.testing.expect(std.mem.indexOf(u8, out, "Skill remove failed") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "next:") != null);
 }
 
