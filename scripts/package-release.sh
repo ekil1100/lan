@@ -32,4 +32,30 @@ cp ./README.md "$PKG_DIR/"
 
 tar -czf "$PKG_TGZ" -C "$DIST_DIR" "$PKG_NAME"
 
-echo "[package] PASS artifact=${PKG_TGZ}"
+sha_cmd=""
+if command -v shasum >/dev/null 2>&1; then
+  sha_cmd="shasum -a 256"
+elif command -v sha256sum >/dev/null 2>&1; then
+  sha_cmd="sha256sum"
+else
+  echo "[package] FAIL reason=no-sha-tool"
+  exit 1
+fi
+
+checksum_file="${PKG_TGZ}.sha256"
+manifest_file="${DIST_DIR}/${PKG_NAME}.manifest"
+
+checksum="$($sha_cmd "$PKG_TGZ" | awk '{print $1}')"
+echo "$checksum  $(basename "$PKG_TGZ")" > "$checksum_file"
+
+cat > "$manifest_file" <<EOF
+name=$PKG_NAME
+artifact=$(basename "$PKG_TGZ")
+checksum_sha256=$checksum
+os=$OS
+arch=$ARCH
+version=$VERSION
+contains=lan,README.md
+EOF
+
+echo "[package] PASS artifact=${PKG_TGZ} checksum=${checksum_file} manifest=${manifest_file}"

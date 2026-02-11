@@ -59,16 +59,7 @@
   - R6-T05 第一批回归入口与 CI 对齐：done
 
 ### R7 第一批原子任务（安装升级机制强化）
-- [ ] R7-T03（NEXT，TDD）发布产物校验清单（checksum + manifest）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/package-release.sh`、`scripts/`
-  - DoD：
-    1) 生成 checksum 与产物清单；
-    2) 安装前可校验完整性；
-    3) 增加离线校验脚本；
-    4) 三项命令验证通过。
-
-- [ ] R7-T04（BDD）安装/升级说明文档收敛
+- [ ] R7-T04（NEXT，BDD）安装/升级说明文档收敛
   - 预计时长：1-2 小时
   - 改动范围：`README.md`、`docs/`
   - DoD：
@@ -640,11 +631,19 @@
     3) 输出回滚结果与 `next:` 提示。
   - 验证：`./scripts/test-upgrade-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R7-T03（TDD）发布产物校验清单（checksum + manifest）
+  - 文件：`scripts/package-release.sh`、`scripts/verify-package.sh`、`scripts/test-package-release.sh`
+  - 验收：
+    1) 打包时输出 checksum 与 manifest；
+    2) 提供离线校验脚本（`verify-package.sh`）并 PASS/FAIL；
+    3) 校验失败路径输出 `next:` 提示。
+  - 验证：`./scripts/test-package-release.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R7-T03（NEXT）：发布产物校验清单（checksum + manifest）
+1. 立即执行 R7-T04（NEXT）：安装/升级说明文档收敛
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

@@ -6,8 +6,13 @@ cd "$(dirname "$0")/.."
 out="$(./scripts/package-release.sh 2>&1 || true)"
 echo "$out" | grep -q "\[package\] PASS artifact=" || { echo "[package-test] FAIL reason=package-step-failed"; echo "$out"; exit 1; }
 
-artifact="$(echo "$out" | sed -n 's/^\[package\] PASS artifact=\(.*\)$/\1/p')"
+artifact="$(echo "$out" | sed -n 's/^\[package\] PASS artifact=\([^ ]*\).*/\1/p')"
+checksum="$(echo "$out" | sed -n 's/^\[package\] PASS artifact=[^ ]* checksum=\([^ ]*\).*/\1/p')"
+manifest="$(echo "$out" | sed -n 's/^\[package\] PASS artifact=[^ ]* checksum=[^ ]* manifest=\([^ ]*\).*/\1/p')"
+
 [[ -f "$artifact" ]] || { echo "[package-test] FAIL reason=artifact-not-found path=$artifact"; exit 1; }
+[[ -f "$checksum" ]] || { echo "[package-test] FAIL reason=checksum-not-found path=$checksum"; exit 1; }
+[[ -f "$manifest" ]] || { echo "[package-test] FAIL reason=manifest-not-found path=$manifest"; exit 1; }
 
 tmp_dir=".lan_pkg_test_$(date +%s)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -25,5 +30,8 @@ echo "$base" | grep -Eq '^lan-[0-9]+\.[0-9]+\.[0-9]+-(macos|linux)-[^.]+\.tar\.g
   echo "[package-test] FAIL reason=filename-format-invalid name=$base"
   exit 1
 }
+
+verify_out="$(./scripts/verify-package.sh "$artifact" 2>&1 || true)"
+echo "$verify_out" | grep -q "\[verify-package\] PASS" || { echo "[package-test] FAIL reason=verify-failed"; echo "$verify_out"; exit 1; }
 
 echo "[package-test] PASS reason=artifact-validated"
