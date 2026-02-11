@@ -310,6 +310,13 @@
     3) CI 复用本地入口（新增 `Protocol + Observability Suite` 步骤）。
   - 验证：`make protocol-observability` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T16.B（并行）协议+观测回归入口文档化
+  - 文件：`README.md`、`docs/TASKS.md`
+  - 验收：
+    1) 文档补充统一入口用法（`make regression` / `make protocol-observability`）；
+    2) 提供本地执行命令与结果判读示例（exit code + PASS/FAIL）；
+    3) 与 CI 入口一致（CI 同样执行 `make protocol-observability` / `make regression`）。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 

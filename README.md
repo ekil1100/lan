@@ -170,6 +170,27 @@ Parser demo:
 ./scripts/parse-tool-log-sample.sh
 ```
 
+## Regression Entrypoints (Local + CI)
+
+Unified commands:
+
+```bash
+make regression            # Full offline regression suite (used by CI)
+make protocol-observability # Protocol + observability focused suite
+```
+
+Result interpretation:
+- Success: exit code `0` and terminal line contains `PASS`
+- Failure: non-zero exit code and terminal line contains `FAIL` (with reason/case)
+
+Example (local):
+```bash
+make protocol-observability
+# expected on success:
+# [tool-log-parse] PASS
+# [tool-protocol] PASS reason=structure-tests-passed
+```
+
 ## Development
 
 ```bash
