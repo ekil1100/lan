@@ -55,10 +55,28 @@ pub const LLMClient = struct {
         try self.tools.append(tool);
     }
 
-    fn chatByProvider(self: *LLMClient, provider: Provider, messages: []const Message) ![]const u8 {
+    fn selectModelForProvider(provider: Provider) []const u8 {
         return switch (provider) {
-            .kimi, .openai => self.chatOpenAI(messages),
-            .anthropic => self.chatAnthropic(messages),
+            .kimi => "kimi-k2-0711-preview",
+            .openai => "gpt-4o",
+            .anthropic => "claude-3-5-sonnet-20241022",
+        };
+    }
+
+    fn selectBaseUrlForProvider(provider: Provider) []const u8 {
+        return switch (provider) {
+            .kimi => "https://api.moonshot.cn/v1",
+            .openai => "https://api.openai.com/v1",
+            .anthropic => "https://api.anthropic.com/v1",
+        };
+    }
+
+    fn chatByProvider(self: *LLMClient, provider: Provider, messages: []const Message) ![]const u8 {
+        const model = selectModelForProvider(provider);
+        const base_url = selectBaseUrlForProvider(provider);
+        return switch (provider) {
+            .kimi, .openai => self.chatOpenAI(messages, model, base_url),
+            .anthropic => self.chatAnthropic(messages, model, base_url),
         };
     }
 
@@ -71,22 +89,31 @@ pub const LLMClient = struct {
             return error.NoAPIKey;
         }
 
+        const preferred = switch (self.config.route_mode) {
+            .speed => self.config.route_primary,
+            .quality => self.config.route_fallback,
+        };
+        const secondary = switch (self.config.route_mode) {
+            .speed => self.config.route_fallback,
+            .quality => self.config.route_primary,
+        };
+
         var attempts: u8 = 0;
         const max_attempts: u8 = self.config.route_retry + 1;
         while (attempts < max_attempts) : (attempts += 1) {
-            const primary_result = self.chatByProvider(self.config.route_primary, messages);
+            const primary_result = self.chatByProvider(preferred, messages);
             return primary_result catch |primary_err| {
                 if (attempts + 1 < max_attempts) {
                     std.Thread.sleep(200 * std.time.ns_per_ms);
                     continue;
                 }
 
-                if (self.config.route_fallback == self.config.route_primary) return primary_err;
+                if (secondary == preferred) return primary_err;
 
-                const fallback_result = self.chatByProvider(self.config.route_fallback, messages) catch {
+                const fallback_result = self.chatByProvider(secondary, messages) catch {
                     return primary_err;
                 };
-                const hint = try self.fallbackHint(self.config.route_primary, self.config.route_fallback);
+                const hint = try self.fallbackHint(preferred, secondary);
                 defer self.allocator.free(hint);
                 return try std.mem.concat(self.allocator, u8, &[_][]const u8{ hint, fallback_result });
             };
@@ -110,8 +137,8 @@ pub const LLMClient = struct {
         };
     }
 
-    fn chatOpenAI(self: *LLMClient, messages: []const Message) ![]const u8 {
-        const uri_str = try std.fmt.allocPrint(self.allocator, "{s}/chat/completions", .{self.config.base_url});
+    fn chatOpenAI(self: *LLMClient, messages: []const Message, model: []const u8, base_url: []const u8) ![]const u8 {
+        const uri_str = try std.fmt.allocPrint(self.allocator, "{s}/chat/completions", .{base_url});
         defer self.allocator.free(uri_str);
         const uri = try std.Uri.parse(uri_str);
 
@@ -121,7 +148,7 @@ pub const LLMClient = struct {
         var writer = body.writer();
 
         try writer.writeAll("{\"model\":\"");
-        try writer.writeAll(self.config.model);
+        try writer.writeAll(model);
         try writer.writeAll("\",\"messages\":[");
 
         for (messages, 0..) |msg, i| {
@@ -319,8 +346,8 @@ pub const LLMClient = struct {
         return try accumulated.toOwnedSlice();
     }
 
-    fn chatAnthropic(self: *LLMClient, messages: []const Message) ![]const u8 {
-        const uri_str = try std.fmt.allocPrint(self.allocator, "{s}/messages", .{self.config.base_url});
+    fn chatAnthropic(self: *LLMClient, messages: []const Message, model: []const u8, base_url: []const u8) ![]const u8 {
+        const uri_str = try std.fmt.allocPrint(self.allocator, "{s}/messages", .{base_url});
         defer self.allocator.free(uri_str);
         const uri = try std.Uri.parse(uri_str);
 
@@ -330,7 +357,7 @@ pub const LLMClient = struct {
         var writer = body.writer();
 
         try writer.writeAll("{\"model\":\"");
-        try writer.writeAll(self.config.model);
+        try writer.writeAll(model);
         try writer.writeAll("\",\"max_tokens\":4096,\"messages\":[");
 
         for (messages, 0..) |msg, i| {
@@ -384,7 +411,7 @@ pub const LLMClient = struct {
         output_writer: anytype,
     ) ![]const u8 {
         // For now, fall back to non-streaming for Anthropic
-        const response = try self.chatAnthropic(messages);
+        const response = try self.chatAnthropic(messages, selectModelForProvider(.anthropic), selectBaseUrlForProvider(.anthropic));
         try output_writer.writeAll(response);
         return response;
     }
@@ -640,6 +667,7 @@ test "provider fallback hint format is observable and stable" {
     var cfg = Config{
         .allocator = allocator,
         .provider = .kimi,
+        .route_mode = .speed,
         .route_primary = .kimi,
         .route_fallback = .openai,
         .route_retry = 1,

@@ -33,16 +33,7 @@
   - R4-T11 第二批回归入口与 CI 对齐：done
 
 ### R5 第一批原子任务（多模型编排启动）
-- [ ] R5-T03（NEXT，TDD）路由策略 v1：速度优先/质量优先开关
-  - 预计时长：1-2 小时
-  - 改动范围：`src/config.zig`、`src/agent.zig`
-  - DoD：
-    1) 新增 route_mode（speed|quality）；
-    2) 不同模式选择不同 provider/model 组合；
-    3) 保持默认配置兼容；
-    4) 三项命令验证通过。
-
-- [ ] R5-T04（BDD）多模型路由日志标准化（机器可解析）
+- [ ] R5-T04（NEXT，BDD）多模型路由日志标准化（机器可解析）
   - 预计时长：1-2 小时
   - 改动范围：`src/agent.zig`、`README.md`、`scripts/`
   - DoD：
@@ -504,11 +495,19 @@
     3) 提供离线可复现 PASS/FAIL 脚本。
   - 验证：`./scripts/test-provider-fallback.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R5-T03（TDD）路由策略 v1：速度优先/质量优先开关
+  - 文件：`src/config.zig`、`src/llm.zig`
+  - 验收：
+    1) 新增 `route_mode`（speed|quality）并持久化到 config；
+    2) speed/quality 模式选择不同 provider+model 组合（primary-first / fallback-first）；
+    3) 保持默认兼容（未知 mode 回落 speed，默认配置可继续运行）。
+  - 验证：`zig build` / `zig build test` / `make smoke` / `./scripts/test-provider-fallback.sh` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R5-T03（NEXT）：路由策略 v1：速度优先/质量优先开关
+1. 立即执行 R5-T04（NEXT）：多模型路由日志标准化（机器可解析）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

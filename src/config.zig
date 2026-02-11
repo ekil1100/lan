@@ -21,6 +21,23 @@ pub const Provider = enum {
     }
 };
 
+pub const RouteMode = enum {
+    speed,
+    quality,
+
+    pub fn fromString(str: []const u8) RouteMode {
+        if (std.mem.eql(u8, str, "quality")) return .quality;
+        return .speed;
+    }
+
+    pub fn toString(self: RouteMode) []const u8 {
+        return switch (self) {
+            .speed => "speed",
+            .quality => "quality",
+        };
+    }
+};
+
 pub const ProviderRoute = struct {
     primary: Provider,
     fallback: Provider,
@@ -76,6 +93,7 @@ fn parseProviderStrict(str: []const u8) ?Provider {
 pub const Config = struct {
     allocator: std.mem.Allocator,
     provider: Provider,
+    route_mode: RouteMode,
     route_primary: Provider,
     route_fallback: Provider,
     route_retry: u8,
@@ -115,6 +133,7 @@ pub const Config = struct {
         var config = Config{
             .allocator = allocator,
             .provider = .kimi,
+            .route_mode = .speed,
             .route_primary = .kimi,
             .route_fallback = .openai,
             .route_retry = 2,
@@ -138,6 +157,7 @@ pub const Config = struct {
 
         // Parse JSON (simple string matching for now)
         config.provider = parseProviderFromJson(file_content);
+        config.route_primary = config.provider;
         if (parseStringFromJson(allocator, file_content, "\"model\":\"")) |model| {
             allocator.free(config.model);
             config.model = model;
@@ -145,6 +165,10 @@ pub const Config = struct {
         if (parseStringFromJson(allocator, file_content, "\"base_url\":\"")) |base_url| {
             allocator.free(config.base_url);
             config.base_url = base_url;
+        }
+        if (parseStringFromJson(allocator, file_content, "\"route_mode\":\"")) |rm| {
+            defer allocator.free(rm);
+            config.route_mode = RouteMode.fromString(rm);
         }
         if (parseStringFromJson(allocator, file_content, "\"route_primary\":\"")) |rp| {
             defer allocator.free(rp);
@@ -205,6 +229,7 @@ pub const Config = struct {
         try writer.interface.print("  \"provider\": \"{s}\",\n", .{self.provider.toString()});
         try writer.interface.print("  \"model\": \"{s}\",\n", .{self.model});
         try writer.interface.print("  \"base_url\": \"{s}\",\n", .{self.base_url});
+        try writer.interface.print("  \"route_mode\": \"{s}\",\n", .{self.route_mode.toString()});
         try writer.interface.print("  \"route_primary\": \"{s}\",\n", .{self.route_primary.toString()});
         try writer.interface.print("  \"route_fallback\": \"{s}\",\n", .{self.route_fallback.toString()});
         try writer.interface.print("  \"route_retry\": {d},\n", .{self.route_retry});
@@ -236,6 +261,12 @@ pub const Config = struct {
         return std.fmt.parseInt(u32, json[val_start..i], 10) catch null;
     }
 };
+
+test "route mode string parsing keeps default compatibility" {
+    try std.testing.expect(RouteMode.fromString("speed") == .speed);
+    try std.testing.expect(RouteMode.fromString("quality") == .quality);
+    try std.testing.expect(RouteMode.fromString("unknown") == .speed);
+}
 
 test "provider route schema v1 accepts valid sample" {
     const allocator = std.testing.allocator;
