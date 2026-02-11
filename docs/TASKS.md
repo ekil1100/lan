@@ -72,16 +72,7 @@
   - R7-T05 第一批回归入口与 CI 对齐：done
 
 ### R8 第一批原子任务（文档与分发体验收敛）
-- [ ] R8-T03（NEXT，BDD）安装前预检脚本（env/path/permissions）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/preflight.sh`、`scripts/`
-  - DoD：
-    1) 预检 shell、目标路径、写权限、sha 工具可用性；
-    2) 输出 PASS/FAIL + next-step；
-    3) 与 install/upgrade 脚本协同；
-    4) 三项命令验证通过。
-
-- [ ] R8-T04（TDD）最小变更日志生成（release notes stub）
+- [ ] R8-T04（NEXT，TDD）最小变更日志生成（release notes stub）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/`、`docs/`
   - DoD：
@@ -698,11 +689,19 @@
     3) 失败路径输出明确 `next:`。
   - 验证：`./scripts/parse-install-upgrade-log-sample.sh` / `./scripts/test-upgrade-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R8-T03（BDD）安装前预检脚本（env/path/permissions）
+  - 文件：`scripts/preflight.sh`、`scripts/test-preflight.sh`、`scripts/install.sh`、`scripts/upgrade.sh`
+  - 验收：
+    1) 预检 shell、目标路径、写权限、sha 工具可用性；
+    2) 预检输出 PASS/FAIL + next-step；
+    3) install/upgrade 入口已接入 preflight 校验。
+  - 验证：`./scripts/test-preflight.sh` / `./scripts/test-install-local.sh` / `./scripts/test-upgrade-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R8-T03（NEXT）：安装前预检脚本（env/path/permissions）
+1. 立即执行 R8-T04（NEXT）：最小变更日志生成（release notes stub）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

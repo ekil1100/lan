@@ -34,6 +34,13 @@ log_event() {
   echo "install_event phase=${phase} action=${action} target=${target} result=${result} reason=${reason} duration_ms=${duration_ms}"
 }
 
+if ! ./scripts/preflight.sh "$TARGET_DIR" >/dev/null 2>&1; then
+  log_event "end" "install" "$TARGET_DIR" "fail" "preflight_failed"
+  ./scripts/preflight.sh "$TARGET_DIR" || true
+  echo "next: fix preflight issues then retry install"
+  exit 1
+fi
+
 if [[ -z "$PKG_PATH" ]]; then
   log_event "end" "install" "-" "fail" "missing_package_path"
   echo "Install failed: missing package path"

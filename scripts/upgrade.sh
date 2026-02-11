@@ -15,6 +15,13 @@ log_event() {
   echo "install_event phase=${phase} action=${action} target=${target} result=${result} reason=${reason} duration_ms=${duration_ms}"
 }
 
+if ! ./scripts/preflight.sh "$BIN_DIR" >/dev/null 2>&1; then
+  log_event "end" "upgrade" "$BIN_DIR" "fail" "preflight_failed"
+  ./scripts/preflight.sh "$BIN_DIR" || true
+  echo "next: fix preflight issues then retry upgrade"
+  exit 1
+fi
+
 if [[ -z "$PKG_PATH" ]]; then
   log_event "end" "upgrade" "-" "fail" "missing_package_path"
   echo "Upgrade failed: missing package path"
