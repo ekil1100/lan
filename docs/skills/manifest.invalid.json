@@ -1,0 +1,6 @@
+{
+  "name": "",
+  "version": "1.0.0",
+  "entry": "run.sh",
+  "tools": ["read"]
+}

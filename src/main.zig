@@ -2,6 +2,7 @@ const std = @import("std");
 const tui = @import("tui.zig");
 const Agent = @import("agent.zig").Agent;
 const Config = @import("config.zig").Config;
+const _skill_manifest = @import("skill_manifest.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
