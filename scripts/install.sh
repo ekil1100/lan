@@ -35,7 +35,30 @@ if [[ -z "$bin_path" ]]; then
   exit 1
 fi
 
-mkdir -p "$TARGET_DIR"
+if [[ -e "$TARGET_DIR" && ! -d "$TARGET_DIR" ]]; then
+  echo "Install failed: target path is a file ($TARGET_DIR)"
+  echo "next: choose a directory path, e.g. ~/.local/bin"
+  exit 1
+fi
+
+if ! mkdir -p "$TARGET_DIR" 2>/dev/null; then
+  echo "Install failed: cannot create target directory ($TARGET_DIR)"
+  echo "next: check path permissions or use a writable directory"
+  exit 1
+fi
+
+if [[ ! -w "$TARGET_DIR" ]]; then
+  echo "Install failed: target directory not writable ($TARGET_DIR)"
+  echo "next: grant write permission or use another install path"
+  exit 1
+fi
+
+if [[ -d "$TARGET_DIR/lan" ]]; then
+  echo "Install failed: conflict at $TARGET_DIR/lan (is directory)"
+  echo "next: remove/rename that directory then retry install"
+  exit 1
+fi
+
 cp "$bin_path" "$TARGET_DIR/lan"
 chmod +x "$TARGET_DIR/lan"
 

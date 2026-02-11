@@ -59,16 +59,7 @@
   - R6-T05 第一批回归入口与 CI 对齐：done
 
 ### R7 第一批原子任务（安装升级机制强化）
-- [ ] R7-T01（NEXT，TDD）安装路径探测与冲突检查
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/install.sh`、`scripts/`
-  - DoD：
-    1) 安装前检测目标路径冲突（文件/目录/权限）；
-    2) 冲突场景输出 next-step；
-    3) 增加离线 PASS/FAIL 回归；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R7-T02（BDD）升级回滚最小机制（失败可回退）
+- [ ] R7-T02（NEXT，BDD）升级回滚最小机制（失败可回退）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/upgrade.sh`、`scripts/`
   - DoD：
@@ -642,11 +633,19 @@
     2) 预拆 R7 第一批 5 个原子任务（R7-T01~R7-T05）；
     3) 唯一 NEXT 已切换到 R7-T01。
 
+- [x] R7-T01（TDD）安装路径探测与冲突检查
+  - 文件：`scripts/install.sh`、`scripts/test-install-path-conflict.sh`
+  - 验收：
+    1) 安装前检测目标路径冲突（文件/目录/权限）；
+    2) 冲突场景输出 `next:` 指引；
+    3) 增加离线 PASS/FAIL 回归断言。
+  - 验证：`./scripts/test-install-path-conflict.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R7-T01（NEXT）：安装路径探测与冲突检查
+1. 立即执行 R7-T02（NEXT）：升级回滚最小机制（失败可回退）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
