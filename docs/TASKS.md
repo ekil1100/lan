@@ -85,16 +85,7 @@
   - R8-T05 第一批回归入口与 CI 对齐：done
 
 ### R9 第一批原子任务（发布后运维体验）
-- [ ] R9-T02（NEXT，BDD）自修复建议模板（按失败类型映射）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/`、`docs/`
-  - DoD：
-    1) 常见失败（权限/路径/校验）映射到标准 next-step；
-    2) 与 install/upgrade/preflight 错误口径一致；
-    3) 增加离线断言脚本；
-    4) 三项命令验证通过。
-
-- [ ] R9-T03（TDD）离线诊断打包（support bundle stub）
+- [ ] R9-T03（NEXT，TDD）离线诊断打包（support bundle stub）
   - 预计时长：1-2 小时
   - 改动范围：`scripts/support-bundle.sh`、`scripts/`
   - DoD：
@@ -767,11 +758,19 @@
     3) JSON 与文本语义一致（同 reason/next）。
   - 验证：`./scripts/test-preflight.sh` / `./scripts/test-preflight-json.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R9-T02（并行，BDD）发布说明模板参数化（版本/日期/commit 注入）
+  - 文件：`scripts/release-notes.sh`、`scripts/test-release-notes.sh`
+  - 验收：
+    1) release notes stub 支持版本/日期/commit 参数注入；
+    2) 模板缺参时输出明确 FAIL + `next:`；
+    3) 输出格式与现有发布流程兼容。
+  - 验证：`./scripts/test-release-notes.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R9-T02（NEXT）：自修复建议模板（按失败类型映射）
+1. 立即执行 R9-T03（NEXT）：离线诊断打包（support bundle stub）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
