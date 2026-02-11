@@ -111,15 +111,17 @@
   - R10-T05 Beta 一键验收总入口与 CI 对齐：done
 
 ### R11 第一批原子任务（Beta 试用准备）
-- [ ] R11-T02（NEXT，并行，BDD）试用反馈模板（问题分级+复现信息）
+- [ ] R11-T03（NEXT，并行，TDD）Beta 回滚演练脚本
+  - 依赖：R11-T01
   - 预计时长：1-2 小时
-  - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
+  - 改动范围：`scripts/rehearse-beta-rollback.sh`、`scripts/`
   - DoD：
-    1) 模板覆盖严重级别、复现步骤、环境信息；
-    2) 与当前故障清单/next-step 口径一致；
-    3) 文档人话可读。
+    1) 演练升级失败后的恢复流程；
+    2) 输出 PASS/FAIL + next-step；
+    3) 离线可执行；
+    4) 三项命令验证通过。
 
-- [ ] R11-T03（并行，TDD）Beta 回滚演练脚本
+- [ ] R11-T04（并行，BDD）Beta 试用 runbook（最小版）
   - 预计时长：1-2 小时
   - 改动范围：`docs/release/beta-feedback-template.md`、`README.md`
   - DoD：
@@ -871,6 +873,13 @@
     3) 与 beta 验收入口口径一致（checklist/verify/health/acceptance）。
   - 验证：`./scripts/test-snapshot-beta-acceptance.sh` 通过。
 
+- [x] R11-T02（并行，BDD）试用反馈模板（问题分级+复现信息）
+  - 文件：`docs/release/beta-feedback-template.md`、`docs/release/beta-trial-runbook.md`
+  - 验收：
+    1) 模板覆盖严重级别/复现步骤/环境信息；
+    2) 提供可直接复制版本用于收集反馈；
+    3) 字段与 runbook 一致（severity/environment/repro/evidence/next_step/triage）。
+
 - [x] R11-Prep-A（并行）里程碑估时口径修正（小时优先）并落文档
   - 文件：`docs/ROADMAP.md`
   - 结果：
@@ -896,7 +905,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R11-T02（NEXT）：试用反馈模板（问题分级+复现信息）
+1. 立即执行 R11-T03（NEXT）：Beta 回滚演练脚本
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
