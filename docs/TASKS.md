@@ -14,16 +14,7 @@
   - R3-T16 观测与协议入口汇总（本地/CI）：done
 
 ### R4 第一批原子任务（Skill Runtime v1 启动）
-- [ ] R4-T01（NEXT，TDD）Skill manifest schema v1（最小字段）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/`、`docs/`
-  - DoD：
-    1) 定义 manifest 最小字段（name/version/entry/tools/permissions）；
-    2) 提供 1 份合法 + 1 份非法样例；
-    3) 增加 schema 校验测试；
-    4) `zig build && zig build test && make smoke` 通过。
-
-- [ ] R4-T02（TDD）`lan skill list` 最小闭环（本地索引）
+- [ ] R4-T02（NEXT，TDD）`lan skill list` 最小闭环（本地索引）
   - 预计时长：1-2 小时
   - 改动范围：`src/`、`README.md`
   - DoD：
@@ -370,11 +361,19 @@
     3) 已接入 `make protocol-observability` 与总回归入口。
   - 验证：`make protocol-observability` 通过。
 
+- [x] R4-T01（TDD）Skill manifest schema v1（最小字段）
+  - 文件：`src/skill_manifest.zig`、`src/main.zig`、`docs/skills/manifest.valid.json`、`docs/skills/manifest.invalid.json`
+  - 验收：
+    1) 定义最小字段：`name/version/entry/tools/permissions`；
+    2) 提供 1 份合法 + 1 份非法样例；
+    3) 增加 schema 校验测试（valid/invalid）。
+  - 验证：`zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T01（NEXT）：Skill manifest schema v1（最小字段）
+1. 立即执行 R4-T02（NEXT）：`lan skill list` 最小闭环（本地索引）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
