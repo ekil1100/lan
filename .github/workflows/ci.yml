@@ -29,6 +29,9 @@ jobs:
       - name: Smoke
         run: make smoke
 
+      - name: Regression Suite
+        run: make regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:

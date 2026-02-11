@@ -14,17 +14,7 @@
   2) 不改动模型调用链路与 Skill Runtime；
   3) 不重复已完成项（R3-T01 ~ R3-T05）。
 
-- [ ] R3-T09（NEXT，BDD，串行）脚本与 CI 对齐：统一执行入口与失败判定
-  - 依赖：R3-T07 / R3-T08（先完成再对齐入口）
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`scripts/`
-  - DoD：
-    1) 定义统一入口命令（本地/CI 同一套）；
-    2) 明确通过标准与失败判定（exit code + PASS/FAIL 文本）；
-    3) CI 可直接复用本地入口；
-    4) 三项命令验证通过。
-
-- [ ] R3-T10（收敛）R3 第二批任务收口与依赖编排
+- [ ] R3-T10（NEXT，收敛）R3 第二批任务收口与依赖编排
   - 预计时长：0.5-1 小时
   - 改动范围：`docs/TASKS.md`（必要时 `docs/ROADMAP.md`）
   - DoD：
@@ -242,11 +232,19 @@
     3) 正常短命令成功路径保持不变。
   - 验证：`./scripts/test-exec-priority.sh` / `zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R3-T09（BDD，串行）脚本与 CI 对齐：统一执行入口与失败判定
+  - 文件：`Makefile`、`.github/workflows/ci.yml`、`scripts/test-regression-suite.sh`
+  - 验收：
+    1) 统一入口命令：`make regression`（本地/CI 同一套）；
+    2) 通过标准与失败判定：exit code + `[regression-suite] PASS`；
+    3) CI 直接复用本地入口（新增 Regression Suite 步骤）。
+  - 验证：`make regression` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T09（NEXT）：脚本与 CI 对齐（统一入口与失败判定）
+1. 立即执行 R3-T10（NEXT）：R3 第二批任务收口与依赖编排
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件

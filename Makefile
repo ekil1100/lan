@@ -4,7 +4,7 @@ ZIG ?= zig
 BUILD_DIR = zig-out/bin
 TARGET = $(BUILD_DIR)/lan
 
-.PHONY: all build run test smoke smoke-online clean install fmt
+.PHONY: all build run test smoke smoke-online regression clean install fmt
 
 all: build
 
@@ -22,6 +22,9 @@ smoke: build
 
 smoke-online: build
 	./scripts/smoke-online.sh
+
+regression: build
+	./scripts/test-regression-suite.sh
 
 clean:
 	rm -rf .zig-cache zig-out
