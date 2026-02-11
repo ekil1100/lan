@@ -160,8 +160,16 @@
   - R14-T03 ROADMAP 里程碑切换：done
   - R14-T04 第一批回归入口与 CI 对齐：done
 
-### R15 第一批原子任务（Beta 发布基建）
-- [ ] R15-T01（NEXT，串行）CD release workflow 补充跨平台构建矩阵
+### R15 第一批收口结论
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R15-T01 跨平台 release workflow：done
+  - R15-T02 Issue templates：done
+  - R15-T03 README Beta 更新：done
+  - R15-T04 release-notes 自动分类：done
+
+### R16 第一批原子任务（待拆解）
+- [ ] R16-T00（NEXT）R16 第一批任务拆解
   - 预计时长：1-2 小时
   - 改动范围：`.github/workflows/release.yml`
   - DoD：
@@ -1069,6 +1077,25 @@
   - 文件：`Makefile`、`scripts/test-r14-beta-launch-suite.sh`、`docs/TASKS.md`
   - 验收：`make r14-beta-launch-regression` 通过；统一 PASS/FAIL 标识。
 
+- [x] R15-T00（拆解）R15 第一批任务拆解
+  - 文件：`docs/TASKS.md`
+
+- [x] R15-T01（串行）CD release workflow 跨平台构建矩阵
+  - 文件：`.github/workflows/release.yml`
+  - 验收：matrix build (ubuntu + macos)，独立 artifact 上传到同一 release。
+
+- [x] R15-T02（并行）Beta 反馈收集模板与 issue template
+  - 文件：`.github/ISSUE_TEMPLATE/bug_report.yml`、`.github/ISSUE_TEMPLATE/feature_request.yml`
+  - 验收：bug report 含环境/复现步骤/严重等级；feature request 含分类/动机/方案。
+
+- [x] R15-T03（串行）README Beta 文档更新
+  - 文件：`README.md`
+  - 验收：Beta 徽章 + release 安装方式 + 反馈渠道入口。
+
+- [x] R15-T04（并行）release-notes.sh 增强为自动分类
+  - 文件：`scripts/release-notes.sh`、`scripts/test-release-notes.sh`
+  - 验收：自动分类 feat/fix/docs/ci/other；向后兼容参数接口。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1102,7 +1129,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R15-T01（NEXT）：CD release workflow 补充跨平台构建矩阵
+1. 立即执行 R16-T00（NEXT）：R16 第一批任务拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
