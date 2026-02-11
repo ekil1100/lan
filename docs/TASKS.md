@@ -432,11 +432,19 @@
     3) 现有合法样例保持通过。
   - 验证：`zig build` / `zig build test` / `make smoke` 通过。
 
+- [x] R4-T08（BDD）`lan skill update`（本地覆盖安装）最小闭环
+  - 文件：`src/main.zig`、`src/skills.zig`、`scripts/test-skill-update-local.sh`
+  - 验收：
+    1) 支持 `lan skill update <local-dir>`；
+    2) 更新前后 `lan skill list` 可见版本变化；
+    3) 无目标 skill 时返回 `next:` 提示。
+  - 验证：`./scripts/test-skill-update-local.sh` / `zig build` / `zig build test` / `make smoke` 通过。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R4-T08（NEXT）：`lan skill update`（本地覆盖安装）最小闭环
+1. 立即执行 R4-T09（NEXT）：Skill 索引文件落地（metadata snapshot）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
