@@ -137,38 +137,13 @@
   - R12-T05 第一批回归入口与 CI 对齐：done
 
 ### R13 第一批原子任务（Beta 运营质量提升）
-- [ ] R13-T01（NEXT，并行）Beta 试用结果聚合脚本增强（跨批次统计）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/summarize-beta-trial.sh`、`scripts/test-summarize-beta-trial.sh`、`docs/release/`
+- [ ] R13-T05（NEXT）R13 第一批收口与 R14 启动拆解
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
   - DoD：
-    1) 支持多批次输入并输出 pass_rate/failed/pending 汇总；
-    2) 输出 machine-readable + human summary；
-    3) 新增回归脚本并通过。
-
-- [ ] R13-T02（并行）Go/No-Go 模板校验器（字段完整性）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/validate-beta-go-no-go.sh`、`scripts/test-validate-beta-go-no-go.sh`、`docs/release/`
-  - DoD：
-    1) 校验 owner/mitigation/due/pass_rate 等关键字段；
-    2) 缺失时非0退出并输出 next-step；
-    3) 文档补一条可复现命令。
-
-- [ ] R13-T03（并行）Trial 证据目录一致性检查（tracker/report/snapshot 对账）
-  - 预计时长：1-2 小时
-  - 改动范围：`scripts/check-trial-artifact-consistency.sh`、`scripts/test-check-trial-artifact-consistency.sh`
-  - DoD：
-    1) 校验 run_id/batch_id 映射一致；
-    2) 输出 PASS/FAIL 与不一致清单；
-    3) 保留机读字段供 CI/脚本消费。
-
-- [ ] R13-T04（串行收口）R13 第一批回归入口与 CI 对齐预留
-  - 依赖：R13-T01~R13-T03
-  - 预计时长：1 小时
-  - 改动范围：`Makefile`、`scripts/test-r13-beta-trial-ops-suite.sh`、`docs/TASKS.md`
-  - DoD：
-    1) 新增统一入口（如 `make r13-beta-trial-ops-regression`）；
-    2) 输出统一 PASS/FAIL 标识；
-    3) 在 TASKS 写清依赖顺序（T01~T03 -> T04）。
+    1) 判定 R13 第一批状态（done/remaining）；
+    2) 若 close-ready，产出 R14 第一批 3-5 个原子任务；
+    3) 指定唯一 NEXT。
 
 
 ## Done
@@ -1007,6 +982,14 @@
     2) 预拆 R13 第一批 4 个原子任务（含目标/DoD/预计时长/依赖）；
     3) 唯一 NEXT 切换到 R13-T01。
 
+- [x] R13-T01（并行）Beta 试用结果聚合脚本增强（跨批次统计）
+  - 文件：`scripts/summarize-beta-trial.sh`、`scripts/test-summarize-beta-trial.sh`、`docs/release/beta-go-no-go-template.md`
+  - 验收：
+    1) 支持多批次输入并输出 pass_rate/failed/pending 汇总；
+    2) 输出 machine-readable + human summary；
+    3) 新增回归脚本并通过。
+  - 验证：`./scripts/test-summarize-beta-trial.sh` 通过。
+
 - [x] R13-T02（并行）Go/No-Go 模板校验器（字段完整性）
   - 文件：`scripts/validate-beta-go-no-go.sh`、`scripts/test-validate-beta-go-no-go.sh`、`docs/release/beta-go-no-go-template.md`
   - 验收：
@@ -1022,6 +1005,14 @@
     2) 输出 PASS/FAIL 与不一致清单；
     3) 保留机读字段供 CI/脚本消费。
   - 验证：`./scripts/test-check-trial-artifact-consistency.sh` 通过。
+
+- [x] R13-T04（串行收口）R13 第一批回归入口与 CI 对齐预留
+  - 文件：`scripts/test-r13-beta-trial-ops-suite.sh`、`Makefile`、`docs/TASKS.md`
+  - 验收：
+    1) 新增统一入口：`make r13-beta-trial-ops-regression`；
+    2) 输出统一 PASS/FAIL 标识：`[r13-beta-trial-ops-suite] PASS/FAIL ...`；
+    3) TASKS 依赖顺序清晰（R13-T01~T03 -> R13-T04）。
+  - 验证：`make r13-beta-trial-ops-regression` 通过。
 
 - [x] R10-Prep-A（并行预拆）Beta 准入清单文档化（人话版）
   - 文件：`docs/release/beta-entry-checklist.md`、`docs/ROADMAP.md`
@@ -1041,7 +1032,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R13-T01（NEXT）：Beta 试用结果聚合脚本增强（跨批次统计）
+1. 立即执行 R13-T05（NEXT）：R13 第一批收口与 R14 启动拆解
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
