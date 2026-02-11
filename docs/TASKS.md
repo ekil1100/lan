@@ -4,23 +4,61 @@
 
 ## In Progress
 
-### R3 第三批设计说明（R3-T11.A/B）
-- **聚焦主题**：Tool 协议与可观测性（Protocol + Observability）
-- **不重叠约束**：
-  1) 不重复 R3-T01~T10 已完成内容（错误码规范、日志最小落地、超时/非零退出、CI入口对齐）；
-  2) 本批不新增在线 API 测试，不进入 Skill Runtime。
-- **依赖顺序（并行/串行）**：
-  - 并行：R3-T13（耗时指标） 与 R3-T14（日志格式）
-  - 串行：R3-T12（协议结构） -> R3-T15（协议回归断言） -> R3-T16（本地/CI入口汇总）
-  - 收敛规则：唯一 NEXT 仅允许一个，当前为 R3-T12
+### R3 第三批收口结论（R3-T17）
+- **状态判定**：close-ready ✅
+- **第三批任务状态**：
+  - R3-T12 Tool 协议响应结构 v1：done
+  - R3-T13 Tool 调用耗时指标 duration_ms：done
+  - R3-T14 Tool 观测日志格式稳定化：done
+  - R3-T15 Tool 协议回归脚本 v1：done
+  - R3-T16 观测与协议入口汇总（本地/CI）：done
 
-- [ ] R3-T17（NEXT）R3 第三批收口与 R4 启动拆解
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`（如需）
+### R4 第一批原子任务（Skill Runtime v1 启动）
+- [ ] R4-T01（NEXT，TDD）Skill manifest schema v1（最小字段）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/`、`docs/`
   - DoD：
-    1) 第三批任务状态可判定（done/remaining）；
-    2) 若 close-ready，产出 R4 第一批 3-5 个原子任务；
-    3) 指定唯一 NEXT。
+    1) 定义 manifest 最小字段（name/version/entry/tools/permissions）；
+    2) 提供 1 份合法 + 1 份非法样例；
+    3) 增加 schema 校验测试；
+    4) `zig build && zig build test && make smoke` 通过。
+
+- [ ] R4-T02（TDD）`lan skill list` 最小闭环（本地索引）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/`、`README.md`
+  - DoD：
+    1) 可列出已安装 skill（名称/版本/路径）；
+    2) 无 skill 时给出可操作提示；
+    3) 保持离线可运行；
+    4) 三项命令验证通过。
+
+- [ ] R4-T03（BDD）`lan skill add` 本地目录安装（无网络）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/`、`scripts/`
+  - DoD：
+    1) 支持从本地目录安装 skill；
+    2) 安装前做 manifest 校验，失败给 next-step；
+    3) 提供可复现脚本（PASS/FAIL）；
+    4) 三项命令验证通过。
+
+- [ ] R4-T04（BDD）`lan skill remove` 卸载与状态一致性
+  - 预计时长：1-2 小时
+  - 改动范围：`src/`、`scripts/`
+  - DoD：
+    1) 支持按名称卸载 skill；
+    2) list 与索引状态保持一致；
+    3) 错误路径（不存在/权限）可解释；
+    4) 三项命令验证通过。
+
+- [ ] R4-T05（串行）R4 第一批回归入口与 CI 对齐
+  - 依赖：R4-T01~R4-T04
+  - 预计时长：1 小时
+  - 改动范围：`Makefile`、`.github/workflows/ci.yml`、`docs/TASKS.md`
+  - DoD：
+    1) 定义统一入口执行 R4 第一批回归；
+    2) 明确 PASS/FAIL 判定；
+    3) CI 复用本地入口；
+    4) 三项命令验证通过。
 
 ## Done
 
@@ -317,11 +355,18 @@
     2) 提供本地执行命令与结果判读示例（exit code + PASS/FAIL）；
     3) 与 CI 入口一致（CI 同样执行 `make protocol-observability` / `make regression`）。
 
+- [x] R3-T17（收口）R3 第三批收口与 R4 启动拆解
+  - 文件：`docs/TASKS.md`
+  - 结论：
+    1) R3 第三批（R3-T12~R3-T16）全部 done，close-ready；
+    2) 已产出 R4 第一批 5 个原子任务（R4-T01~R4-T05）；
+    3) 唯一 NEXT 已切换到 R4-T01。
+
 ## Blocked
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R3-T17（NEXT）：R3 第三批收口与 R4 启动拆解
+1. 立即执行 R4-T01（NEXT）：Skill manifest schema v1（最小字段）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
