@@ -9,8 +9,15 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64
+          - os: macos-latest
+            target: macos-aarch64
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,11 +39,39 @@ jobs:
       - name: Package release artifact
         run: make package-release
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+            dist/*.manifest
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.15.2
+
       - name: Generate release notes
         env:
           VERSION: ${{ github.ref_name }}
           RELEASE_COMMIT: ${{ github.sha }}
         run: |
+          mkdir -p dist
           RELEASE_DATE="$(git show -s --format=%cI "$GITHUB_SHA")"
           ./scripts/release-notes.sh "HEAD~20..HEAD" dist/release-notes.md "$VERSION" "$RELEASE_DATE" "$RELEASE_COMMIT"
 
