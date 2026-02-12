@@ -409,14 +409,55 @@
     2) `docs/errors.md` 可查询完整列表；
     3) 回归测试覆盖。
 
-- [ ] R29-T04（串行收口）R29 收口与 GA 准备
+- [ ] R29-T04（串行收口）R29 收口与 R30 拆解
   - 依赖：R29-T01~R29-T03
   - 预计时长：0.5 小时
-  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`
+  - 改动范围：`docs/TASKS.md`
   - DoD：
-    1) R29 close-ready；
-    2) GA v1.0 最终检查清单；
-    3) 唯一 NEXT（或宣布 GA）。
+    1) R29 标记 close-ready；
+    2) R30 第一批 3-5 个原子任务；
+    3) 唯一 NEXT。
+
+### R29 第一批收口结论（R29-T04）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R29-T01 Config 热重载：done
+  - R29-T02 Skill 缓存：done
+  - R29-T03 Markdown 导出：done
+
+### R30 第一批原子任务（Beta 迭代 IV - 最终准备）
+- [ ] R30-T01（NEXT，并行）Error code 统一落地
+  - 预计时长：2-3 小时
+  - 改动范围：`src/`、`docs/errors.md`
+  - DoD：
+    1) 所有 error 输出使用 E1xx/E2xx/E3xx/E4xx 编码；
+    2) `docs/errors.md` 可查询完整列表；
+    3) 回归测试覆盖。
+
+- [ ] R30-T02（并行）CI 产物最终验证
+  - 预计时长：0.5-1 小时
+  - 改动范围：GitHub Release、本地验证
+  - DoD：
+    1) `v0.1.0-beta` artifact 验证通过；
+    2) macOS + Linux 双平台安装测试通过；
+    3) checklist 全部 ☑。
+
+- [ ] R30-T03（并行）文档最终审查
+  - 预计时长：1 小时
+  - 改动范围：`README.md`、`docs/`、`CONTRIBUTING.md`
+  - DoD：
+    1) 无死链；
+    2) 安装命令正确；
+    3) 版本号一致。
+
+- [ ] R30-T04（串行收口）R30 收口与 GA 宣布
+  - 依赖：R30-T01~R30-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
+  - DoD：
+    1) R30 close-ready；
+    2) GA v1.0 宣布（或定义延期条件）；
+    3) 唯一 NEXT（或宣布项目进入维护模式）。
 
 
 ## Done
@@ -1565,6 +1606,22 @@
   - 文件：`docs/TASKS.md`
   - 结果：R28 close-ready；R29 第一批 4 个原子任务已拆；NEXT → R29-T01。
 
+- [x] R29-T01（并行）Config 热重载
+  - 文件：`src/config.zig`、`src/main.zig`、`scripts/test-config-reload.sh`
+  - 验收：`lan config reload` 命令，Config.reload() 函数。
+
+- [x] R29-T02（并行）Skill 缓存
+  - 文件：`scripts/skill-cache.sh`
+  - 验收：list/get/put/clean 操作，7 天 TTL。
+
+- [x] R29-T03（并行）Markdown 导出
+  - 文件：`src/main.zig`
+  - 验收：`lan history export --format markdown` 支持。
+
+- [x] R29-T04（串行收口）R29 收口与 R30 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R29 close-ready；R30 第一批 4 个原子任务已拆；NEXT → R30-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1598,7 +1655,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R29-T01（NEXT）：Config 热重载支持
+1. 立即执行 R30-T01（NEXT）：Error code 统一落地
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
