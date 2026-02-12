@@ -46,6 +46,37 @@ else
   echo "log_status=missing path=${LOG_FILE}" > "$recent_log"
 fi
 
+# history summary (message count, no content)
+history_summary="$work_dir/history-summary.txt"
+history_file="$CONFIG_DIR/history.json"
+if [[ -f "$history_file" ]]; then
+  msg_count="$(python3 -c "import json; print(len(json.load(open('$history_file'))))" 2>/dev/null || echo "parse_error")"
+  file_size="$(wc -c < "$history_file" | xargs)"
+  echo "history_messages=$msg_count" > "$history_summary"
+  echo "history_file_bytes=$file_size" >> "$history_summary"
+else
+  echo "history_status=missing" > "$history_summary"
+fi
+
+# config snapshot (redacted, structured)
+config_snapshot="$work_dir/config-snapshot.json"
+if [[ -f "$CONFIG_DIR/config.json" ]]; then
+  python3 -c "
+import json,sys,re
+with open(sys.argv[1]) as f:
+    d=json.load(f)
+def redact(obj):
+    if isinstance(obj,dict):
+        return {k: '***REDACTED***' if any(s in k.lower() for s in ['key','token','secret','password']) else redact(v) for k,v in obj.items()}
+    if isinstance(obj,list):
+        return [redact(i) for i in obj]
+    return obj
+json.dump(redact(d),open(sys.argv[2],'w'),indent=2)
+" "$CONFIG_DIR/config.json" "$config_snapshot" 2>/dev/null || echo '{"error":"parse_failed"}' > "$config_snapshot"
+else
+  echo '{"error":"config_not_found"}' > "$config_snapshot"
+fi
+
 # manifest
 cat > "$work_dir/manifest.txt" <<EOF
 bundle=${bundle_name}
