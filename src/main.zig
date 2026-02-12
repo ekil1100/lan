@@ -187,6 +187,52 @@ pub fn main() !void {
         return;
     }
 
+    // lan history stats — show statistics about session history
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "stats")) {
+        var cfg_s = try Config.load(allocator);
+        defer cfg_s.deinit();
+        const hp = try std.fs.path.join(allocator, &[_][]const u8{ cfg_s.config_dir, "history.json" });
+        defer allocator.free(hp);
+        const raw = std.fs.cwd().readFileAlloc(allocator, hp, 4 * 1024 * 1024) catch |err| {
+            var eb: [4096]u8 = undefined;
+            var ew2 = std.fs.File.stdout().writer(&eb);
+            try ew2.interface.print("History stats failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew2.interface.flush();
+            return;
+        };
+        defer allocator.free(raw);
+
+        // Count messages and roles (simple string matching)
+        var total: usize = 0;
+        var system: usize = 0;
+        var user: usize = 0;
+        var assistant: usize = 0;
+
+        var i: usize = 0;
+        while (i < raw.len) : (i += 1) {
+            if (std.mem.startsWith(u8, raw[i..], "{\"role\":")) {
+                total += 1;
+                if (std.mem.indexOf(u8, raw[i..i+30], "\"system\"") != null) {
+                    system += 1;
+                } else if (std.mem.indexOf(u8, raw[i..i+30], "\"user\"") != null) {
+                    user += 1;
+                } else if (std.mem.indexOf(u8, raw[i..i+30], "\"assistant\"") != null) {
+                    assistant += 1;
+                }
+            }
+        }
+
+        const file_size = raw.len;
+
+        var sb: [1024]u8 = undefined;
+        var sw = std.fs.File.stdout().writer(&sb);
+        try sw.interface.print("{{\"total\":{d},\"system\":{d},\"user\":{d},\"assistant\":{d},\"file_bytes\":{d}}}\n", .{
+            total, system, user, assistant, file_size,
+        });
+        try sw.interface.flush();
+        return;
+    }
+
     // lan history clear — delete history file
     if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "clear")) {
         var cfg_c = try Config.load(allocator);
