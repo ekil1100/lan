@@ -15,6 +15,39 @@ pub fn main() !void {
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
 
+    if (args.len >= 2 and (std.mem.eql(u8, args[1], "help") or std.mem.eql(u8, args[1], "--help") or std.mem.eql(u8, args[1], "-h"))) {
+        var hb: [4096]u8 = undefined;
+        var hw = std.fs.File.stdout().writer(&hb);
+        try hw.interface.writeAll(
+            \\lan — a fast, skill-native agent CLI/TUI
+            \\
+            \\Usage: lan [command] [options]
+            \\
+            \\Commands:
+            \\  (none)             Start interactive TUI session
+            \\  help               Show this help message
+            \\  --version          Show version, commit, and build time
+            \\  config init        Generate default config file
+            \\  skill list         List installed skills
+            \\  skill add <dir>    Install skill from local directory
+            \\  skill update <dir> Update installed skill from local directory
+            \\  skill remove <name> Remove installed skill by name
+            \\  history export     Export session history as JSON
+            \\  history search <q> Search history by keyword (JSON output)
+            \\  history clear      Clear session history
+            \\
+            \\Diagnostics (scripts):
+            \\  ./scripts/lan-doctor.sh       Run comprehensive diagnostics
+            \\  ./scripts/preflight.sh <dir>  Pre-install environment check
+            \\  ./scripts/support-bundle.sh   Generate support bundle
+            \\
+            \\Documentation: docs/
+            \\
+        );
+        try hw.interface.flush();
+        return;
+    }
+
     if (args.len >= 2 and std.mem.eql(u8, args[1], "--version")) {
         var buf: [4096]u8 = undefined;
         var writer = std.fs.File.stdout().writer(&buf);
