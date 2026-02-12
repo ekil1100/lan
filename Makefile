@@ -4,7 +4,7 @@ ZIG ?= zig
 BUILD_DIR = zig-out/bin
 TARGET = $(BUILD_DIR)/lan
 
-.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression r7-install-upgrade-regression r8-release-experience-regression r9-ops-readiness-regression r10-beta-acceptance-regression r11-beta-trial-regression r12-beta-trial-ops-regression r12-beta-trial-execution-regression r13-beta-trial-ops-regression r14-beta-launch-regression r17-quality-regression r18-feature-regression r19-stability-regression r20-crossplatform-regression r21-ux-regression r22-observability-regression r23-features-regression full-regression package-release clean install fmt
+.PHONY: all build run test smoke smoke-online regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression r7-install-upgrade-regression r8-release-experience-regression r9-ops-readiness-regression r10-beta-acceptance-regression r11-beta-trial-regression r12-beta-trial-ops-regression r12-beta-trial-execution-regression r13-beta-trial-ops-regression r14-beta-launch-regression r17-quality-regression r18-feature-regression r19-stability-regression r20-crossplatform-regression r21-ux-regression r22-observability-regression r23-features-regression r24-prerelease-regression full-regression package-release clean install fmt
 
 all: build
 
@@ -89,6 +89,9 @@ r22-observability-regression: build
 
 r23-features-regression: build
 	./scripts/test-r23-features-suite.sh
+
+r24-prerelease-regression: build
+	./scripts/test-r24-prerelease-suite.sh
 
 full-regression: build test smoke regression protocol-observability r4-skill-regression r5-routing-regression r6-release-regression r7-install-upgrade-regression r8-release-experience-regression r9-ops-readiness-regression r11-beta-trial-regression r12-beta-trial-ops-regression r12-beta-trial-execution-regression r13-beta-trial-ops-regression r14-beta-launch-regression r17-quality-regression r18-feature-regression r19-stability-regression r20-crossplatform-regression r21-ux-regression
 	@echo "[full-regression] PASS"
