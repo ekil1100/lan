@@ -174,3 +174,16 @@
 | 运维文档与诊断包 | ☑ | lan-doctor, support-bundle 就绪 |
 | 发布流程稳定 | ☑ | v0.1.0-beta 已发布 |
 | P0/P1 issue 清零 | ☐ | 监控中 |
+
+## R28 - Beta 迭代 II（功能增强）（已完成 ✅，2026-02-12）
+
+**目标**：建立 Skill 注册表雏形，优化 TUI 体验，实现 Provider 降级策略。
+
+### 里程碑
+- [x] Skill registry 设计（JSON index 格式，search/install 命令）
+- [x] TUI 体验优化（完整 help 快捷键列表，loading 指示器）
+- [x] Provider 降级策略（fallback logging，可观测性）
+
+### 状态
+- 完成日期：2026-02-12
+- 技术债务：skill install 远程实现待完成（依赖 registry 托管方案）
