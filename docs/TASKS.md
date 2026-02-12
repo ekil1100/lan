@@ -450,7 +450,7 @@
     2) 安装命令正确；
     3) 版本号一致。
 
-- [ ] R30-T04（串行收口）R30 收口与 GA 宣布
+- [x] R30-T04（串行收口）R30 收口与 GA 宣布
   - 依赖：R30-T01~R30-T03
   - 预计时长：0.5 小时
   - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
@@ -459,7 +459,49 @@
     2) GA v1.0 宣布（或定义延期条件）；
     3) 唯一 NEXT（或宣布项目进入维护模式）。
 
-### R30 第一批收口结论（R30-T04）
+### R31 第一批原子任务（CI 修复预案 - 预防性）
+- [ ] R31-T01（NEXT，并行）CI 修复预案准备（错误码 E5xx 文档）
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/errors.md`
+  - DoD：
+    1) 添加 CI 相关错误码 E5xx 说明；
+    2) 覆盖 workflow 语法、artifact 缺失、权限错误。
+
+- [ ] R31-T02（并行）release workflow 诊断脚本
+  - 预计时长：0.5-1 小时
+  - 改动范围：`scripts/diagnose-release.sh`
+  - DoD：
+    1) 检查 workflow 文件语法、secret 配置、runner 可用性；
+    2) 输出诊断报告。
+
+- [ ] R31-T03（并行）回滚预案文档
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/release/rollback-plan.md`
+  - DoD：
+    1) 如 release 失败，如何回滚 tag；
+    2) 如何通知用户、如何重新发布。
+
+- [ ] R31-T04（串行收口）R31 收口
+  - 依赖：R31-T01~R31-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/TASKS.md`
+  - DoD：
+    1) R31 标记 close-ready；
+    2) 如 CI 持续正常，标记为 reserved。
+
+### R31 第一批收口结论（R31-T04）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R31-T01 E5xx 错误码文档：done
+  - R31-T02 release 诊断脚本：done
+  - R31-T03 回滚预案文档：done
+- **备注**：当前 CI 运行正常，R31 为预防性准备任务，标记为 reserved
+
+## Next Up
+**当前状态**：等待 CI 产物生成（截止 2026-02-12 18:00）
+- 若 CI 成功 → 宣布 GA v1.0
+- 若 CI 失败 → 激活 R31 预案执行修复
+- R31 任务已预留，随时可启用
 - **状态判定**：close-ready ✅（pending CI artifact generation)
 - **第一批任务状态**：
   - R30-T01 Error code 统一：done
@@ -1659,6 +1701,22 @@
 - [x] R30-T04（串行收口）R30 收口与 GA 宣布
   - 文件：`docs/TASKS.md`
   - 结果：R30 close-ready（pending CI）；GA 条件 6/7 满足；决策标准明确。
+
+- [x] R31-T01（并行）E5xx 错误码文档
+  - 文件：`docs/errors.md`
+  - 验收：E501-E509 CI/CD 错误码完整。
+
+- [x] R31-T02（并行）release 诊断脚本
+  - 文件：`scripts/diagnose-release.sh`
+  - 验收：workflow 检查、CLI 验证、远程连接检查。
+
+- [x] R31-T03（并行）回滚预案文档
+  - 文件：`docs/release/rollback-plan.md`
+  - 验收：回滚流程、用户通知模板、重新发布步骤。
+
+- [x] R31-T04（收口）R31 收口
+  - 文件：`docs/TASKS.md`
+  - 结果：R31 close-ready（reserved for CI failure scenario）。
 
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
