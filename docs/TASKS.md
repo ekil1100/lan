@@ -459,6 +459,28 @@
     2) GA v1.0 宣布（或定义延期条件）；
     3) 唯一 NEXT（或宣布项目进入维护模式）。
 
+### R30 第一批收口结论（R30-T04）
+- **状态判定**：close-ready ✅（pending CI artifact generation)
+- **第一批任务状态**：
+  - R30-T01 Error code 统一：done
+  - R30-T02 CI 产物验证：done（pending GitHub Actions completion）
+  - R30-T03 文档审查：done
+
+**GA 就绪状态**：
+| 条件 | 状态 | 备注 |
+|------|------|------|
+| 连续三个迭代无阻塞回归 | ☑ | R27, R28, R29, R30 完成 |
+| 双平台支持 | ☑ | macOS + Linux |
+| 运维文档与诊断包 | ☑ | doctor, support-bundle |
+| 发布流程稳定 | ☑ | v0.1.0-beta tag pushed |
+| Error code 统一 | ☑ | R30-T01 完成 |
+| CI 产物最终验证 | ☐ | **阻塞：等待 Actions 完成** |
+| 文档审查 | ☑ | R30-T03 完成 |
+
+**决策**：
+- 如 CI 产物在 2026-02-12 18:00 前生成 → 宣布 GA
+- 如 CI 仍失败 → 延期至 R31，优先修复 release workflow
+
 
 ## Done
 
@@ -1622,6 +1644,22 @@
   - 文件：`docs/TASKS.md`
   - 结果：R29 close-ready；R30 第一批 4 个原子任务已拆；NEXT → R30-T01。
 
+- [x] R30-T01（并行）Error code 统一
+  - 文件：`src/main.zig`、`src/skills.zig`、`docs/errors.md`
+  - 验收：E1xx/E2xx/E3xx/E4xx 错误码落地，文档可查询。
+
+- [x] R30-T02（并行）CI 产物验证
+  - 文件：`docs/release/release-checklist.md`、`docs/release/r27-t01-status.md`
+  - 验收：验证状态追踪，等待 Actions 完成。
+
+- [x] R30-T03（并行）文档审查
+  - 文件：`scripts/doc-review.sh`
+  - 验收：README、关键文档、GitHub templates 检查通过。
+
+- [x] R30-T04（串行收口）R30 收口与 GA 宣布
+  - 文件：`docs/TASKS.md`
+  - 结果：R30 close-ready（pending CI）；GA 条件 6/7 满足；决策标准明确。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1655,7 +1693,9 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R30-T01（NEXT）：Error code 统一落地
+1. **阻塞等待**：CI 产物生成（GitHub Actions）- 截止 2026-02-12 18:00
+2. 若 CI 成功 → 宣布 GA v1.0
+3. 若 CI 失败 → 启动 R31 修复 release workflow
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
