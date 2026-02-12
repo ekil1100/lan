@@ -247,3 +247,58 @@
 1. 创建 R31 计划 - 专注修复 release workflow
 2. 更新 `docs/ROADMAP.md` - 调整 GA 时间线
 3. 更新 `docs/TASKS.md` - NEXT → R31-T01
+
+## R31 - CI 修复预案（已完成 ✅，2026-02-12）
+
+**目标**：准备 CI 故障时的应急响应方案（预防性任务）。
+
+### 里程碑
+- [x] E5xx CI/CD 错误码文档（E501-E509）
+- [x] release workflow 诊断脚本（`diagnose-release.sh`）
+- [x] 回滚预案文档（`rollback-plan.md`）
+
+### 状态
+- 完成日期：2026-02-12
+- 备注：当前 CI 运行正常，R31 为预防性准备，标记为 reserved
+
+## R32 - GA v1.0 或后续迭代（规划中 🟡）
+
+**决策点**：2026-02-12 18:00 根据 CI 状态决定
+
+### 方案 A：宣布 GA v1.0（若 CI 产物生成成功）
+**目标**：正式发布 v1.0 GA
+
+#### 执行步骤
+1. 验证 CI artifact（macOS + Linux）
+2. 运行 `verify-install.sh` 双平台测试
+3. 更新 `docs/ROADMAP.md` 标记 GA 日期
+4. 创建 GitHub Discussion 发布公告
+5. 更新 `docs/TASKS.md` 标记所有任务完成
+
+#### GA 后维护模式
+- 监控 GitHub Issues（P0: 24h, P1: 72h 响应）
+- 收集用户反馈规划 v1.1
+- 定期安全更新
+
+### 方案 B：启动 R32 修复迭代（若 CI 失败）
+**目标**：修复 release workflow，确保 artifact 生成
+
+#### 里程碑
+- [ ] 诊断 CI 失败原因（workflow 日志分析）
+- [ ] 修复 workflow 配置或权限问题
+- [ ] 重新触发 release 流程
+- [ ] 验证双平台 artifact 生成
+
+#### 预计时间
+- 诊断：0.5-1 小时
+- 修复：1-2 小时
+- 验证：0.5 小时
+- **总计**：2-4 小时
+
+#### 新 GA 目标日期
+- 修复完成当天 + 2 小时验证缓冲
+- 最晚：2026-02-13 12:00
+
+---
+
+*Last updated: 2026-02-12*
