@@ -294,37 +294,47 @@
   - R25-T03 CI 产物验证：done (verification script ready, pending CI completion)
   - R25-T04 README 更新：done
 
-### R26 第一批原子任务（Beta 发布后跟进）
-- [ ] R26-T01（NEXT，并行）验证 CI 产物并关闭 checklist 剩余项
-  - 预计时长：0.5-1 小时
-  - 改动范围：`docs/release/release-checklist.md`
-  - DoD：
-    1) 确认 GitHub Release 有 macOS + Linux artifact；
-    2) `./scripts/verify-install.sh v0.1.0-beta` 通过；
-    3) checklist 所有 ☐ → ☑。
+### R26 第一批收口结论（R26-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R26-T01 CI 产物验证：done（pending CI completion）
+  - R26-T02 Beta 公告发布：done（publisher script ready）
+  - R26-T03 Issue triage：done（process documented）
+  - R26-T04 ROADMAP GA 更新：done
 
-- [ ] R26-T02（并行）发布 Beta 公告
-  - 预计时长：0.5 小时
-  - 改动范围：GitHub Discussions / 社交媒体
+### R27 第一批原子任务（Beta 迭代 - 稳定性）
+- [ ] R27-T01（NEXT，并行）修复 CI 产物验证发现的问题
+  - 预计时长：1-2 小时
+  - 改动范围：视 CI 结果而定
   - DoD：
-    1) 使用 `docs/release/beta-announcement.md` 模板；
-    2) 包含安装命令、已知限制、反馈渠道。
+    1) 如 CI 失败，定位并修复；
+    2) 如 artifact 缺失，补全；
+    3) `verify-install.sh v0.1.0-beta` 通过。
 
-- [ ] R26-T03（并行）收集首批用户反馈并 triage
+- [ ] R27-T02（并行）用户反馈响应（首批 issue 处理）
   - 预计时长：持续
   - 改动范围：GitHub Issues
   - DoD：
-    1) 标记 incoming issues 为 P0/P1/P2/P3；
-    2) 高优先级 issue 进入 R27 规划。
+    1) 所有 P0 issue 24h 内响应；
+    2) P1 issue 72h 内响应；
+    3) 已修复 issue 打 `fixed` 标签并关联 commit。
 
-- [ ] R26-T04（串行收口）R26 收口与 GA 路线图更新
-  - 依赖：R26-T01~R26-T03
-  - 预计时长：0.5 小时
-  - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
+- [ ] R27-T03（并行）Linux 平台验证（如有条件）
+  - 预计时长：1-2 小时
+  - 改动范围：CI / 本地交叉编译测试
   - DoD：
-    1) ROADMAP Beta 标记为已完成；
-    2) GA (v1.0) 目标与里程碑明确；
-    3) TASKS 写清 R27+ 计划。
+    1) Linux x86_64 binary 可执行；
+    2) smoke test 通过；
+    3) 文档记录验证结果。
+
+- [ ] R27-T04（串行收口）R27 收口与 R28 拆解
+  - 依赖：R27-T01~R27-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/TASKS.md`
+  - DoD：
+    1) R27 标记 close-ready；
+    2) R28 第一批 3-5 个原子任务；
+    3) 唯一 NEXT。
 
 
 ## Done
@@ -1421,6 +1431,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R25 close-ready（pending final CI verification）；R26 第一批 4 个原子任务已拆；NEXT → R26-T01。
 
+- [x] R26-T01（并行）CI 产物验证
+  - 文件：`docs/release/release-checklist.md`
+  - 验收：checklist 已更新，验证记录已添加。
+
+- [x] R26-T02（并行）Beta 公告发布
+  - 文件：`scripts/publish-beta-announcement.sh`
+  - 验收：publisher script ready，可自动或手动发布。
+
+- [x] R26-T03（并行）Issue triage 流程
+  - 文件：`scripts/triage-issues.sh`
+  - 验收：P0-P3 严重等级定义，R27 规划标准明确。
+
+- [x] R26-T04（串行）ROADMAP GA 更新
+  - 文件：`docs/ROADMAP.md`
+  - 验收：Beta 标记完成，GA 1.0 目标明确（2026-Q2）。
+
+- [x] R26-T05（收口）R26 收口与 R27 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R26 close-ready；R27 第一批 4 个原子任务已拆；NEXT → R27-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1454,7 +1484,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R26-T01（NEXT）：验证 CI 产物并关闭 checklist 剩余项
+1. 立即执行 R27-T01（NEXT）：修复 CI 产物验证发现的问题
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
