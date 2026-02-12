@@ -279,6 +279,36 @@ pub const Config = struct {
         if (i == val_start) return null;
         return std.fmt.parseInt(u32, json[val_start..i], 10) catch null;
     }
+
+    /// Reload config from disk without creating new allocator
+    pub fn reload(self: *Config) !void {
+        const config_path = try std.fs.path.join(self.allocator, &[_][]const u8{ self.config_dir, "config.json" });
+        defer self.allocator.free(config_path);
+
+        const file_content = std.fs.cwd().readFileAlloc(self.allocator, config_path, 4096) catch |err| {
+            std.log.warn("Config reload failed: {s}", .{@errorName(err)});
+            return err;
+        };
+        defer self.allocator.free(file_content);
+
+        // Update provider
+        self.provider = parseProviderFromJson(file_content);
+        self.route_primary = self.provider;
+
+        // Update model if present
+        if (parseStringFromJson(self.allocator, file_content, "\"model\":\"")) |model| {
+            self.allocator.free(self.model);
+            self.model = model;
+        }
+
+        // Update base_url if present
+        if (parseStringFromJson(self.allocator, file_content, "\"base_url\":\"")) |base_url| {
+            self.allocator.free(self.base_url);
+            self.base_url = base_url;
+        }
+
+        std.log.info("Config reloaded from {s}", .{config_path});
+    }
 };
 
 test "route mode string parsing keeps default compatibility" {

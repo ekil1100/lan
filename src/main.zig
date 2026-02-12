@@ -126,6 +126,29 @@ pub fn main() !void {
         return;
     }
 
+    // lan config reload — reload config from disk
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "config") and std.mem.eql(u8, args[2], "reload")) {
+        var cfg_reload = try Config.load(allocator);
+        defer cfg_reload.deinit();
+        
+        cfg_reload.reload() catch |err| {
+            var ebuf: [256]u8 = undefined;
+            var ew = std.fs.File.stdout().writer(&ebuf);
+            try ew.interface.print("Config reload failed: {s}\nnext: ensure config file exists at ~/.config/lan/config.json\n", .{@errorName(err)});
+            try ew.interface.flush();
+            return;
+        };
+        
+        var buf: [256]u8 = undefined;
+        var w = std.fs.File.stdout().writer(&buf);
+        try w.interface.print("Config reloaded successfully.\nprovider={s} model={s}\n", .{
+            cfg_reload.provider.toString(),
+            cfg_reload.model,
+        });
+        try w.interface.flush();
+        return;
+    }
+
     // lan skill search <keyword> — search skill registry
     if (args.len >= 4 and std.mem.eql(u8, args[1], "skill") and std.mem.eql(u8, args[2], "search")) {
         var sbuf: [4096]u8 = undefined;
