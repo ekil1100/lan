@@ -3,7 +3,7 @@
 [![Beta](https://img.shields.io/badge/status-beta-blue)](https://github.com/ekil1100/lan/releases)
 [![CI](https://github.com/ekil1100/lan/actions/workflows/ci.yml/badge.svg)](https://github.com/ekil1100/lan/actions/workflows/ci.yml)
 
-A terminal UI agent inspired by OpenCode and Claude Code. Now in **Beta** — feedback welcome!
+A terminal UI agent inspired by OpenCode and Claude Code. Now in **Beta v0.1.0** — feedback welcome!
 
 ## Design Inspiration
 
@@ -65,17 +65,22 @@ cat > ~/.config/lan/config.json << 'EOF'
 EOF
 ```
 
-### 3. Install from Release (recommended)
+### 3. Install from Release (recommended — v0.1.0-beta)
 
 ```bash
-# Download latest beta
-curl -fsSL https://github.com/ekil1100/lan/releases/latest/download/lan-$(uname -s | tr A-Z a-z)-$(uname -m).tar.gz -o lan.tar.gz
+# Download latest beta (v0.1.0-beta)
+curl -fsSL https://github.com/ekil1100/lan/releases/download/v0.1.0-beta/lan-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz -o lan.tar.gz
 
 # Install
 ./scripts/install.sh lan.tar.gz ~/.local/bin
 
 # Verify
 lan --version
+```
+
+Or use the install helper that auto-detects platform:
+```bash
+curl -fsSL https://github.com/ekil1100/lan/releases/download/v0.1.0-beta/install.sh | bash
 ```
 
 ### 3b. Build from Source
