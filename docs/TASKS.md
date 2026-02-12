@@ -219,35 +219,43 @@
   - R21-T03 支持包增强：done
   - R21-T04 回归入口：done
 
-### R22 第一批原子任务（Beta 可观测性）
-- [ ] R22-T01（NEXT，并行）结构化日志框架（统一 log 格式）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/log.zig`（新增）、`src/main.zig`
-  - DoD：
-    1) 定义统一日志格式（timestamp/level/component/message）；
-    2) 至少 info/warn/error 三级；
-    3) 现有 stdout 输出不受影响；回归覆盖。
+### R22 第一批收口结论（R22-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R22-T01 结构化日志框架：done
+  - R22-T02 CLI help：done
+  - R22-T03 CI 全量回归门禁：done
+  - R22-T04 回归入口：done
 
-- [ ] R22-T02（并行）CLI help 文本（`lan help` / `lan <cmd> --help`）
-  - 预计时长：1 小时
-  - 改动范围：`src/main.zig`
+### R23 第一批原子任务（Beta 功能深化）
+- [ ] R23-T01（NEXT，并行）多 provider 配置支持（config 中定义多个 provider）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/config.zig`、`docs/config/`、`scripts/test-multi-provider.sh`
   - DoD：
-    1) `lan help` 列出所有子命令及简要说明；
-    2) 覆盖 skill/history/config/doctor 子命令；
+    1) config.json 支持 providers 数组（name/url/api_key/model）；
+    2) 向后兼容单 provider 配置；
     3) 回归测试覆盖。
 
-- [ ] R22-T03（并行）CI 全量回归门禁（聚合所有 make targets）
+- [ ] R23-T02（并行）`lan skill info <name>` 查看已安装 skill 详情
   - 预计时长：1 小时
-  - 改动范围：`.github/workflows/ci.yml`、`Makefile`
+  - 改动范围：`src/skills.zig`、`src/main.zig`、`scripts/test-skill-info.sh`
   - DoD：
-    1) CI 增加 R17~R21 回归步骤；
-    2) 任一失败则 CI 红；
-    3) 本地 `make full-regression` 可一键跑全量。
+    1) 输出 skill 的 name/version/entry/tools/permissions；
+    2) 未找到时输出明确错误 + next-step；
+    3) 回归测试覆盖。
 
-- [ ] R22-T04（串行收口）R22 第一批回归入口与 CI 对齐
-  - 依赖：R22-T01~R22-T03
+- [ ] R23-T03（并行）会话历史统计命令（`lan history stats`）
+  - 预计时长：1 小时
+  - 改动范围：`src/main.zig`、`scripts/test-history-stats.sh`
+  - DoD：
+    1) 输出消息总数、按 role 分布、文件大小；
+    2) JSON 格式输出；
+    3) 回归测试覆盖。
+
+- [ ] R23-T04（串行收口）R23 第一批回归入口与 CI 对齐
+  - 依赖：R23-T01~R23-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r22-*.sh`、`docs/TASKS.md`
+  - 改动范围：`Makefile`、`scripts/test-r23-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1269,6 +1277,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R21 close-ready；R22 第一批 4 个原子任务已拆；NEXT → R22-T01。
 
+- [x] R22-T01（并行）结构化日志框架
+  - 文件：`src/log.zig`、`src/main.zig`
+  - 验收：info/warn/error 三级；stderr 输出；zig build test 通过。
+
+- [x] R22-T02（并行）CLI help 文本
+  - 文件：`src/main.zig`、`scripts/test-cli-help.sh`
+  - 验收：`lan help` 列出全部子命令。
+
+- [x] R22-T03（并行）CI 全量回归门禁
+  - 文件：`.github/workflows/ci.yml`、`Makefile`
+  - 验收：CI 含 R14~R21 步骤；`make full-regression` 可用。
+
+- [x] R22-T04（串行收口）R22 回归入口
+  - 文件：`Makefile`、`scripts/test-r22-observability-suite.sh`
+  - 验收：`make r22-observability-regression` 通过。
+
+- [x] R22-T05（收口）R22 收口与 R23 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R22 close-ready；R23 第一批 4 个原子任务已拆；NEXT → R23-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1302,7 +1330,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R22-T01（NEXT）：结构化日志框架（统一 log 格式）
+1. 立即执行 R23-T01（NEXT）：多 provider 配置支持
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
