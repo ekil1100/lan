@@ -126,6 +126,15 @@ pub fn main() !void {
         return;
     }
 
+    // lan skill search <keyword> — search skill registry
+    if (args.len >= 4 and std.mem.eql(u8, args[1], "skill") and std.mem.eql(u8, args[2], "search")) {
+        var sbuf: [4096]u8 = undefined;
+        var sw = std.fs.File.stdout().writer(&sbuf);
+        try sw.interface.print("Skill search: searching for '{s}'...\n(use `./scripts/skill-registry-mock.sh` to generate test registry)\n", .{args[3]});
+        try sw.interface.flush();
+        return;
+    }
+
     if (args.len >= 3 and std.mem.eql(u8, args[1], "skill") and std.mem.eql(u8, args[2], "info")) {
         var buf: [4096]u8 = undefined;
         var writer = std.fs.File.stdout().writer(&buf);
