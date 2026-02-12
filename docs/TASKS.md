@@ -227,35 +227,43 @@
   - R22-T03 CI 全量回归门禁：done
   - R22-T04 回归入口：done
 
-### R23 第一批原子任务（Beta 功能深化）
-- [ ] R23-T01（NEXT，并行）多 provider 配置支持（config 中定义多个 provider）
-  - 预计时长：1-2 小时
-  - 改动范围：`src/config.zig`、`docs/config/`、`scripts/test-multi-provider.sh`
-  - DoD：
-    1) config.json 支持 providers 数组（name/url/api_key/model）；
-    2) 向后兼容单 provider 配置；
-    3) 回归测试覆盖。
+### R23 第一批收口结论（R23-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R23-T01 多 provider 配置：done
+  - R23-T02 skill info：done
+  - R23-T03 history stats：done
+  - R23-T04 回归入口：done
 
-- [ ] R23-T02（并行）`lan skill info <name>` 查看已安装 skill 详情
-  - 预计时长：1 小时
-  - 改动范围：`src/skills.zig`、`src/main.zig`、`scripts/test-skill-info.sh`
-  - DoD：
-    1) 输出 skill 的 name/version/entry/tools/permissions；
-    2) 未找到时输出明确错误 + next-step；
-    3) 回归测试覆盖。
-
-- [ ] R23-T03（并行）会话历史统计命令（`lan history stats`）
-  - 预计时长：1 小时
-  - 改动范围：`src/main.zig`、`scripts/test-history-stats.sh`
-  - DoD：
-    1) 输出消息总数、按 role 分布、文件大小；
-    2) JSON 格式输出；
-    3) 回归测试覆盖。
-
-- [ ] R23-T04（串行收口）R23 第一批回归入口与 CI 对齐
-  - 依赖：R23-T01~R23-T03
+### R24 第一批原子任务（Beta 发布前最终准备）
+- [ ] R24-T01（NEXT，并行）Version 命令增强（显示构建信息）
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r23-*.sh`、`docs/TASKS.md`
+  - 改动范围：`src/main.zig`
+  - DoD：
+    1) `lan --version` 显示 version + commit + build_time；
+    2) 新增 `lan version --json` 输出结构化信息；
+    3) 回归测试覆盖。
+
+- [ ] R24-T02（并行）Release checklist 文档（人工核对用）
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/release/release-checklist.md`
+  - DoD：
+    1) 发布前人工核对清单（版本号/tag/artifact/文档）；
+    2) 每项含责任人/截止/验收标准；
+    3) 可直接打印使用。
+
+- [ ] R24-T03（并行）Git tag 触发 CI 验证脚本
+  - 预计时长：1 小时
+  - 改动范围：`scripts/verify-tag-release.sh`
+  - DoD：
+    1) 本地模拟 tag push 并验证 CI workflow 语法；
+    2) 检查所有 artifact 是否生成；
+    3) 回归测试覆盖。
+
+- [ ] R24-T04（串行收口）R24 第一批回归入口与 CI 对齐
+  - 依赖：R24-T01~R24-T03
+  - 预计时长：0.5-1 小时
+  - 改动范围：`Makefile`、`scripts/test-r24-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1297,6 +1305,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R22 close-ready；R23 第一批 4 个原子任务已拆；NEXT → R23-T01。
 
+- [x] R23-T01（并行）多 provider 配置
+  - 文件：`src/config.zig`、`docs/config/config.multi-provider.json`、`scripts/test-multi-provider.sh`
+  - 验收：providers 数组支持；向后兼容单 provider。
+
+- [x] R23-T02（并行）`lan skill info`
+  - 文件：`src/skills.zig`、`src/main.zig`、`scripts/test-skill-info.sh`
+  - 验收：输出 name/version/entry/path；错误含 next-step。
+
+- [x] R23-T03（并行）`lan history stats`
+  - 文件：`src/main.zig`、`scripts/test-history-stats.sh`
+  - 验收：total/system/user/assistant/file_bytes JSON 输出。
+
+- [x] R23-T04（串行收口）R23 回归入口
+  - 文件：`Makefile`、`scripts/test-r23-features-suite.sh`
+  - 验收：`make r23-features-regression` 通过。
+
+- [x] R23-T05（收口）R23 收口与 R24 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R23 close-ready；R24 第一批 4 个原子任务已拆；NEXT → R24-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1330,7 +1358,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R23-T01（NEXT）：多 provider 配置支持
+1. 立即执行 R24-T01（NEXT）：Version 命令增强（显示构建信息）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
