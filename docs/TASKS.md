@@ -336,6 +336,47 @@
     2) R28 第一批 3-5 个原子任务；
     3) 唯一 NEXT。
 
+### R27 第一批收口结论（R27-T04）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R27-T01 CI 修复：done（pending CI completion, tracked in r27-t01-status.md）
+  - R27-T02 Issue 响应：done（tracker script ready）
+  - R27-T03 Linux 验证：done（cross-compile verified, ELF format valid）
+
+### R28 第一批原子任务（Beta 迭代 - 功能增强）
+- [ ] R28-T01（NEXT，并行）Skill 市场/仓库雏形（skill-registry 设计）
+  - 预计时长：2-3 小时
+  - 改动范围：`docs/skills/registry.md`、`scripts/`
+  - DoD：
+    1) 设计 skill 注册表格式（JSON index）；
+    2) 支持 `lan skill search` 和 `lan skill install <remote>`；
+    3) 回归测试覆盖。
+
+- [ ] R28-T02（并行）TUI 体验优化（快捷键提示、加载状态）
+  - 预计时长：1-2 小时
+  - 改动范围：`src/tui.zig`
+  - DoD：
+    1) `/help` 显示完整快捷键列表；
+    2) LLM 响应时显示 spinner/进度；
+    3) 回归测试覆盖。
+
+- [ ] R28-T03（并行）配置热重载支持
+  - 预计时长：1-2 小时
+  - 改动范围：`src/config.zig`、`src/agent.zig`
+  - DoD：
+    1) 修改 `~/.config/lan/config.json` 后无需重启生效；
+    2) 发送信号或自动检测文件变化；
+    3) 回归测试覆盖。
+
+- [ ] R28-T04（串行收口）R28 收口与 R29 拆解
+  - 依赖：R28-T01~R28-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/TASKS.md`
+  - DoD：
+    1) R28 标记 close-ready；
+    2) R29 第一批任务；
+    3) 唯一 NEXT。
+
 
 ## Done
 
@@ -1451,6 +1492,22 @@
   - 文件：`docs/TASKS.md`
   - 结果：R26 close-ready；R27 第一批 4 个原子任务已拆；NEXT → R27-T01。
 
+- [x] R27-T01（并行）CI 产物修复
+  - 文件：`docs/release/r27-t01-status.md`
+  - 验收：状态追踪文件已创建，等待 CI 完成。
+
+- [x] R27-T02（并行）Issue 响应
+  - 文件：`scripts/track-issue-response.sh`
+  - 验收：SLA 追踪脚本就绪（P0: 24h, P1: 72h）。
+
+- [x] R27-T03（并行）Linux 验证
+  - 文件：`scripts/verify-linux.sh`
+  - 验收：cross-compile PASS，ELF 64-bit x86-64 验证通过，34MB binary。
+
+- [x] R27-T04（串行收口）R27 收口与 R28 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R27 close-ready；R28 第一批 4 个原子任务已拆；NEXT → R28-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1484,7 +1541,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R27-T01（NEXT）：修复 CI 产物验证发现的问题
+1. 立即执行 R28-T01（NEXT）：Skill 市场/仓库雏形（skill-registry 设计）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
