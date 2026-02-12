@@ -48,6 +48,20 @@ pub fn main() !void {
         return;
     }
 
+    // lan version [--json] — show version info (structured or human-readable)
+    if (args.len >= 2 and std.mem.eql(u8, args[1], "version")) {
+        var buf: [4096]u8 = undefined;
+        var writer = std.fs.File.stdout().writer(&buf);
+        const json_mode = args.len >= 3 and std.mem.eql(u8, args[2], "--json");
+        if (json_mode) {
+            try writer.interface.print("{{\"version\":\"{s}\",\"commit\":\"{s}\",\"build_time\":\"{s}\"}}\n", .{ build_info.version, build_info.commit, build_info.build_time });
+        } else {
+            try writer.interface.print("lan version={s} commit={s} build_time={s}\n", .{ build_info.version, build_info.commit, build_info.build_time });
+        }
+        try writer.interface.flush();
+        return;
+    }
+
     if (args.len >= 2 and std.mem.eql(u8, args[1], "--version")) {
         var buf: [4096]u8 = undefined;
         var writer = std.fs.File.stdout().writer(&buf);
