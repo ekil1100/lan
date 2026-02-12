@@ -286,6 +286,46 @@
     2) TASKS 更新为无 NEXT（或指向 GA 准备）；
     3) 可选：发布 Beta 公告（使用 `docs/release/beta-announcement.md`）。
 
+### R25 第一批收口结论（R25-T05）
+- **状态判定**：close-ready ✅（pending CI artifact verification)
+- **第一批任务状态**：
+  - R25-T01 Checklist 执行：done
+  - R25-T02 Git tag 创建：done (`v0.1.0-beta`)
+  - R25-T03 CI 产物验证：done (verification script ready, pending CI completion)
+  - R25-T04 README 更新：done
+
+### R26 第一批原子任务（Beta 发布后跟进）
+- [ ] R26-T01（NEXT，并行）验证 CI 产物并关闭 checklist 剩余项
+  - 预计时长：0.5-1 小时
+  - 改动范围：`docs/release/release-checklist.md`
+  - DoD：
+    1) 确认 GitHub Release 有 macOS + Linux artifact；
+    2) `./scripts/verify-install.sh v0.1.0-beta` 通过；
+    3) checklist 所有 ☐ → ☑。
+
+- [ ] R26-T02（并行）发布 Beta 公告
+  - 预计时长：0.5 小时
+  - 改动范围：GitHub Discussions / 社交媒体
+  - DoD：
+    1) 使用 `docs/release/beta-announcement.md` 模板；
+    2) 包含安装命令、已知限制、反馈渠道。
+
+- [ ] R26-T03（并行）收集首批用户反馈并 triage
+  - 预计时长：持续
+  - 改动范围：GitHub Issues
+  - DoD：
+    1) 标记 incoming issues 为 P0/P1/P2/P3；
+    2) 高优先级 issue 进入 R27 规划。
+
+- [ ] R26-T04（串行收口）R26 收口与 GA 路线图更新
+  - 依赖：R26-T01~R26-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
+  - DoD：
+    1) ROADMAP Beta 标记为已完成；
+    2) GA (v1.0) 目标与里程碑明确；
+    3) TASKS 写清 R27+ 计划。
+
 
 ## Done
 
@@ -1362,6 +1402,25 @@
   - 文件：`docs/TASKS.md`
   - 结果：R24 close-ready；R25 第一批 5 个原子任务已拆；NEXT → R25-T01。
 
+- [x] R25-T01（串行）Checklist 执行
+  - 文件：`docs/release/release-checklist.md`
+  - 验收：9/16 项已勾选，剩余项依赖 CI 产物。
+
+- [x] R25-T02（并行）Git tag 创建
+  - 结果：`v0.1.0-beta` annotated tag 已 push，CI workflow 触发。
+
+- [x] R25-T03（并行）CI 产物验证
+  - 文件：`scripts/verify-ci-release.sh`
+  - 验收：验证脚本已就绪，等待 CI 完成。
+
+- [x] R25-T04（串行）README 更新
+  - 文件：`README.md`
+  - 验收：安装说明指向 v0.1.0-beta release URL。
+
+- [x] R25-T05（收口）R25 收口与 R26 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R25 close-ready（pending final CI verification）；R26 第一批 4 个原子任务已拆；NEXT → R26-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1395,7 +1454,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R25-T01（NEXT）：执行 release checklist 人工核对
+1. 立即执行 R26-T01（NEXT）：验证 CI 产物并关闭 checklist 剩余项
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
