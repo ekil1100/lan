@@ -40,7 +40,7 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     if (skill_name.len == 0 or std.mem.indexOf(u8, skill_name, "/") != null or std.mem.eql(u8, skill_name, ".") or std.mem.eql(u8, skill_name, "..")) {
         return std.fmt.allocPrint(
             allocator,
-            "Skill remove failed: invalid name ({s})\nnext: use a plain skill name (e.g. demo-skill) and retry `lan skill remove <name>`.\n",
+            "[E406] Skill remove failed: invalid name ({s})\nnext: use a plain skill name (e.g. demo-skill) and retry `lan skill remove <name>`.\n",
             .{skill_name},
         );
     }
@@ -51,7 +51,7 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     var existing_dir = std.fs.cwd().openDir(skill_dir, .{}) catch {
         return std.fmt.allocPrint(
             allocator,
-            "Skill remove failed: not found ({s})\nnext: run `lan skill list` to check installed names, then retry `lan skill remove <name>`.\n",
+            "[E407] Skill remove failed: not found ({s})\nnext: run `lan skill list` to check installed names, then retry `lan skill remove <name>`.\n",
             .{skill_name},
         );
     };
@@ -61,7 +61,7 @@ pub fn removeSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
         error.AccessDenied, error.PermissionDenied => {
             return std.fmt.allocPrint(
                 allocator,
-                "Skill remove failed: permission denied ({s})\nnext: check directory permissions under ~/.config/lan/skills and retry.\n",
+                "[E408] Skill remove failed: permission denied ({s})\nnext: check directory permissions under ~/.config/lan/skills and retry.\n",
                 .{skill_name},
             );
         },
@@ -94,13 +94,13 @@ pub fn addSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, s
         error.FileNotFound => {
             return allocator.dupe(
                 u8,
-                "Skill install failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill add <path>`.\n",
+                "[E409] Skill install failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill add <path>`.\n",
             );
         },
         error.InvalidData => {
             return allocator.dupe(
                 u8,
-                "Skill install failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
+                "[E410] Skill install failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
             );
         },
         else => return err,
@@ -130,13 +130,13 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
         error.FileNotFound => {
             return allocator.dupe(
                 u8,
-                "Skill update failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill update <path>`.\n",
+                "[E411] Skill update failed: missing manifest.json\nnext: provide a local folder containing manifest.json and retry `lan skill update <path>`.\n",
             );
         },
         error.InvalidData => {
             return allocator.dupe(
                 u8,
-                "Skill update failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
+                "[E412] Skill update failed: invalid manifest schema\nnext: ensure name/version/entry/tools/permissions are valid, then retry.\n",
             );
         },
         else => return err,
@@ -150,7 +150,7 @@ pub fn updateSkillFromRoot(allocator: std.mem.Allocator, skills_root: []const u8
     var existing = std.fs.cwd().openDir(target_dir, .{}) catch {
         return std.fmt.allocPrint(
             allocator,
-            "Skill update failed: target not installed ({s})\nnext: run `lan skill list` then `lan skill add <path>` for first install.\n",
+            "[E413] Skill update failed: target not installed ({s})\nnext: run `lan skill list` then `lan skill add <path>` for first install.\n",
             .{loaded.manifest.name},
         );
     };

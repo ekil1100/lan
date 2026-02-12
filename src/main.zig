@@ -89,7 +89,7 @@ pub fn main() !void {
         var writer = std.fs.File.stdout().writer(&buf);
 
         if (args.len < 4) {
-            try writer.interface.print("Skill install failed: missing path\nnext: run `lan skill add <local-dir>`\n", .{});
+            try writer.interface.print("[E401] Skill install failed: missing path\nnext: run `lan skill add <local-dir>`\n", .{});
             try writer.interface.flush();
             return;
         }
@@ -110,7 +110,7 @@ pub fn main() !void {
         var writer = std.fs.File.stdout().writer(&buf);
 
         if (args.len < 4) {
-            try writer.interface.print("Skill update failed: missing path\nnext: run `lan skill update <local-dir>`\n", .{});
+            try writer.interface.print("[E402] Skill update failed: missing path\nnext: run `lan skill update <local-dir>`\n", .{});
             try writer.interface.flush();
             return;
         }
@@ -134,7 +134,7 @@ pub fn main() !void {
         cfg_reload.reload() catch |err| {
             var ebuf: [256]u8 = undefined;
             var ew = std.fs.File.stdout().writer(&ebuf);
-            try ew.interface.print("Config reload failed: {s}\nnext: ensure config file exists at ~/.config/lan/config.json\n", .{@errorName(err)});
+            try ew.interface.print("[E201] Config reload failed: {s}\nnext: ensure config file exists at ~/.config/lan/config.json\n", .{@errorName(err)});
             try ew.interface.flush();
             return;
         };
@@ -163,7 +163,7 @@ pub fn main() !void {
         var writer = std.fs.File.stdout().writer(&buf);
 
         if (args.len < 4) {
-            try writer.interface.print("Skill info failed: missing name\nnext: run `lan skill info <name>`\n", .{});
+            try writer.interface.print("[E403] Skill info failed: missing name\nnext: run `lan skill info <name>`\n", .{});
             try writer.interface.flush();
             return;
         }
@@ -184,7 +184,7 @@ pub fn main() !void {
         var writer = std.fs.File.stdout().writer(&buf);
 
         if (args.len < 4) {
-            try writer.interface.print("Skill remove failed: missing name\nnext: run `lan skill remove <name>`\n", .{});
+            try writer.interface.print("[E405] Skill remove failed: missing name\nnext: run `lan skill remove <name>`\n", .{});
             try writer.interface.flush();
             return;
         }
@@ -242,7 +242,7 @@ pub fn main() !void {
         const raw = std.fs.cwd().readFileAlloc(allocator, hp, 4 * 1024 * 1024) catch |err| {
             var eb: [4096]u8 = undefined;
             var ew2 = std.fs.File.stdout().writer(&eb);
-            try ew2.interface.print("History stats failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew2.interface.print("[E301] History stats failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
             try ew2.interface.flush();
             return;
         };
@@ -310,7 +310,7 @@ pub fn main() !void {
         const raw = std.fs.cwd().readFileAlloc(allocator, hp, 4 * 1024 * 1024) catch |err| {
             var eb: [4096]u8 = undefined;
             var ew2 = std.fs.File.stdout().writer(&eb);
-            try ew2.interface.print("History search failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew2.interface.print("[E302] History search failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
             try ew2.interface.flush();
             return;
         };
@@ -361,7 +361,7 @@ pub fn main() !void {
         const content = std.fs.cwd().readFileAlloc(allocator, history_path, 4 * 1024 * 1024) catch |err| {
             var ebuf: [4096]u8 = undefined;
             var ew = std.fs.File.stdout().writer(&ebuf);
-            try ew.interface.print("History export failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
+            try ew.interface.print("[E303] History export failed: {s}\nnext: ensure a session has been run at least once.\n", .{@errorName(err)});
             try ew.interface.flush();
             return;
         };
