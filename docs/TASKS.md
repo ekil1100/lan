@@ -235,39 +235,56 @@
   - R23-T03 history stats：done
   - R23-T04 回归入口：done
 
-### R24 第一批原子任务（Beta 发布前最终准备）
-- [ ] R24-T01（NEXT，并行）Version 命令增强（显示构建信息）
-  - 预计时长：0.5-1 小时
-  - 改动范围：`src/main.zig`
-  - DoD：
-    1) `lan --version` 显示 version + commit + build_time；
-    2) 新增 `lan version --json` 输出结构化信息；
-    3) 回归测试覆盖。
+### R24 第一批收口结论（R24-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R24-T01 Version 命令增强：done
+  - R24-T02 Release checklist 文档：done
+  - R24-T03 Git tag 验证脚本：done
+  - R24-T04 回归入口：done
 
-- [ ] R24-T02（并行）Release checklist 文档（人工核对用）
+### R25 第一批原子任务（Beta 发布执行）
+- [ ] R25-T01（NEXT，串行主线）执行 release checklist 人工核对
   - 预计时长：0.5-1 小时
-  - 改动范围：`docs/release/release-checklist.md`
+  - 改动范围：`docs/release/release-checklist.md`（执行时勾选）
   - DoD：
-    1) 发布前人工核对清单（版本号/tag/artifact/文档）；
-    2) 每项含责任人/截止/验收标准；
-    3) 可直接打印使用。
+    1) 完成 checklist 所有 ☐ → ☑；
+    2) 任何 FAIL 项需修复或记录风险；
+    3) 产出签字（comment 或 commit）。
 
-- [ ] R24-T03（并行）Git tag 触发 CI 验证脚本
-  - 预计时长：1 小时
-  - 改动范围：`scripts/verify-tag-release.sh`
+- [ ] R25-T02（并行）创建 Git tag 并推送
+  - 预计时长：0.5 小时
+  - 改动范围：git tag
   - DoD：
-    1) 本地模拟 tag push 并验证 CI workflow 语法；
-    2) 检查所有 artifact 是否生成；
-    3) 回归测试覆盖。
+    1) tag 格式 `v0.1.0-beta`；
+    2) 附 annotated message；
+    3) push 到 origin 触发 CI release workflow。
 
-- [ ] R24-T04（串行收口）R24 第一批回归入口与 CI 对齐
-  - 依赖：R24-T01~R24-T03
+- [ ] R25-T03（并行）验证 CI release 产物
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r24-*.sh`、`docs/TASKS.md`
+  - 改动范围：GitHub Release 页面、本地验证
   - DoD：
-    1) 新增统一入口；
-    2) 输出统一 PASS/FAIL；
-    3) TASKS 写清依赖（T01~T03 → T04）。
+    1) macOS + Linux artifact 均生成；
+    2) checksum 文件正确；
+    3) 本地 `verify-install.sh` 通过。
+
+- [ ] R25-T04（串行收口）更新 README 指向正式 release
+  - 依赖：R25-T03 验证通过
+  - 预计时长：0.5 小时
+  - 改动范围：`README.md`
+  - DoD：
+    1) 安装命令指向实际 release URL；
+    2) 版本号更新为 `v0.1.0-beta`；
+    3) commit 并 push。
+
+- [ ] R25-T05（最终）关闭 Beta 里程碑
+  - 依赖：R25-T04
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/ROADMAP.md`、`docs/TASKS.md`
+  - DoD：
+    1) ROADMAP Beta 标记为已完成（含完成日期）；
+    2) TASKS 更新为无 NEXT（或指向 GA 准备）；
+    3) 可选：发布 Beta 公告（使用 `docs/release/beta-announcement.md`）。
 
 
 ## Done
@@ -1325,6 +1342,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R23 close-ready；R24 第一批 4 个原子任务已拆；NEXT → R24-T01。
 
+- [x] R24-T01（并行）Version 命令增强
+  - 文件：`src/main.zig`、`scripts/test-version-enhanced.sh`
+  - 验收：`lan version` 人话输出；`lan version --json` 结构化输出。
+
+- [x] R24-T02（并行）Release checklist 文档
+  - 文件：`docs/release/release-checklist.md`
+  - 验收：16 项核对清单含责任人/截止/验收标准。
+
+- [x] R24-T03（并行）Git tag 验证脚本
+  - 文件：`scripts/verify-tag-release.sh`、`scripts/test-verify-tag-release.sh`
+  - 验收：workflow 语法、步骤检查、artifact 验证。
+
+- [x] R24-T04（串行收口）R24 回归入口
+  - 文件：`Makefile`、`scripts/test-r24-prerelease-suite.sh`
+  - 验收：`make r24-prerelease-regression` 通过。
+
+- [x] R24-T05（收口）R24 收口与 R25 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R24 close-ready；R25 第一批 5 个原子任务已拆；NEXT → R25-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1358,7 +1395,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R24-T01（NEXT）：Version 命令增强（显示构建信息）
+1. 立即执行 R25-T01（NEXT）：执行 release checklist 人工核对
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
