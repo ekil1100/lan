@@ -5,6 +5,7 @@ const Config = @import("config.zig").Config;
 const _skill_manifest = @import("skill_manifest.zig");
 const skills = @import("skills.zig");
 const build_info = @import("build_info");
+const logger = @import("log.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
