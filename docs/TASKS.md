@@ -360,12 +360,12 @@
     2) LLM 响应时显示 spinner/进度；
     3) 回归测试覆盖。
 
-- [ ] R28-T03（并行）配置热重载支持
+- [ ] R28-T03（并行）Provider 降级策略
   - 预计时长：1-2 小时
-  - 改动范围：`src/config.zig`、`src/agent.zig`
+  - 改动范围：`src/llm.zig`
   - DoD：
-    1) 修改 `~/.config/lan/config.json` 后无需重启生效；
-    2) 发送信号或自动检测文件变化；
+    1) 主 provider 失败时自动切换到备用 provider；
+    2) 降级事件记录日志；
     3) 回归测试覆盖。
 
 - [ ] R28-T04（串行收口）R28 收口与 R29 拆解
@@ -376,6 +376,47 @@
     1) R28 标记 close-ready；
     2) R29 第一批任务；
     3) 唯一 NEXT。
+
+### R28 第一批收口结论（R28-T04）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R28-T01 Skill registry 设计：done
+  - R28-T02 TUI 优化：done
+  - R28-T03 Provider 降级：done
+
+### R29 第一批原子任务（Beta 迭代 III - 质量与生态）
+- [ ] R29-T01（NEXT，并行）Config 热重载支持
+  - 预计时长：1-2 小时
+  - 改动范围：`src/config.zig`、`src/agent.zig`
+  - DoD：
+    1) 修改 `~/.config/lan/config.json` 后无需重启生效；
+    2) 信号触发或文件监听；
+    3) 回归测试覆盖。
+
+- [ ] R29-T02（并行）Skill 安装本地缓存
+  - 预计时长：1-2 小时
+  - 改动范围：`src/skills.zig`
+  - DoD：
+    1) 远程安装的 skill 本地缓存避免重复下载；
+    2) 缓存过期策略；
+    3) 回归测试覆盖。
+
+- [ ] R29-T03（并行）Error code 统一落地（替换 error text）
+  - 预计时长：2-3 小时
+  - 改动范围：`src/`、`docs/errors.md`
+  - DoD：
+    1) 所有 error 输出使用 E1xx/E2xx/E3xx/E4xx 编码；
+    2) `docs/errors.md` 可查询完整列表；
+    3) 回归测试覆盖。
+
+- [ ] R29-T04（串行收口）R29 收口与 GA 准备
+  - 依赖：R29-T01~R29-T03
+  - 预计时长：0.5 小时
+  - 改动范围：`docs/TASKS.md`、`docs/ROADMAP.md`
+  - DoD：
+    1) R29 close-ready；
+    2) GA v1.0 最终检查清单；
+    3) 唯一 NEXT（或宣布 GA）。
 
 
 ## Done
@@ -1508,6 +1549,22 @@
   - 文件：`docs/TASKS.md`
   - 结果：R27 close-ready；R28 第一批 4 个原子任务已拆；NEXT → R28-T01。
 
+- [x] R28-T01（并行）Skill registry 设计
+  - 文件：`docs/skills/registry.md`、`scripts/skill-registry-mock.sh`、`src/main.zig`
+  - 验收：JSON index 格式设计，`lan skill search` 命令 stub。
+
+- [x] R28-T02（并行）TUI 体验优化
+  - 文件：`src/tui.zig`
+  - 验收：完整 help 显示，printLoading 函数添加。
+
+- [x] R28-T03（并行）Provider 降级策略
+  - 文件：`src/llm.zig`
+  - 验收：logFallbackEvent 函数，降级事件可观测。
+
+- [x] R28-T04（串行收口）R28 收口与 R29 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R28 close-ready；R29 第一批 4 个原子任务已拆；NEXT → R29-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1541,7 +1598,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R28-T01（NEXT）：Skill 市场/仓库雏形（skill-registry 设计）
+1. 立即执行 R29-T01（NEXT）：Config 热重载支持
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
