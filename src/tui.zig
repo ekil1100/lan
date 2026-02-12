@@ -35,11 +35,47 @@ pub const App = struct {
 
     fn printHelp(writer: anytype) !void {
         try writer.writeAll(Color.cyan);
-        try writer.writeAll("\nCommands:\n");
+        try writer.writeAll("\n╔════════════════════════════════════════════════╗\n");
+        try writer.writeAll("║  Lan TUI Shortcuts                             ║\n");
+        try writer.writeAll("╚════════════════════════════════════════════════╝\n");
         try writer.writeAll(Color.reset);
-        try writer.writeAll("  /help   Toggle this help\n");
-        try writer.writeAll("  /clear  Clear chat history (keeps system message)\n");
-        try writer.writeAll("  /exit   Exit Lan\n\n");
+        
+        try writer.writeAll(Color.yellow);
+        try writer.writeAll("\nCommands (type in chat):\n");
+        try writer.writeAll(Color.reset);
+        try writer.writeAll("  /help          Toggle this help\n");
+        try writer.writeAll("  /clear         Clear chat history (keeps system message)\n");
+        try writer.writeAll("  /exit          Exit Lan\n");
+        
+        try writer.writeAll(Color.yellow);
+        try writer.writeAll("\nKeyboard Shortcuts:\n");
+        try writer.writeAll(Color.reset);
+        try writer.writeAll("  Ctrl+C         Exit\n");
+        try writer.writeAll("  Ctrl+D         Exit (EOF)\n");
+        try writer.writeAll("  Up/Down        Navigate history\n");
+        try writer.writeAll("  Enter          Send message\n");
+        
+        try writer.writeAll(Color.yellow);
+        try writer.writeAll("\nCLI Commands (outside TUI):\n");
+        try writer.writeAll(Color.reset);
+        try writer.writeAll("  lan skill list              List installed skills\n");
+        try writer.writeAll("  lan skill search <kw>       Search skill registry\n");
+        try writer.writeAll("  lan skill info <name>       Show skill details\n");
+        try writer.writeAll("  lan history export          Export session history\n");
+        try writer.writeAll("  lan history stats           Show history statistics\n");
+        try writer.writeAll("  lan doctor                  Run diagnostics\n");
+        try writer.writeAll(Color.yellow);
+        try writer.writeAll("\nTip: AI responses stream in real-time.");
+        try writer.writeAll(Color.reset);
+        try writer.writeAll("\n\n");
+    }
+
+    fn printLoading(writer: anytype, message: []const u8) !void {
+        try writer.writeAll(Color.yellow);
+        try writer.writeAll("⏳ ");
+        try writer.writeAll(message);
+        try writer.writeAll("...");
+        try writer.writeAll(Color.reset);
     }
 
     const ErrorClass = struct {
