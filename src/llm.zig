@@ -138,6 +138,15 @@ pub const LLMClient = struct {
         return error.MaxRetriesExceeded;
     }
 
+    /// Log provider fallback events for observability
+    pub fn logFallbackEvent(_: *LLMClient, from_provider: Provider, to_provider: Provider, reason: []const u8) void {
+        std.log.warn("[provider-fallback] from={s} to={s} reason={s}", .{
+            from_provider.toString(),
+            to_provider.toString(),
+            reason,
+        });
+    }
+
     pub fn chatStream(
         self: *LLMClient,
         messages: []const Message,
