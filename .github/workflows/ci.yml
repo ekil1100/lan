@@ -68,6 +68,24 @@ jobs:
       - name: R12 Beta Trial Execution Suite
         run: make r12-beta-trial-execution-regression
 
+      - name: R14 Beta Launch Suite
+        run: make r14-beta-launch-regression
+
+      - name: R17 Quality Suite
+        run: make r17-quality-regression
+
+      - name: R18 Feature Suite
+        run: make r18-feature-regression
+
+      - name: R19 Stability Suite
+        run: make r19-stability-regression
+
+      - name: R20 Cross-Platform Suite
+        run: make r20-crossplatform-regression
+
+      - name: R21 UX Suite
+        run: make r21-ux-regression
+
       - name: Smoke Online (with secrets)
         if: ${{ secrets.MOONSHOT_API_KEY != '' || secrets.OPENAI_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' }}
         env:
