@@ -1,0 +1,49 @@
+Lan v1.0.0 GA Release
+
+🎉 First stable release of Lan - A fast, skill-native TUI agent in Zig.
+
+## Highlights
+
+### Core Features
+- Interactive TUI with streaming responses
+- Multi-provider LLM support (Kimi, Anthropic, OpenAI)
+- Tool calling: read/write files, execute commands, list directories
+- Auto-saving conversation history
+- Syntax highlighting and Markdown rendering
+
+### Skill System
+- Skill management: add/remove/list/info/search
+- Local skill installation from directories
+- Skill registry design for future remote installation
+- Permission and tool requirements in manifest
+
+### Reliability
+- Provider fallback with automatic retry
+- Config hot-reload support
+- Comprehensive error codes (E1xx-E5xx)
+- Structured logging framework
+
+### Cross-Platform
+- macOS arm64 native support
+- Linux x86_64 cross-compilation
+- Single static binary distribution
+
+## Installation
+
+```bash
+curl -fsSL https://github.com/ekil1100/lan/releases/download/v1.0.0/lan-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz -o lan.tar.gz
+./scripts/install.sh lan.tar.gz ~/.local/bin
+```
+
+## Documentation
+- User Guide: docs/
+- Error Codes: docs/errors.md
+- Skill Development: docs/skills/
+
+## Thanks
+
+Special thanks to all contributors and early beta testers.
+
+---
+
+Full changelog: docs/release/CHANGELOG.md

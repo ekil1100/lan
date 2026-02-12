@@ -1,6 +1,6 @@
 .{
     .name = .lan,
-    .version = "0.1.0",
+    .version = "1.0.0",
     .fingerprint = 0x6860fdef897a7b5c,
     .minimum_zig_version = "0.15.0",
     .paths = .{
