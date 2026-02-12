@@ -60,6 +60,22 @@
 
 ---
 
+## E5xx — CI/CD 错误
+
+| Code | Severity | Description | Next Step |
+|------|----------|-------------|-----------|
+| E501 | P1 | Workflow syntax error | Check `.github/workflows/*.yml` syntax with `actionlint` or online validator |
+| E502 | P1 | Artifact upload failed | Check artifact path exists and is not empty; verify `actions/upload-artifact` version |
+| E503 | P1 | Artifact download failed | Verify artifact name matches between upload and download jobs |
+| E504 | P1 | Missing required secret | Add secret in GitHub Settings > Secrets and Variables > Actions |
+| E505 | P1 | Permission denied (GITHUB_TOKEN) | Ensure workflow has `permissions: contents: write` for release creation |
+| E506 | P1 | Runner out of disk space | Free up space or use larger runner; check artifact sizes |
+| E507 | P2 | Release already exists | Delete existing release or use new tag version |
+| E508 | P2 | Tag not found | Ensure tag is pushed with `git push origin <tag>` |
+| E509 | P2 | Network timeout during upload | Retry workflow; check GitHub status page |
+
+---
+
 ## 严重等级说明
 
 | Level | 含义 | 影响 |
