@@ -90,6 +90,20 @@ fn parseProviderStrict(str: []const u8) ?Provider {
     return null;
 }
 
+pub const ProviderConfig = struct {
+    name: []const u8,
+    url: []const u8,
+    api_key: []const u8,
+    model: []const u8,
+
+    pub fn deinit(self: *ProviderConfig, allocator: std.mem.Allocator) void {
+        allocator.free(self.name);
+        allocator.free(self.url);
+        allocator.free(self.api_key);
+        allocator.free(self.model);
+    }
+};
+
 pub const Config = struct {
     allocator: std.mem.Allocator,
     provider: Provider,
@@ -102,6 +116,8 @@ pub const Config = struct {
     model: []const u8,
     base_url: []const u8,
     config_dir: []const u8,
+    // Multi-provider support: backward compatible — if empty, use single provider fields
+    providers: []ProviderConfig,
 
     // Defaults for each provider
     const kimi_model = "kimi-k2-0711-preview";
@@ -142,6 +158,7 @@ pub const Config = struct {
             .model = try allocator.dupe(u8, kimi_model),
             .base_url = try allocator.dupe(u8, kimi_base_url),
             .config_dir = config_dir,
+            .providers = &[_]ProviderConfig{},
         };
 
         // Try to read config file
@@ -210,6 +227,8 @@ pub const Config = struct {
         self.allocator.free(self.model);
         self.allocator.free(self.base_url);
         self.allocator.free(self.config_dir);
+        for (self.providers) |*p| p.deinit(self.allocator);
+        self.allocator.free(self.providers);
     }
 
     pub fn hasApiKey(self: *const Config) bool {

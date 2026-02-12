@@ -1,0 +1,23 @@
+{
+  "providers": [
+    {
+      "name": "kimi",
+      "url": "https://api.moonshot.cn/v1",
+      "api_key": "",
+      "model": "kimi-k2-0711-preview"
+    },
+    {
+      "name": "openai",
+      "url": "https://api.openai.com/v1",
+      "api_key": "",
+      "model": "gpt-4o"
+    }
+  ],
+  "route": {
+    "mode": "speed",
+    "fallback": []
+  },
+  "skills": {
+    "dir": "~/.config/lan/skills"
+  }
+}
