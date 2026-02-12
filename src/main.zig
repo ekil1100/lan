@@ -32,7 +32,7 @@ pub fn main() !void {
             \\  skill add <dir>    Install skill from local directory
             \\  skill update <dir> Update installed skill from local directory
             \\  skill remove <name> Remove installed skill by name
-            \\  history export     Export session history as JSON
+            \\  history export [--format markdown]  Export session history as JSON or Markdown
             \\  history search <q> Search history by keyword (JSON output)
             \\  history clear      Clear session history
             \\
@@ -352,7 +352,7 @@ pub fn main() !void {
         return;
     }
 
-    // lan history export — dump history as JSON with role/content/timestamp
+    // lan history export [--format markdown] — dump history as JSON or Markdown
     if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "export")) {
         var cfg = try Config.load(allocator);
         defer cfg.deinit();
@@ -366,9 +366,67 @@ pub fn main() !void {
             return;
         };
         defer allocator.free(content);
-        var hbuf: [4096]u8 = undefined;
+        
+        // Check for --format markdown flag
+        const markdown_mode = args.len >= 4 and std.mem.eql(u8, args[3], "--format") and args.len >= 5 and std.mem.eql(u8, args[4], "markdown");
+        
+        var hbuf: [8192]u8 = undefined;
         var hw = std.fs.File.stdout().writer(&hbuf);
-        try hw.interface.print("{s}", .{content});
+        
+        if (markdown_mode) {
+            // Convert JSON to Markdown
+            try hw.interface.writeAll("# Lan Session History\n\n");
+            try hw.interface.writeAll("Generated: ");
+            try hw.interface.print("{d}", .{std.time.timestamp()});
+            try hw.interface.writeAll("\n\n");
+            
+            // Simple parsing of JSON array (very basic)
+            var i: usize = 0;
+            while (i < content.len) {
+                // Look for role field
+                if (std.mem.startsWith(u8, content[i..], "\"role\":\"")) {
+                    const role_start = i + 8;
+                    var role_end = role_start;
+                    while (role_end < content.len and content[role_end] != '"') : (role_end += 1) {}
+                    const role = content[role_start..role_end];
+                    
+                    // Look for content field
+                    var content_idx = role_end;
+                    while (content_idx < content.len and !std.mem.startsWith(u8, content[content_idx..], "\"content\":\"")) : (content_idx += 1) {}
+                    
+                    if (content_idx < content.len) {
+                        const msg_start = content_idx + 11;
+                        var msg_end = msg_start;
+                        var in_escape = false;
+                        while (msg_end < content.len) {
+                            if (in_escape) {
+                                in_escape = false;
+                            } else if (content[msg_end] == '\\') {
+                                in_escape = true;
+                            } else if (content[msg_end] == '"') {
+                                break;
+                            }
+                            msg_end += 1;
+                        }
+                        const msg = content[msg_start..msg_end];
+                        
+                        // Output markdown
+                        const role_title = if (std.mem.eql(u8, role, "user")) "👤 User" 
+                                          else if (std.mem.eql(u8, role, "assistant")) "🤖 Assistant"
+                                          else if (std.mem.eql(u8, role, "system")) "⚙️ System"
+                                          else role;
+                        try hw.interface.print("## {s}\n\n", .{role_title});
+                        try hw.interface.print("{s}\n\n", .{msg});
+                    }
+                    i = content_idx + 1;
+                } else {
+                    i += 1;
+                }
+            }
+        } else {
+            // JSON output (default)
+            try hw.interface.print("{s}", .{content});
+        }
         try hw.interface.flush();
         return;
     }
