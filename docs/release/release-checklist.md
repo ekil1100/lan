@@ -47,8 +47,15 @@
 | 2026-02-12 13:26 | Git tag | ☑ | `v0.1.0-beta` 已 push |
 | 2026-02-12 13:26 | CI 状态 | ☐ | workflow 运行中，产物待生成 |
 | 2026-02-12 13:26 | Release 页面 | ☐ | 等待 CI 完成创建 |
+| 2026-02-12 16:07 | CI 状态 | ☐ | 仍在等待 GitHub Actions 完成 |
 
-**下一步**：CI 完成后运行 `./scripts/verify-ci-release.sh` 确认产物。
+**阻塞项**：GitHub Actions workflow 产物生成中
+**预计解决**：等待 CI 自动完成（通常 2-5 分钟，已运行较长时间需检查 Actions 日志）
+
+**下一步**：
+1. 访问 https://github.com/ekil1100/lan/actions 检查 workflow 状态
+2. 如 workflow 失败，修复后重新触发
+3. 如 workflow 成功但 release 未创建，检查 release.yml 配置
 
 ---
 
