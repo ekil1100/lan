@@ -657,3 +657,61 @@ test "skill list includes name/version/path when installed" {
     try std.testing.expect(std.mem.indexOf(u8, out, "version=1.0.0") != null);
     try std.testing.expect(std.mem.indexOf(u8, out, "path=") != null);
 }
+
+pub fn getSkillInfo(allocator: std.mem.Allocator, config_dir: []const u8, skill_name: []const u8) ![]const u8 {
+    const skills_root = try std.fs.path.join(allocator, &[_][]const u8{ config_dir, "skills" });
+    defer allocator.free(skills_root);
+    return getSkillInfoFromRoot(allocator, skills_root, skill_name);
+}
+
+pub fn getSkillInfoFromRoot(allocator: std.mem.Allocator, skills_root: []const u8, skill_name: []const u8) ![]const u8 {
+    if (skill_name.len == 0 or std.mem.indexOf(u8, skill_name, "/") != null or std.mem.eql(u8, skill_name, ".") or std.mem.eql(u8, skill_name, "..")) {
+        return std.fmt.allocPrint(
+            allocator,
+            "Skill info failed: invalid name ({s})\nnext: use a plain skill name (e.g. hello-world) and retry `lan skill info <name>`.\n",
+            .{skill_name},
+        );
+    }
+
+    const skill_dir = try std.fs.path.join(allocator, &[_][]const u8{ skills_root, skill_name });
+    defer allocator.free(skill_dir);
+
+    var dir = std.fs.cwd().openDir(skill_dir, .{}) catch {
+        return std.fmt.allocPrint(
+            allocator,
+            "Skill info failed: not found ({s})\nnext: run `lan skill list` to check installed names, then retry `lan skill info <name>`.\n",
+            .{skill_name},
+        );
+    };
+    defer dir.close();
+
+    const manifest_path = try std.fs.path.join(allocator, &[_][]const u8{ skill_dir, "manifest.json" });
+    defer allocator.free(manifest_path);
+
+    const content = std.fs.cwd().readFileAlloc(allocator, manifest_path, 64 * 1024) catch {
+        return std.fmt.allocPrint(
+            allocator,
+            "Skill info failed: manifest read error ({s}/manifest.json)\nnext: verify skill installation is not corrupted.\n",
+            .{skill_name},
+        );
+    };
+    defer allocator.free(content);
+
+    // Parse manifest fields (simple string matching for now)
+    const name = extractString(content, "\"name\":\"") orelse skill_name;
+    const version = extractString(content, "\"version\":\"") orelse "unknown";
+    const entry = extractString(content, "\"entry\":\"") orelse "unknown";
+
+    return std.fmt.allocPrint(
+        allocator,
+        "name={s}\nversion={s}\nentry={s}\npath={s}\n",
+        .{ name, version, entry, skill_dir },
+    );
+}
+
+fn extractString(json: []const u8, key: []const u8) ?[]const u8 {
+    const start = std.mem.indexOf(u8, json, key) orelse return null;
+    const val_start = start + key.len;
+    const end = std.mem.indexOfScalar(u8, json[val_start..], '"') orelse return null;
+    return json[val_start .. val_start + end];
+}
