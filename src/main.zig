@@ -99,6 +99,39 @@ pub fn main() !void {
         return;
     }
 
+    // lan config init — generate default config from template
+    if (args.len >= 3 and std.mem.eql(u8, args[1], "config") and std.mem.eql(u8, args[2], "init")) {
+        var cfg_i = try Config.load(allocator);
+        defer cfg_i.deinit();
+        const cp = try std.fs.path.join(allocator, &[_][]const u8{ cfg_i.config_dir, "config.json" });
+        defer allocator.free(cp);
+        // Check if config already exists and has content
+        const existing = std.fs.cwd().readFileAlloc(allocator, cp, 64 * 1024) catch null;
+        if (existing) |e| {
+            allocator.free(e);
+            if (e.len > 2) {
+                var ib: [256]u8 = undefined;
+                var iw = std.fs.File.stdout().writer(&ib);
+                try iw.interface.print("Config already exists at {s} — skipping.\nnext: edit manually or delete and rerun `lan config init`.\n", .{cp});
+                try iw.interface.flush();
+                return;
+            }
+        }
+        const template = "{\"provider\":{\"url\":\"https://api.openai.com\",\"api_key\":\"\",\"model\":\"gpt-4\"},\"route\":{\"mode\":\"speed\",\"fallback\":[]},\"skills\":{\"dir\":\"~/.config/lan/skills\"}}";
+        const f = try std.fs.cwd().createFile(cp, .{});
+        defer f.close();
+        var fb: [4096]u8 = undefined;
+        var fw = f.writer(&fb);
+        try fw.interface.writeAll(template);
+        try fw.interface.writeAll("\n");
+        try fw.interface.flush();
+        var ob: [512]u8 = undefined;
+        var ow2 = std.fs.File.stdout().writer(&ob);
+        try ow2.interface.print("Config initialized at {s}\nnext: edit provider.api_key and provider.url to match your setup.\n", .{cp});
+        try ow2.interface.flush();
+        return;
+    }
+
     // lan history clear — delete history file
     if (args.len >= 3 and std.mem.eql(u8, args[1], "history") and std.mem.eql(u8, args[2], "clear")) {
         var cfg_c = try Config.load(allocator);
