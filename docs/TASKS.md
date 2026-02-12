@@ -211,35 +211,43 @@
   - R20-T03 历史清除：done
   - R20-T04 回归入口：done
 
-### R21 第一批原子任务（Beta 用户体验）
-- [ ] R21-T01（NEXT，并行）`lan config init` 交互式配置初始化
-  - 预计时长：1-2 小时
-  - 改动范围：`src/main.zig`、`scripts/test-config-init.sh`
-  - DoD：
-    1) `lan config init` 从模板生成默认配置文件；
-    2) 若已存在则提示并跳过（不覆盖）；
-    3) 回归测试覆盖。
+### R21 第一批收口结论（R21-T05）
+- **状态判定**：close-ready ✅
+- **第一批任务状态**：
+  - R21-T01 config init：done
+  - R21-T02 lan doctor：done
+  - R21-T03 支持包增强：done
+  - R21-T04 回归入口：done
 
-- [ ] R21-T02（并行）`lan doctor` 综合诊断命令
+### R22 第一批原子任务（Beta 可观测性）
+- [ ] R22-T01（NEXT，并行）结构化日志框架（统一 log 格式）
   - 预计时长：1-2 小时
-  - 改动范围：`scripts/lan-doctor.sh`、`scripts/test-lan-doctor.sh`
+  - 改动范围：`src/log.zig`（新增）、`src/main.zig`
   - DoD：
-    1) 一键运行 preflight + config validate + provider health；
-    2) 汇总输出 PASS/WARN/FAIL 各项结果；
-    3) 回归测试覆盖。
+    1) 定义统一日志格式（timestamp/level/component/message）；
+    2) 至少 info/warn/error 三级；
+    3) 现有 stdout 输出不受影响；回归覆盖。
 
-- [ ] R21-T03（并行）支持包增强（含历史摘要和配置快照）
+- [ ] R22-T02（并行）CLI help 文本（`lan help` / `lan <cmd> --help`）
   - 预计时长：1 小时
-  - 改动范围：`scripts/support-bundle.sh`、`scripts/test-support-bundle.sh`
+  - 改动范围：`src/main.zig`
   - DoD：
-    1) 支持包新增历史消息数统计和配置快照（脱敏）；
-    2) 不泄露 API key；
+    1) `lan help` 列出所有子命令及简要说明；
+    2) 覆盖 skill/history/config/doctor 子命令；
     3) 回归测试覆盖。
 
-- [ ] R21-T04（串行收口）R21 第一批回归入口与 CI 对齐
-  - 依赖：R21-T01~R21-T03
+- [ ] R22-T03（并行）CI 全量回归门禁（聚合所有 make targets）
+  - 预计时长：1 小时
+  - 改动范围：`.github/workflows/ci.yml`、`Makefile`
+  - DoD：
+    1) CI 增加 R17~R21 回归步骤；
+    2) 任一失败则 CI 红；
+    3) 本地 `make full-regression` 可一键跑全量。
+
+- [ ] R22-T04（串行收口）R22 第一批回归入口与 CI 对齐
+  - 依赖：R22-T01~R22-T03
   - 预计时长：0.5-1 小时
-  - 改动范围：`Makefile`、`scripts/test-r21-*.sh`、`docs/TASKS.md`
+  - 改动范围：`Makefile`、`scripts/test-r22-*.sh`、`docs/TASKS.md`
   - DoD：
     1) 新增统一入口；
     2) 输出统一 PASS/FAIL；
@@ -1241,6 +1249,26 @@
   - 文件：`docs/TASKS.md`
   - 结果：R20 close-ready；R21 第一批 4 个原子任务已拆；NEXT → R21-T01。
 
+- [x] R21-T01（并行）`lan config init`
+  - 文件：`src/main.zig`、`scripts/test-config-init.sh`
+  - 验收：生成默认配置；已存在则跳过。
+
+- [x] R21-T02（并行）`lan doctor` 综合诊断
+  - 文件：`scripts/lan-doctor.sh`、`scripts/test-lan-doctor.sh`
+  - 验收：preflight + config + provider + build 汇总。
+
+- [x] R21-T03（并行）支持包增强
+  - 文件：`scripts/support-bundle.sh`
+  - 验收：历史摘要 + 配置快照（脱敏）；API key 已 REDACT。
+
+- [x] R21-T04（串行收口）R21 回归入口
+  - 文件：`Makefile`、`scripts/test-r21-ux-suite.sh`
+  - 验收：`make r21-ux-regression` 通过。
+
+- [x] R21-T05（收口）R21 收口与 R22 拆解
+  - 文件：`docs/TASKS.md`
+  - 结果：R21 close-ready；R22 第一批 4 个原子任务已拆；NEXT → R22-T01。
+
 - [x] R13-T05（收口）R13 第一批收口与 R14 启动拆解
   - 文件：`docs/TASKS.md`
   - 结果：
@@ -1274,7 +1302,7 @@
 - 暂无（如出现请写：阻塞原因/影响范围/预计解除时间）
 
 ## Next Up
-1. 立即执行 R21-T01（NEXT）：`lan config init` 交互式配置初始化
+1. 立即执行 R22-T01（NEXT）：结构化日志框架（统一 log 格式）
 
 ## 更新约定（强制）
 - 每次代码改动后，若任务状态变化，必须同步更新本文件
