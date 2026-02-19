@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,17 +15,26 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux-x86_64
+            zig-arch: x86_64-linux
           - os: macos-latest
             target: macos-aarch64
+            zig-arch: aarch64-macos
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: 0.13.0
+      - name: Setup Zig (direct download)
+        run: |
+          ZIG_VERSION=0.15.2
+          curl -L "https://ziglang.org/download/${ZIG_VERSION}/zig-${{ matrix.zig-arch }}-${ZIG_VERSION}.tar.xz" -o zig.tar.xz
+          tar -xf zig.tar.xz
+          ZIG_DIR=$(tar -tf zig.tar.xz | head -1 | cut -d/ -f1)
+          echo "${PWD}/${ZIG_DIR}" >> $GITHUB_PATH
+          echo "ZIG_DIR=${PWD}/${ZIG_DIR}" >> $GITHUB_ENV
+
+      - name: Verify Zig
+        run: zig version
 
       - name: Build
         run: zig build
@@ -62,10 +70,16 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Setup Zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: 0.13.0
+      - name: Setup Zig (direct download)
+        run: |
+          ZIG_VERSION=0.15.2
+          curl -L "https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz" -o zig.tar.xz
+          tar -xf zig.tar.xz
+          ZIG_DIR=$(tar -tf zig.tar.xz | head -1 | cut -d/ -f1)
+          echo "${PWD}/${ZIG_DIR}" >> $GITHUB_PATH
+
+      - name: Verify Zig
+        run: zig version
 
       - name: Generate release notes
         env:
